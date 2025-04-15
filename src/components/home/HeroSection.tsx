@@ -1,13 +1,20 @@
-
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
+import { Flag, Tractor } from "lucide-react";
 
 const HeroSection = () => {
   return (
     <div className="relative bg-agri-light py-16 sm:py-24">
-      <div className="container">
+      <div className="absolute inset-0 overflow-hidden">
+        <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1593349430443-4628b2e7d9bf?q=80&w=2069')] bg-cover bg-center opacity-10" />
+      </div>
+      <div className="container relative">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 items-center">
           <div className="space-y-6">
+            <div className="flex items-center gap-2 text-agri-primary">
+              <Flag className="h-6 w-6" />
+              <Tractor className="h-6 w-6" />
+            </div>
             <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight text-agri-dark">
               Better farming outcomes through smarter processing
             </h1>
@@ -24,7 +31,7 @@ const HeroSection = () => {
                 <Link to="/learn-more">Learn More</Link>
               </Button>
             </div>
-            <div className="flex items-center gap-4 text-sm text-gray-600 mt-4">
+            <div className="flex flex-wrap items-center gap-4 text-sm text-gray-600 mt-4">
               <div className="flex items-center">
                 <svg className="w-5 h-5 text-agri-primary mr-1" fill="currentColor" viewBox="0 0 20 20">
                   <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
@@ -46,14 +53,17 @@ const HeroSection = () => {
             </div>
           </div>
           <div className="relative">
-            <img 
-              src="https://source.unsplash.com/random/800x600/?agriculture,india,farming" 
-              alt="Indian Agriculture" 
-              className="rounded-lg shadow-xl w-full h-auto object-cover max-h-[500px]"
-            />
+            <div className="relative rounded-lg overflow-hidden shadow-xl">
+              <img 
+                src="https://images.unsplash.com/photo-1595337797484-61f526ef3608?q=80&w=2071"
+                alt="Indian Farmer in Field" 
+                className="w-full h-[500px] object-cover"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent" />
+            </div>
             <div className="absolute -bottom-6 -left-6 bg-white rounded-lg shadow-lg p-4 max-w-xs hidden md:block">
               <div className="flex items-center gap-3">
-                <div className="bg-agri-accent w-12 h-12 rounded-full flex items-center justify-center">
+                <div className="bg-[#FF9933] w-12 h-12 rounded-full flex items-center justify-center">
                   <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                   </svg>
