@@ -61,6 +61,19 @@ export default {
 					'accent-foreground': 'hsl(var(--sidebar-accent-foreground))',
 					border: 'hsl(var(--sidebar-border))',
 					ring: 'hsl(var(--sidebar-ring))'
+				},
+				// Custom agricultural theme colors
+				agri: {
+					primary: '#2e7d32', // Deep green
+					secondary: '#558b2f', // Light green
+					accent: '#f9a825', // Harvest gold
+					dark: '#33691e', // Forest green
+					light: '#dcedc8', // Pale green
+					brown: '#795548', // Earth brown
+					beige: '#f5f5dc', // Beige for backgrounds
+					warning: '#ff8f00', // Orange for warnings
+					success: '#43a047', // Green for success
+					info: '#29b6f6', // Blue for information
 				}
 			},
 			borderRadius: {
