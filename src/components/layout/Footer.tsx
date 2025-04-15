@@ -67,9 +67,9 @@ const Footer = () => {
             <h4 className="font-semibold mb-4">Contact</h4>
             <address className="not-italic text-sm space-y-2">
               <p>Agricultural Innovation Center</p>
-              <p>New Delhi, India</p>
+              <p>Kolkata, West Bengal, India</p>
               <p>Email: info@kisanconnect.in</p>
-              <p>Phone: +91 (XXX) XXX-XXXX</p>
+              <p>Phone: +91 33 2345 6789</p>
             </address>
           </div>
         </div>

@@ -1,7 +1,7 @@
 
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Menu, X, User, Bell } from "lucide-react";
+import { Menu, User, Bell } from "lucide-react";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { useState } from "react";
 
@@ -13,7 +13,7 @@ const Navbar = () => {
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="container flex h-16 items-center">
-        <div className="flex items-center gap-2 font-bold text-2xl text-agri-primary">
+        <div className="flex items-center gap-2 font-bold text-xl sm:text-2xl text-agri-primary">
           <img src="/logo.svg" alt="Kisan Connect" className="h-8 w-8" />
           <span>Kisan Connect</span>
         </div>
@@ -30,21 +30,21 @@ const Navbar = () => {
             Forecasting
           </Link>
           <Link to="/facilities" className="text-sm font-medium transition-colors hover:text-agri-accent">
-            Processing Facilities
+            Processing
           </Link>
           <Link to="/quality" className="text-sm font-medium transition-colors hover:text-agri-accent">
-            Quality Assessment
+            Quality
           </Link>
           <Link to="/prices" className="text-sm font-medium transition-colors hover:text-agri-accent">
-            Price Trends
+            Prices
           </Link>
         </nav>
 
         <div className="hidden md:flex items-center gap-4 ml-auto">
-          <Button variant="ghost" size="icon">
+          <Button variant="ghost" size="icon" aria-label="Notifications">
             <Bell className="h-5 w-5" />
           </Button>
-          <Button variant="ghost" size="icon">
+          <Button variant="ghost" size="icon" aria-label="User account">
             <User className="h-5 w-5" />
           </Button>
           <Button variant="default" className="bg-agri-primary hover:bg-agri-dark">
@@ -55,11 +55,11 @@ const Navbar = () => {
         {/* Mobile Navigation */}
         <Sheet open={isOpen} onOpenChange={setIsOpen}>
           <SheetTrigger asChild className="md:hidden ml-auto">
-            <Button variant="ghost" size="icon">
+            <Button variant="ghost" size="icon" aria-label="Menu">
               <Menu className="h-5 w-5" />
             </Button>
           </SheetTrigger>
-          <SheetContent side="left" className="bg-agri-light">
+          <SheetContent side="left" className="bg-agri-light border-agri-primary">
             <div className="flex flex-col gap-8 py-6">
               <div className="flex items-center gap-2 font-bold text-xl text-agri-primary">
                 <img src="/logo.svg" alt="Kisan Connect" className="h-6 w-6" />
@@ -76,21 +76,21 @@ const Navbar = () => {
                   Forecasting
                 </Link>
                 <Link to="/facilities" className="text-base font-medium" onClick={closeSheet}>
-                  Processing Facilities
+                  Processing
                 </Link>
                 <Link to="/quality" className="text-base font-medium" onClick={closeSheet}>
-                  Quality Assessment
+                  Quality
                 </Link>
                 <Link to="/prices" className="text-base font-medium" onClick={closeSheet}>
-                  Price Trends
+                  Prices
                 </Link>
               </nav>
               <div className="flex flex-col gap-2">
-                <Button variant="outline" className="w-full justify-start">
+                <Button variant="outline" className="w-full justify-start" onClick={closeSheet}>
                   <User className="mr-2 h-4 w-4" />
                   Profile
                 </Button>
-                <Button variant="default" className="w-full bg-agri-primary hover:bg-agri-dark">
+                <Button variant="default" className="w-full bg-agri-primary hover:bg-agri-dark" onClick={closeSheet}>
                   Login / Register
                 </Button>
               </div>

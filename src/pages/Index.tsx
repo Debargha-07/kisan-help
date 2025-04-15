@@ -9,11 +9,13 @@ import CTASection from "@/components/home/CTASection";
 const Index = () => {
   return (
     <Layout>
-      <HeroSection />
-      <FeatureSection />
-      <HowItWorksSection />
-      <TestimonialSection />
-      <CTASection />
+      <div className="space-y-12 py-6">
+        <HeroSection />
+        <FeatureSection />
+        <HowItWorksSection />
+        <TestimonialSection />
+        <CTASection />
+      </div>
     </Layout>
   );
 };
