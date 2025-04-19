@@ -1,4 +1,3 @@
-
 import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Menu, User, Bell, LogOut } from "lucide-react";
@@ -34,30 +33,30 @@ const Navbar = () => {
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="container flex h-16 items-center">
-        <div className="flex items-center gap-2 font-bold text-xl sm:text-2xl text-agri-primary">
+        <Link to="/" className="flex items-center gap-2 font-bold text-xl sm:text-2xl text-agri-primary">
           <img src="/logo.svg" alt="Kisan Connect" className="h-8 w-8" />
           <span>Kisan Connect</span>
-        </div>
+        </Link>
 
         {/* Desktop Navigation */}
         <nav className="hidden md:flex mx-6 items-center space-x-4 lg:space-x-6 flex-1">
           <Link to="/" className="text-sm font-medium transition-colors hover:text-agri-accent">
-            Home
+            होम (Home)
           </Link>
           <Link to="/marketplace" className="text-sm font-medium transition-colors hover:text-agri-accent">
-            Marketplace
+            मंडी (Marketplace)
           </Link>
           <Link to="/forecasting" className="text-sm font-medium transition-colors hover:text-agri-accent">
-            Forecasting
+            मौसम (Weather)
           </Link>
           <Link to="/facilities" className="text-sm font-medium transition-colors hover:text-agri-accent">
-            Processing
+            सुविधाएं (Facilities)
           </Link>
-          <Link to="/quality" className="text-sm font-medium transition-colors hover:text-agri-accent">
-            Quality
+          <Link to="/schemes" className="text-sm font-medium transition-colors hover:text-agri-accent">
+            योजनाएं (Schemes)
           </Link>
           <Link to="/prices" className="text-sm font-medium transition-colors hover:text-agri-accent">
-            Prices
+            भाव (Prices)
           </Link>
         </nav>
 

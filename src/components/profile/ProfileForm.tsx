@@ -8,10 +8,16 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/components/ui/use-toast';
 
+interface ProfileFormData {
+  full_name: string;
+  phone: string;
+  address: string;
+}
+
 export default function ProfileForm() {
   const { profile } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<ProfileFormData>({
     full_name: profile?.full_name || '',
     phone: profile?.phone || '',
     address: profile?.address || '',
@@ -22,10 +28,12 @@ export default function ProfileForm() {
     setIsLoading(true);
 
     try {
+      if (!profile?.id) throw new Error('No profile ID found');
+
       const { error } = await supabase
         .from('profiles')
         .update(formData)
-        .eq('id', profile?.id);
+        .eq('id', profile.id);
 
       if (error) throw error;
 

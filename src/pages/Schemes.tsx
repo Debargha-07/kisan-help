@@ -1,8 +1,7 @@
-
 import Layout from "@/components/layout/Layout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { ExternalLink, Tractor, Leaf, SeedlingIcon, CoinIcon } from "lucide-react";
+import { ExternalLink, Tractor, Leaf, CoinsIcon } from "lucide-react";
 
 const schemes = [
   {
@@ -30,7 +29,7 @@ const schemes = [
     eligibility: "All farmers, including small farmers and sharecroppers",
     link: "https://www.india.gov.in/spotlight/kisan-credit-card-kcc",
     image: "https://images.unsplash.com/photo-1465379944081-7f47de8d74ac?w=800&q=80",
-    icon: CoinIcon
+    icon: CoinsIcon
   }
 ];
 
