@@ -11,7 +11,7 @@ import Profile from "./pages/Profile";
 import Marketplace from "./pages/Marketplace";
 import Forecasting from "./pages/Forecasting";
 import Facilities from "./pages/Facilities";
-import Quality from "./pages/Quality";
+import Schemes from "./pages/Schemes";
 import Prices from "./pages/Prices";
 import NotFound from "./pages/NotFound";
 
@@ -31,7 +31,7 @@ const App = () => (
             <Route path="/marketplace" element={<Marketplace />} />
             <Route path="/forecasting" element={<Forecasting />} />
             <Route path="/facilities" element={<Facilities />} />
-            <Route path="/quality" element={<Quality />} />
+            <Route path="/schemes" element={<Schemes />} />
             <Route path="/prices" element={<Prices />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
