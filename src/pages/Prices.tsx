@@ -6,83 +6,64 @@ import { AlertCircle } from "lucide-react";
 import { PriceCard } from "@/components/prices/PriceCard";
 import { RegionalPrices } from "@/components/prices/RegionalPrices";
 import { FarmerTips } from "@/components/prices/FarmerTips";
+import { supabase } from "@/integrations/supabase/client";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { useQuery } from "@tanstack/react-query";
 
-const cropPriceData = {
-  rice: {
-    current: 2200,
-    previous: 2100,
-    change: 4.76,
-    forecast: 2250,
-    unit: "per quintal",
-    trend: "up",
-    regions: {
-      "West Bengal": 2250,
-      "Uttar Pradesh": 2180,
-      Punjab: 2220,
-      Maharashtra: 2150,
-      Karnataka: 2190
-    }
-  },
-  wheat: {
-    current: 2100,
-    previous: 2150,
-    change: -2.33,
-    forecast: 2050,
-    unit: "per quintal",
-    trend: "down",
-    regions: {
-      "West Bengal": 2050,
-      "Uttar Pradesh": 2120,
-      Punjab: 2180,
-      Maharashtra: 2080,
-      "Madhya Pradesh": 2100
-    }
-  },
-  potato: {
-    current: 1200,
-    previous: 1100,
-    change: 9.09,
-    forecast: 1250,
-    unit: "per quintal",
-    trend: "up",
-    regions: {
-      "West Bengal": 1250,
-      "Uttar Pradesh": 1180,
-      Punjab: 1220,
-      Bihar: 1150,
-      Assam: 1190
-    }
-  },
-  onion: {
-    current: 1800,
-    previous: 2000,
-    change: -10.0,
-    forecast: 1750,
-    unit: "per quintal",
-    trend: "down",
-    regions: {
-      "West Bengal": 1750,
-      Maharashtra: 1900,
-      Karnataka: 1820,
-      Gujarat: 1780,
-      "Madhya Pradesh": 1760
-    }
-  }
+type CropPriceData = {
+  current_price: number;
+  previous_price: number;
+  forecast_price: number;
+  unit: string;
+  region: string;
 };
 
 const Prices = () => {
   const [selectedCrop, setSelectedCrop] = useState("rice");
-  const [isLoading, setIsLoading] = useState(true);
+
+  const { data: cropPrices, isLoading } = useQuery({
+    queryKey: ['cropPrices', selectedCrop],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('crop_prices')
+        .select('*')
+        .eq('crop_name', selectedCrop);
+
+      if (error) throw error;
+      return data as CropPriceData[];
+    }
+  });
+
+  // Calculate average prices and trends
+  const currentPrice = cropPrices ? 
+    Number((cropPrices.reduce((sum, price) => sum + Number(price.current_price), 0) / cropPrices.length).toFixed(2)) : 
+    0;
+  
+  const previousPrice = cropPrices ? 
+    Number((cropPrices.reduce((sum, price) => sum + Number(price.previous_price), 0) / cropPrices.length).toFixed(2)) : 
+    0;
+  
+  const forecastPrice = cropPrices ? 
+    Number((cropPrices.reduce((sum, price) => sum + Number(price.forecast_price), 0) / cropPrices.length).toFixed(2)) : 
+    0;
+
+  const priceChange = previousPrice ? ((currentPrice - previousPrice) / previousPrice) * 100 : 0;
+  const trend = priceChange >= 0 ? 'up' : 'down';
+
+  // Transform data for regional comparison
+  const regions = cropPrices ? 
+    Object.fromEntries(
+      cropPrices.map(price => [price.region, Number(price.current_price)])
+    ) : {};
 
   useEffect(() => {
-    const timer = setTimeout(() => {
-      setIsLoading(false);
-    }, 1000);
-    
-    return () => clearTimeout(timer);
-  }, []);
+    // Update prices every 5 minutes
+    const interval = setInterval(async () => {
+      await supabase.functions.invoke('update-crop-prices');
+    }, 300000);
 
-  const cropData = cropPriceData[selectedCrop as keyof typeof cropPriceData];
+    return () => clearInterval(interval);
+  }, []);
 
   return (
     <Layout>
@@ -112,51 +93,53 @@ const Prices = () => {
             <TabsTrigger value="onion">Onion</TabsTrigger>
           </TabsList>
 
-          {Object.keys(cropPriceData).map((crop) => (
-            <TabsContent key={crop} value={crop} className="mt-0">
-              {isLoading ? (
-                <div className="flex justify-center items-center h-64">
-                  <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-agri-primary"></div>
-                </div>
-              ) : (
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  <PriceCard
-                    title="Current Price"
-                    price={cropData.current}
-                    unit={cropData.unit}
-                    change={cropData.change}
-                    trend={cropData.trend as 'up' | 'down'}
-                  />
-                  <PriceCard
-                    title="Price Forecast"
-                    price={cropData.forecast}
-                    unit={cropData.unit}
-                    subtitle="Expected price in next 7 days"
-                  />
-                  <Card>
-                    <CardHeader className="pb-2">
-                      <CardTitle className="text-lg">Market Advisory</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                      <p className="text-sm">
-                        {cropData.trend === "up"
-                          ? "Prices are rising. Consider holding your produce for 1-2 weeks if storage is available."
-                          : "Prices are declining. Consider selling soon if you have harvested crops ready for market."}
-                      </p>
-                    </CardContent>
-                  </Card>
-                </div>
-              )}
+          <TabsContent value={selectedCrop} className="mt-0">
+            {isLoading ? (
+              <div className="flex justify-center items-center h-64">
+                <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-agri-primary"></div>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <PriceCard
+                  title="Current Price"
+                  price={currentPrice}
+                  unit="per quintal"
+                  change={priceChange}
+                  trend={trend}
+                />
+                <PriceCard
+                  title="Price Forecast"
+                  price={forecastPrice}
+                  unit="per quintal"
+                  subtitle="Expected price in next 7 days"
+                />
+                <Card>
+                  <CardHeader className="pb-2">
+                    <CardTitle className="text-lg">Market Advisory</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <p className="text-sm">
+                      {trend === "up"
+                        ? "Prices are rising. Consider holding your produce for 1-2 weeks if storage is available."
+                        : "Prices are declining. Consider selling soon if you have harvested crops ready for market."}
+                    </p>
+                  </CardContent>
+                </Card>
+              </div>
+            )}
 
-              <h3 className="font-medium text-lg mt-6 mb-3">Regional Price Comparison</h3>
-              <RegionalPrices 
-                regions={cropData.regions}
-                currentPrice={cropData.current}
-              />
+            {cropPrices && cropPrices.length > 0 && (
+              <>
+                <h3 className="font-medium text-lg mt-6 mb-3">Regional Price Comparison</h3>
+                <RegionalPrices 
+                  regions={regions}
+                  currentPrice={currentPrice}
+                />
+              </>
+            )}
 
-              <FarmerTips />
-            </TabsContent>
-          ))}
+            <FarmerTips />
+          </TabsContent>
         </Tabs>
       </div>
     </Layout>
