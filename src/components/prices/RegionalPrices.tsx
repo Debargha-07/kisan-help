@@ -14,9 +14,9 @@ export const RegionalPrices = ({ regions, currentPrice }: RegionalPricesProps) =
           <table className="w-full">
             <thead>
               <tr className="bg-agri-light">
-                <th className="text-left p-3 border-b">State</th>
-                <th className="text-right p-3 border-b">Price (₹)</th>
-                <th className="text-right p-3 border-b">Difference</th>
+                <th className="text-left p-3 border-b">অঞ্চল</th>
+                <th className="text-right p-3 border-b">দাম (₹)</th>
+                <th className="text-right p-3 border-b">পার্থক্য</th>
               </tr>
             </thead>
             <tbody>

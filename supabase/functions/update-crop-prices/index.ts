@@ -21,24 +21,24 @@ serve(async (req) => {
 
     // For demo purposes, we'll simulate real data with some random variations
     const crops = ['rice', 'wheat', 'potato', 'onion'];
-    const regions = ['West Bengal', 'Uttar Pradesh', 'Punjab', 'Maharashtra', 'Karnataka'];
+    const regions = ['West Bengal', 'North Bengal', 'South Bengal', 'Central Bengal', 'Coastal Bengal'];
     const baselinePrices = { rice: 2200, wheat: 2100, potato: 1200, onion: 1800 };
 
     for (const crop of crops) {
       for (const region of regions) {
         const variation = Math.random() * 200 - 100; // Random variation between -100 and +100
-        const currentPrice = baselinePrices[crop] + variation;
-        const previousPrice = currentPrice - (Math.random() * 100 - 50);
-        const forecastPrice = currentPrice + (Math.random() * 150 - 75);
+        const currentPrice = Math.max(0, baselinePrices[crop] + variation);
+        const previousPrice = Math.max(0, currentPrice - (Math.random() * 100 - 50));
+        const forecastPrice = Math.max(0, currentPrice + (Math.random() * 150 - 75));
 
         await supabaseClient
           .from('crop_prices')
           .upsert({
             crop_name: crop,
             region: region,
-            current_price: currentPrice.toFixed(2),
-            previous_price: previousPrice.toFixed(2),
-            forecast_price: forecastPrice.toFixed(2),
+            current_price: Number(currentPrice.toFixed(2)),
+            previous_price: Number(previousPrice.toFixed(2)),
+            forecast_price: Number(forecastPrice.toFixed(2)),
             updated_at: new Date().toISOString()
           }, {
             onConflict: 'crop_name,region'

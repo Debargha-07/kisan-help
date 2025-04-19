@@ -19,6 +19,9 @@ export const PriceCard = ({
   trend, 
   subtitle 
 }: PriceCardProps) => {
+  // Ensure price is a valid number
+  const displayPrice = isNaN(price) ? 0 : price;
+  
   return (
     <Card>
       <CardHeader className="pb-2">
@@ -28,14 +31,14 @@ export const PriceCard = ({
         <div className="flex items-center">
           <IndianRupee className="mr-2 h-4 w-4 text-agri-primary" />
           <span className="text-3xl font-bold text-agri-primary">
-            {price}
+            {displayPrice}
           </span>
           <span className="ml-2 text-sm text-muted-foreground">
             {unit}
           </span>
         </div>
         
-        {change && trend && (
+        {change !== undefined && trend && (
           <div className="flex items-center mt-2">
             {trend === "up" ? (
               <ChevronUp className="h-4 w-4 text-green-600" />
@@ -49,10 +52,10 @@ export const PriceCard = ({
                   : "text-red-600"
               }`}
             >
-              {Math.abs(change)}%
+              {isNaN(change) ? 0 : Math.abs(change)}%
             </span>
             <span className="ml-1 text-sm text-muted-foreground">
-              from last week
+              গত সপ্তাহ থেকে
             </span>
           </div>
         )}

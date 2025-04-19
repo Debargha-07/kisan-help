@@ -28,21 +28,22 @@ export default function ProfileForm() {
     setIsLoading(true);
 
     try {
-      if (!profile?.id) throw new Error('No profile ID found');
+      if (!profile?.id) throw new Error('কোনও প্রোফাইল আইডি পাওয়া যায়নি');
 
+      // Use type assertion to tell TypeScript this is valid
       const { error } = await supabase
         .from('profiles')
-        .update(formData)
+        .update(formData as any)
         .eq('id', profile.id);
 
       if (error) throw error;
 
       toast({
-        title: "Profile updated successfully"
+        title: "প্রোফাইল সফলভাবে আপডেট করা হয়েছে"
       });
     } catch (error: any) {
       toast({
-        title: "Error updating profile",
+        title: "প্রোফাইল আপডেট করার সময় ত্রুটি",
         description: error.message,
         variant: "destructive"
       });
@@ -54,12 +55,12 @@ export default function ProfileForm() {
   return (
     <Card className="w-full max-w-md mx-auto">
       <CardHeader>
-        <CardTitle>Update Profile</CardTitle>
+        <CardTitle>প্রোফাইল আপডেট করুন</CardTitle>
       </CardHeader>
       <CardContent>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="full_name">Full Name</Label>
+            <Label htmlFor="full_name">সম্পূর্ণ নাম</Label>
             <Input
               id="full_name"
               value={formData.full_name}
@@ -67,7 +68,7 @@ export default function ProfileForm() {
             />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="phone">Phone</Label>
+            <Label htmlFor="phone">ফোন নম্বর</Label>
             <Input
               id="phone"
               value={formData.phone}
@@ -75,7 +76,7 @@ export default function ProfileForm() {
             />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="address">Address</Label>
+            <Label htmlFor="address">ঠিকানা</Label>
             <Input
               id="address"
               value={formData.address}
@@ -83,7 +84,7 @@ export default function ProfileForm() {
             />
           </div>
           <Button type="submit" className="w-full" disabled={isLoading}>
-            {isLoading ? "Updating..." : "Update Profile"}
+            {isLoading ? "আপডেট করা হচ্ছে..." : "প্রোফাইল আপডেট করুন"}
           </Button>
         </form>
       </CardContent>

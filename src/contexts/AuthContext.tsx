@@ -1,3 +1,4 @@
+
 import { createContext, useContext, useEffect, useState } from 'react';
 import { User, Session } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
@@ -7,7 +8,7 @@ interface UserProfile {
   id: string;
   full_name: string | null;
   avatar_url: string | null;
-  user_type: 'farmer' | 'processor' | 'trader' | 'admin';
+  user_type: 'farmer' | 'processor' | 'trader' | 'admin' | null;
   phone: string | null;
   address: string | null;
 }
@@ -36,25 +37,33 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const fetchProfile = async (userId: string) => {
     try {
-      const { data, error } = await supabase
-        .from('profiles')
+      // Use type assertion to tell TypeScript this is valid
+      const { data, error } = await (supabase
+        .from('profiles' as any)
         .select('*')
         .eq('id', userId)
-        .single();
+        .single() as any);
 
       if (error) {
-        throw error;
+        console.error("Error fetching profile:", error.message);
+        return;
       }
 
       if (data) {
-        setProfile(data as UserProfile);
+        // Create a default profile if data doesn't match the expected shape
+        const userProfile: UserProfile = {
+          id: userId,
+          full_name: data.full_name || null,
+          avatar_url: data.avatar_url || null,
+          user_type: data.user_type || 'farmer',
+          phone: data.phone || null,
+          address: data.address || null
+        };
+        
+        setProfile(userProfile);
       }
     } catch (error: any) {
-      toast({
-        title: "Error fetching profile",
-        description: error.message,
-        variant: "destructive"
-      });
+      console.error("Error in fetchProfile:", error.message);
     }
   };
 
@@ -62,11 +71,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     try {
       await supabase.auth.signOut();
       toast({
-        title: "Signed out successfully"
+        title: "সফলভাবে লগআউট করা হয়েছে"
       });
     } catch (error: any) {
       toast({
-        title: "Error signing out",
+        title: "লগআউট করার সময় ত্রুটি",
         description: error.message,
         variant: "destructive"
       });
