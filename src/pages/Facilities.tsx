@@ -121,7 +121,7 @@ const storageFacilities = [
     available: "4500 MT",
     cost: "₹40 per quintal/month",
     features: ["Temperature Controlled", "Pest Management", "24/7 Security"],
-    image: "https://images.unsplash.com/photo-1487252665478-49b61b47f302?auto=format&fit=crop&q=80",
+    image: "https://images.unsplash.com/photo-1586528116311-ad8dd3c8310d?auto=format&fit=crop&q=80",
     contact: "+91 98765-43210"
   },
   {
@@ -135,7 +135,7 @@ const storageFacilities = [
     available: "8000 MT",
     cost: "₹35 per quintal/month",
     features: ["Modern Silos", "Moisture Control", "Automated Management"],
-    image: "https://images.unsplash.com/photo-1465379944081-7f47de8d74ac?auto=format&fit=crop&q=80",
+    image: "https://images.unsplash.com/photo-1605618309770-5292d0299d97?auto=format&fit=crop&q=80",
     contact: "+91 98123-45678"
   },
   {
@@ -149,7 +149,7 @@ const storageFacilities = [
     available: "1200 MT",
     cost: "₹75 per quintal/month",
     features: ["Temperature Range: -10°C to 10°C", "Humidity Control", "24/7 Power Backup"],
-    image: "https://images.unsplash.com/photo-1452378174528-3090a4bba7b2?auto=format&fit=crop&q=80",
+    image: "https://images.unsplash.com/photo-1624926571755-2ff2b4133e6a?auto=format&fit=crop&q=80",
     contact: "+91 99876-54321"
   },
   {
@@ -163,7 +163,7 @@ const storageFacilities = [
     available: "3500 MT",
     cost: "₹45 per quintal/month",
     features: ["Pallet Storage", "Loading/Unloading Equipment", "Fire Protection"],
-    image: "https://images.unsplash.com/photo-1517022812141-23620dba5c23?auto=format&fit=crop&q=80",
+    image: "https://images.unsplash.com/photo-1593079831268-3381b0db4a77?auto=format&fit=crop&q=80",
     contact: "+91 95678-12345"
   },
 ];
