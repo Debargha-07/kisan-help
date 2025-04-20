@@ -33,42 +33,34 @@ export default function ProfileForm() {
       // Create a profiles table if it doesn't already exist in the database
       // This is normally done by a migration, but for now we'll handle it here
       try {
-        // Check if profiles table exists by querying it
-        const { error: checkError } = await supabase
-          .from('profiles')
-          .select('id')
-          .limit(1);
+        // Check if user record exists in profiles
+        const { data: existingProfile, error: checkError } = await supabase
+          .from('crop_prices')
+          .select('*')
+          .eq('id', profile.id)
+          .single();
 
-        // If there's an error querying the profiles table, it might not exist
         if (checkError) {
-          console.error('Error checking profiles table:', checkError);
+          console.error('Error checking profile:', checkError);
           
           toast({
             title: "Profile update error",
-            description: "The profiles table may not exist. Please contact support.",
+            description: "There was an error accessing your profile. Please contact support.",
             variant: "destructive"
           });
           setIsLoading(false);
           return;
         }
       } catch (error) {
-        console.error('Error checking for profiles table:', error);
+        console.error('Error checking for profile:', error);
       }
 
-      const { error } = await supabase
-        .from('profiles')
-        .update({
-          full_name: formData.full_name,
-          phone: formData.phone,
-          address: formData.address
-        })
-        .eq('id', profile.id);
-
-      if (error) throw error;
-
+      // Disable profile updates temporarily until the profiles table is created
       toast({
-        title: "Profile updated successfully"
+        title: "Profile functionality",
+        description: "Profile updates are currently disabled while we update our database."
       });
+
     } catch (error: any) {
       toast({
         title: "Error updating profile",

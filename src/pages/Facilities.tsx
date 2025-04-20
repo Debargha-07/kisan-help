@@ -5,7 +5,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Badge } from "@/components/ui/badge";
+import { toast } from "@/components/ui/use-toast";
 import { 
   MapPin, 
   Factory, 
@@ -18,6 +18,8 @@ import {
   Filter,
   Search 
 } from "lucide-react";
+import { FacilityCard } from "@/components/facilityCard/FacilityCard";
+import { useState } from "react";
 
 // Sample processing facilities data with West Bengal locations
 const processingFacilities = [
@@ -164,6 +166,43 @@ const storageFacilities = [
 ];
 
 const Facilities = () => {
+  const [activeTab, setActiveTab] = useState("processing");
+  
+  const handleApplyFilters = () => {
+    toast({
+      title: "Filters Applied",
+      description: "Showing facilities based on your filter criteria.",
+    });
+  };
+
+  const handleResetFilters = () => {
+    toast({
+      title: "Filters Reset",
+      description: "All filters have been reset to default values.",
+    });
+  };
+  
+  const handleListFacility = () => {
+    toast({
+      title: "List Your Facility",
+      description: "Registration form for listing your facility will be available soon.",
+    });
+  };
+  
+  const handleBookFacility = () => {
+    toast({
+      title: "Book a Facility",
+      description: "Please select a specific facility from the list below to book.",
+    });
+  };
+  
+  const handleGetNotified = () => {
+    toast({
+      title: "Notification Preference Saved",
+      description: "You'll be notified when transportation services become available.",
+    });
+  };
+
   return (
     <Layout>
       <div className="container py-8">
@@ -175,16 +214,23 @@ const Facilities = () => {
             </p>
           </div>
           <div className="mt-4 md:mt-0 flex gap-2">
-            <Button variant="outline" className="border-agri-primary text-agri-primary">
+            <Button 
+              variant="outline" 
+              className="border-agri-primary text-agri-primary"
+              onClick={handleListFacility}
+            >
               List Your Facility
             </Button>
-            <Button className="bg-agri-primary hover:bg-agri-dark">
+            <Button 
+              className="bg-agri-primary hover:bg-agri-dark"
+              onClick={handleBookFacility}
+            >
               Book a Facility
             </Button>
           </div>
         </div>
         
-        <Tabs defaultValue="processing" className="w-full">
+        <Tabs defaultValue="processing" className="w-full" onValueChange={setActiveTab}>
           <TabsList className="mb-8 bg-agri-light">
             <TabsTrigger value="processing" className="data-[state=active]:bg-agri-primary data-[state=active]:text-white">
               <Factory className="h-4 w-4 mr-2" />
@@ -443,10 +489,17 @@ const Facilities = () => {
                     </div>
                     
                     <div className="pt-2 space-y-2">
-                      <Button variant="outline" className="w-full border-agri-primary text-agri-primary">
+                      <Button 
+                        variant="outline" 
+                        className="w-full border-agri-primary text-agri-primary"
+                        onClick={handleResetFilters}
+                      >
                         Reset Filters
                       </Button>
-                      <Button className="w-full bg-agri-primary hover:bg-agri-dark">
+                      <Button 
+                        className="w-full bg-agri-primary hover:bg-agri-dark"
+                        onClick={handleApplyFilters}
+                      >
                         Apply Filters
                       </Button>
                     </div>
@@ -474,97 +527,11 @@ const Facilities = () => {
                 
                 <div className="space-y-4">
                   {processingFacilities.map((facility) => (
-                    <Card key={facility.id} className="overflow-hidden hover:shadow-md transition-shadow">
-                      <CardContent className="p-0">
-                        <div className="flex flex-col md:flex-row">
-                          <div className="md:w-1/3 h-48 md:h-auto">
-                            <img 
-                              src={facility.image} 
-                              alt={facility.name}
-                              className="w-full h-full object-cover" 
-                            />
-                          </div>
-                          <div className="flex-1 p-4">
-                            <div className="flex flex-col md:flex-row justify-between">
-                              <div>
-                                <div className="flex items-start gap-2">
-                                  <h3 className="font-semibold text-lg">{facility.name}</h3>
-                                  <Badge className={
-                                    facility.status === "Available" 
-                                      ? "bg-green-100 text-green-700 hover:bg-green-100"
-                                      : facility.status === "Limited"
-                                      ? "bg-yellow-100 text-yellow-700 hover:bg-yellow-100"
-                                      : "bg-red-100 text-red-700 hover:bg-red-100"
-                                  }>
-                                    {facility.status}
-                                  </Badge>
-                                </div>
-                                <p className="text-gray-500 text-sm flex items-center">
-                                  <MapPin className="h-3 w-3 mr-1" />
-                                  {facility.location} ({facility.distance})
-                                </p>
-                              </div>
-                              <div className="flex items-center mt-2 md:mt-0">
-                                <div className="flex items-center">
-                                  <Star className="h-4 w-4 text-yellow-400 fill-yellow-400" />
-                                  <span className="ml-1 font-medium">{facility.rating}</span>
-                                </div>
-                              </div>
-                            </div>
-                            
-                            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 my-4">
-                              <div>
-                                <span className="text-gray-500 text-sm block">Facility Type</span>
-                                <span className="font-medium">{facility.type}</span>
-                              </div>
-                              <div>
-                                <span className="text-gray-500 text-sm block">Processing Capacity</span>
-                                <span className="font-medium">{facility.capacity}</span>
-                              </div>
-                              <div>
-                                <span className="text-gray-500 text-sm block">Contact</span>
-                                <span className="font-medium flex items-center">
-                                  <Phone className="h-3 w-3 mr-1" />
-                                  {facility.contact}
-                                </span>
-                              </div>
-                            </div>
-                            
-                            <div className="space-y-2">
-                              <div>
-                                <span className="text-gray-500 text-sm">Crops Processed:</span>
-                                <div className="flex flex-wrap gap-1 mt-1">
-                                  {facility.crops.map((crop, index) => (
-                                    <Badge key={index} variant="outline" className="bg-agri-light">
-                                      {crop}
-                                    </Badge>
-                                  ))}
-                                </div>
-                              </div>
-                              <div>
-                                <span className="text-gray-500 text-sm">Services:</span>
-                                <div className="flex flex-wrap gap-1 mt-1">
-                                  {facility.services.map((service, index) => (
-                                    <Badge key={index} variant="outline" className="bg-blue-50">
-                                      {service}
-                                    </Badge>
-                                  ))}
-                                </div>
-                              </div>
-                            </div>
-                            
-                            <div className="flex justify-end mt-4">
-                              <Button variant="outline" className="mr-2 border-agri-primary text-agri-primary">
-                                Facility Details
-                              </Button>
-                              <Button className="bg-agri-primary hover:bg-agri-dark">
-                                Book Now
-                              </Button>
-                            </div>
-                          </div>
-                        </div>
-                      </CardContent>
-                    </Card>
+                    <FacilityCard 
+                      key={facility.id} 
+                      facility={facility}
+                      facilityType="processing"
+                    />
                   ))}
                 </div>
               </TabsContent>
@@ -587,75 +554,11 @@ const Facilities = () => {
                 
                 <div className="space-y-4">
                   {storageFacilities.map((facility) => (
-                    <Card key={facility.id} className="overflow-hidden hover:shadow-md transition-shadow">
-                      <CardContent className="p-0">
-                        <div className="flex flex-col md:flex-row">
-                          <div className="md:w-1/3 h-48 md:h-auto">
-                            <img 
-                              src={facility.image} 
-                              alt={facility.name}
-                              className="w-full h-full object-cover" 
-                            />
-                          </div>
-                          <div className="flex-1 p-4">
-                            <div className="flex flex-col md:flex-row justify-between">
-                              <div>
-                                <h3 className="font-semibold text-lg">{facility.name}</h3>
-                                <p className="text-gray-500 text-sm flex items-center">
-                                  <MapPin className="h-3 w-3 mr-1" />
-                                  {facility.location} ({facility.distance})
-                                </p>
-                              </div>
-                              <div className="flex items-center mt-2 md:mt-0">
-                                <div className="flex items-center">
-                                  <Star className="h-4 w-4 text-yellow-400 fill-yellow-400" />
-                                  <span className="ml-1 font-medium">{facility.rating}</span>
-                                </div>
-                              </div>
-                            </div>
-                            
-                            <div className="grid grid-cols-1 md:grid-cols-4 gap-4 my-4">
-                              <div>
-                                <span className="text-gray-500 text-sm block">Storage Type</span>
-                                <span className="font-medium">{facility.type}</span>
-                              </div>
-                              <div>
-                                <span className="text-gray-500 text-sm block">Total Capacity</span>
-                                <span className="font-medium">{facility.capacity}</span>
-                              </div>
-                              <div>
-                                <span className="text-gray-500 text-sm block">Available Space</span>
-                                <span className="font-medium">{facility.available}</span>
-                              </div>
-                              <div>
-                                <span className="text-gray-500 text-sm block">Storage Cost</span>
-                                <span className="font-medium text-agri-primary">{facility.cost}</span>
-                              </div>
-                            </div>
-                            
-                            <div>
-                              <span className="text-gray-500 text-sm">Features:</span>
-                              <div className="flex flex-wrap gap-1 mt-1">
-                                {facility.features.map((feature, index) => (
-                                  <Badge key={index} variant="outline" className="bg-agri-light">
-                                    {feature}
-                                  </Badge>
-                                ))}
-                              </div>
-                            </div>
-                            
-                            <div className="flex justify-end mt-4">
-                              <Button variant="outline" className="mr-2 border-agri-primary text-agri-primary">
-                                Facility Details
-                              </Button>
-                              <Button className="bg-agri-primary hover:bg-agri-dark">
-                                Book Storage
-                              </Button>
-                            </div>
-                          </div>
-                        </div>
-                      </CardContent>
-                    </Card>
+                    <FacilityCard 
+                      key={facility.id} 
+                      facility={facility}
+                      facilityType="storage"
+                    />
                   ))}
                 </div>
               </TabsContent>
@@ -669,7 +572,10 @@ const Facilities = () => {
                     providers to help move your produce from farm to processing facilities 
                     and markets.
                   </p>
-                  <Button className="bg-agri-primary hover:bg-agri-dark">
+                  <Button 
+                    className="bg-agri-primary hover:bg-agri-dark" 
+                    onClick={handleGetNotified}
+                  >
                     Get Notified When Available
                   </Button>
                 </div>

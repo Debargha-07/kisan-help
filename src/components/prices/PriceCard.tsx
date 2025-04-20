@@ -19,7 +19,7 @@ export const PriceCard = ({
   trend, 
   subtitle 
 }: PriceCardProps) => {
-  // Ensure price is a valid number
+  // Ensure price is a valid number with defensive coding
   const displayPrice = isNaN(Number(price)) ? 0 : Number(price);
   const displayChange = change !== undefined && !isNaN(Number(change)) ? Number(change) : 0;
   
