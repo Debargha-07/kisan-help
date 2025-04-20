@@ -1,470 +1,490 @@
 
+import { useState } from "react";
 import Layout from "@/components/layout/Layout";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Calendar, Clock, Cloud, CloudRain, BarChart, Thermometer, Upload, Info, HelpCircle, Check } from "lucide-react";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Calendar } from "@/components/ui/calendar";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar, Legend } from "recharts";
+import { CalendarIcon, ChevronDown, CloudSun, Droplets, Thermometer, Wind, AlertCircle, Info } from "lucide-react";
+import { format } from "date-fns";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { toast } from "@/components/ui/use-toast";
 
-// Mock data for charts
-const chartImage = "https://miro.medium.com/v2/resize:fit:1400/1*qAZGgWaLvaiOJxBuulIKeg.png";
-const weatherImage = "https://www.visualcrossing.com/images/forecast-timeline.png";
+// Sample forecast data
+const weatherForecast = [
+  { day: "Mon", temperature: 32, humidity: 65, rainfall: 0, description: "Sunny", icon: "sun" },
+  { day: "Tue", temperature: 33, humidity: 70, rainfall: 0, description: "Partly Cloudy", icon: "cloud-sun" },
+  { day: "Wed", temperature: 31, humidity: 75, rainfall: 5, description: "Light Rain", icon: "cloud-rain" },
+  { day: "Thu", temperature: 29, humidity: 80, rainfall: 15, description: "Thunderstorms", icon: "cloud-lightning" },
+  { day: "Fri", temperature: 30, humidity: 72, rainfall: 2, description: "Light Rain", icon: "cloud-drizzle" },
+  { day: "Sat", temperature: 31, humidity: 68, rainfall: 0, description: "Mostly Sunny", icon: "sun" },
+  { day: "Sun", temperature: 33, humidity: 62, rainfall: 0, description: "Sunny", icon: "sun" },
+];
+
+// Sample crop yield data for charts
+const cropYieldData = [
+  { month: "Jan", rice: 42, wheat: 35, potatoes: 0, jute: 0 },
+  { month: "Feb", rice: 45, wheat: 38, potatoes: 0, jute: 0 },
+  { month: "Mar", rice: 0, wheat: 40, potatoes: 25, jute: 0 },
+  { month: "Apr", rice: 0, wheat: 0, potatoes: 32, jute: 10 },
+  { month: "May", rice: 0, wheat: 0, potatoes: 38, jute: 25 },
+  { month: "Jun", rice: 0, wheat: 0, potatoes: 30, jute: 40 },
+  { month: "Jul", rice: 20, wheat: 0, potatoes: 0, jute: 45 },
+  { month: "Aug", rice: 35, wheat: 0, potatoes: 0, jute: 42 },
+  { month: "Sep", rice: 50, wheat: 0, potatoes: 0, jute: 30 },
+  { month: "Oct", rice: 65, wheat: 0, potatoes: 0, jute: 0 },
+  { month: "Nov", rice: 55, wheat: 15, potatoes: 0, jute: 0 },
+  { month: "Dec", rice: 48, wheat: 25, potatoes: 0, jute: 0 },
+];
+
+// Sample market forecast data
+const marketForecastData = [
+  { month: "Jan", price: 2200, demand: 65 },
+  { month: "Feb", price: 2220, demand: 68 },
+  { month: "Mar", price: 2250, demand: 70 },
+  { month: "Apr", price: 2350, demand: 75 },
+  { month: "May", price: 2400, demand: 80 },
+  { month: "Jun", price: 2380, demand: 75 },
+  { month: "Jul", price: 2320, demand: 70 },
+  { month: "Aug", price: 2270, demand: 65 },
+  { month: "Sep", price: 2190, demand: 60 },
+  { month: "Oct", price: 2150, demand: 62 },
+  { month: "Nov", price: 2180, demand: 68 },
+  { month: "Dec", price: 2210, demand: 72 },
+];
+
+// Disease risk levels
+const diseaseRisk = {
+  rice: {
+    "Bacterial Leaf Blight": "Medium",
+    "Rice Blast": "Low",
+    "Sheath Blight": "High",
+  },
+  wheat: {
+    "Rust": "Low",
+    "Powdery Mildew": "Medium",
+    "Loose Smut": "Low",
+  },
+  potato: {
+    "Late Blight": "High",
+    "Early Blight": "Medium",
+    "Black Scurf": "Low",
+  },
+  jute: {
+    "Stem Rot": "Medium",
+    "Anthracnose": "Low",
+    "Root Rot": "Medium",
+  }
+};
 
 const Forecasting = () => {
+  const [date, setDate] = useState<Date>(new Date());
+  const [selectedCrop, setSelectedCrop] = useState("rice");
+  const [isCalculating, setIsCalculating] = useState(false);
+  const [showLoadingForecast, setShowLoadingForecast] = useState(false);
+
+  const updateForecast = () => {
+    setShowLoadingForecast(true);
+    setTimeout(() => {
+      setShowLoadingForecast(false);
+      toast({
+        title: "Forecast Updated",
+        description: "Harvest forecast has been updated with the latest data",
+      });
+    }, 2000);
+  };
+
+  const calculateYield = () => {
+    setIsCalculating(true);
+    setTimeout(() => {
+      setIsCalculating(false);
+      toast({
+        title: "Yield Calculation Complete",
+        description: `Based on current conditions, expected yield for ${selectedCrop} is 42-45 quintals per hectare.`,
+      });
+    }, 2000);
+  };
+
   return (
     <Layout>
-      <div className="container py-8">
-        <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8">
-          <div>
-            <h1 className="text-3xl font-bold text-agri-dark mb-2">Harvest Forecasting</h1>
-            <p className="text-gray-600">
-              AI-powered predictions to help plan your harvest and optimize sales timing
-            </p>
-          </div>
-          <div className="mt-4 md:mt-0">
-            <Button className="bg-agri-primary hover:bg-agri-dark">
-              <Upload className="h-4 w-4 mr-2" /> Upload Crop Data
-            </Button>
-          </div>
+      <div className="container py-6">
+        <div className="flex flex-col space-y-2 mb-6">
+          <h1 className="text-3xl font-bold text-agri-primary">
+            Harvest Forecasting
+          </h1>
+          <p className="text-muted-foreground">
+            Predict yields, analyze weather impact, and plan your harvest with AI-powered forecasting
+          </p>
         </div>
-        
+
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
-          <Card className="col-span-1">
+          <Card className="col-span-2">
             <CardHeader className="pb-3">
-              <CardTitle className="text-xl font-semibold">Crop Selection</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                <div>
-                  <label className="text-sm font-medium mb-1 block">Crop Type</label>
-                  <Select defaultValue="wheat">
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select Crop" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="wheat">Wheat</SelectItem>
-                      <SelectItem value="rice">Rice</SelectItem>
-                      <SelectItem value="cotton">Cotton</SelectItem>
-                      <SelectItem value="sugarcane">Sugarcane</SelectItem>
-                      <SelectItem value="tomato">Tomato</SelectItem>
-                      <SelectItem value="potato">Potato</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-                
-                <div>
-                  <label className="text-sm font-medium mb-1 block">Variety</label>
-                  <Select defaultValue="hd2967">
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select Variety" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="hd2967">HD 2967</SelectItem>
-                      <SelectItem value="hd3086">HD 3086</SelectItem>
-                      <SelectItem value="pusa">Pusa Wheat</SelectItem>
-                      <SelectItem value="pbw550">PBW 550</SelectItem>
-                      <SelectItem value="wh542">WH 542</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-                
-                <div>
-                  <label className="text-sm font-medium mb-1 block">Location</label>
-                  <Select defaultValue="punjab">
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select Location" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="punjab">Punjab</SelectItem>
-                      <SelectItem value="haryana">Haryana</SelectItem>
-                      <SelectItem value="up">Uttar Pradesh</SelectItem>
-                      <SelectItem value="mp">Madhya Pradesh</SelectItem>
-                      <SelectItem value="rajasthan">Rajasthan</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-                
-                <div>
-                  <label className="text-sm font-medium mb-1 block">Sowing Date</label>
-                  <div className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm">
-                    <span className="flex items-center">
-                      <Calendar className="h-4 w-4 mr-2 text-gray-500" />
-                      November 15, 2023
-                    </span>
-                  </div>
-                </div>
-                
-                <div>
-                  <label className="text-sm font-medium mb-1 block">Land Area</label>
-                  <div className="flex items-center h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm">
-                    <span>5.0</span>
-                    <Select defaultValue="acre">
-                      <SelectTrigger className="w-[100px] ml-2 border-0 p-0 h-auto">
-                        <SelectValue placeholder="Unit" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="acre">Acres</SelectItem>
-                        <SelectItem value="hectare">Hectares</SelectItem>
-                        <SelectItem value="bigha">Bigha</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                </div>
-                
-                <div>
-                  <label className="text-sm font-medium mb-1 block">Irrigation Type</label>
-                  <Select defaultValue="tubewell">
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select Irrigation" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="tubewell">Tubewell</SelectItem>
-                      <SelectItem value="canal">Canal</SelectItem>
-                      <SelectItem value="rainfed">Rain-fed</SelectItem>
-                      <SelectItem value="drip">Drip Irrigation</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-                
-                <Button className="w-full bg-agri-primary hover:bg-agri-dark">
-                  Update Forecast
+              <div className="flex justify-between items-center">
+                <CardTitle>Weather Forecast</CardTitle>
+                <Button onClick={updateForecast} variant="outline" size="sm" className="text-xs">
+                  {showLoadingForecast ? 
+                    <span className="flex items-center"><span className="animate-spin mr-2">⟳</span> Updating...</span> : 
+                    "Update Forecast"}
                 </Button>
               </div>
-            </CardContent>
-          </Card>
-          
-          <Card className="col-span-1 lg:col-span-2">
-            <CardHeader className="pb-3">
-              <CardTitle className="text-xl font-semibold">Harvest Forecast</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="space-y-6">
-                <div className="bg-agri-light rounded-lg p-4 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+              <div className="grid grid-cols-7 gap-4">
+                {weatherForecast.map((day, index) => (
+                  <div key={index} className="flex flex-col items-center p-2 bg-muted/50 rounded-lg">
+                    <span className="font-medium text-sm">{day.day}</span>
+                    <div className="my-2">
+                      {day.icon === "sun" && <CloudSun className="h-8 w-8 text-yellow-500" />}
+                      {day.icon === "cloud-sun" && <CloudSun className="h-8 w-8 text-gray-500" />}
+                      {day.icon === "cloud-rain" && <Droplets className="h-8 w-8 text-blue-500" />}
+                      {day.icon === "cloud-lightning" && <AlertCircle className="h-8 w-8 text-red-500" />}
+                      {day.icon === "cloud-drizzle" && <Droplets className="h-8 w-8 text-blue-400" />}
+                    </div>
+                    <div className="flex items-center text-sm">
+                      <Thermometer className="h-3 w-3 mr-1 text-red-500" />
+                      <span>{day.temperature}°C</span>
+                    </div>
+                    <div className="flex items-center text-sm">
+                      <Droplets className="h-3 w-3 mr-1 text-blue-500" />
+                      <span>{day.humidity}%</span>
+                    </div>
+                    {day.rainfall > 0 && (
+                      <span className="text-xs text-blue-600 mt-1">{day.rainfall}mm</span>
+                    )}
+                  </div>
+                ))}
+              </div>
+              
+              <div className="mt-4 text-sm text-muted-foreground">
+                <p>Weather data from West Bengal Meteorological Department. Last updated: {format(new Date(), "PPP")}</p>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader className="pb-2">
+              <CardTitle>Yield Calculator</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="space-y-2">
+                <label className="text-sm font-medium">Crop Type</label>
+                <Select defaultValue="rice" onValueChange={setSelectedCrop}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select crop" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="rice">Rice</SelectItem>
+                    <SelectItem value="wheat">Wheat</SelectItem>
+                    <SelectItem value="potato">Potato</SelectItem>
+                    <SelectItem value="jute">Jute</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="space-y-2">
+                <label className="text-sm font-medium">Planting Date</label>
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button
+                      variant="outline"
+                      className="w-full justify-start text-left font-normal"
+                    >
+                      <CalendarIcon className="mr-2 h-4 w-4" />
+                      {date ? format(date, "PPP") : "Select date"}
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-0">
+                    <Calendar
+                      mode="single"
+                      selected={date}
+                      onSelect={(date) => date && setDate(date)}
+                      initialFocus
+                    />
+                  </PopoverContent>
+                </Popover>
+              </div>
+
+              <div className="space-y-2">
+                <label className="text-sm font-medium">Area</label>
+                <Select defaultValue="1">
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select area" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="0.5">0.5 hectare</SelectItem>
+                    <SelectItem value="1">1 hectare</SelectItem>
+                    <SelectItem value="2">2 hectares</SelectItem>
+                    <SelectItem value="5">5 hectares</SelectItem>
+                    <SelectItem value="10">10 hectares</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="space-y-2">
+                <label className="text-sm font-medium">Soil Type</label>
+                <Select defaultValue="loam">
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select soil type" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="clay">Clay</SelectItem>
+                    <SelectItem value="silt">Silt</SelectItem>
+                    <SelectItem value="loam">Loam</SelectItem>
+                    <SelectItem value="sandy">Sandy</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <Button className="w-full bg-agri-primary hover:bg-agri-dark" onClick={calculateYield}>
+                {isCalculating ? 
+                  <span className="flex items-center"><span className="animate-spin mr-2">⟳</span> Calculating...</span> : 
+                  "Calculate Expected Yield"}
+              </Button>
+
+              <div className="text-xs text-muted-foreground">
+                Calculations include climate data, soil conditions, and historical yields.
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+
+        <Tabs defaultValue="yield" className="space-y-4">
+          <TabsList>
+            <TabsTrigger value="yield">Crop Yield Forecast</TabsTrigger>
+            <TabsTrigger value="disease">Disease Risk</TabsTrigger>
+            <TabsTrigger value="market">Market Forecast</TabsTrigger>
+          </TabsList>
+          
+          <TabsContent value="yield" className="space-y-4">
+            <Card>
+              <CardHeader>
+                <CardTitle>Annual Crop Yield Patterns</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="h-80">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <AreaChart
+                      data={cropYieldData}
+                      margin={{ top: 10, right: 30, left: 0, bottom: 0 }}
+                    >
+                      <CartesianGrid strokeDasharray="3 3" />
+                      <XAxis dataKey="month" />
+                      <YAxis label={{ value: 'Quintals per Hectare', angle: -90, position: 'insideLeft' }} />
+                      <Tooltip />
+                      <Legend />
+                      <Area type="monotone" dataKey="rice" stackId="1" stroke="#8884d8" fill="#8884d8" />
+                      <Area type="monotone" dataKey="wheat" stackId="2" stroke="#82ca9d" fill="#82ca9d" />
+                      <Area type="monotone" dataKey="potatoes" stackId="3" stroke="#ffc658" fill="#ffc658" />
+                      <Area type="monotone" dataKey="jute" stackId="4" stroke="#ff8042" fill="#ff8042" />
+                    </AreaChart>
+                  </ResponsiveContainer>
+                </div>
+                
+                <div className="mt-4 space-y-4">
+                  <Alert>
+                    <Info className="h-4 w-4" />
+                    <AlertTitle>Seasonal Insights</AlertTitle>
+                    <AlertDescription>
+                      Rice yields peak in September-October. For wheat, December-February is the optimal harvest period. Plan your planting and harvesting accordingly.
+                    </AlertDescription>
+                  </Alert>
+                  
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="bg-muted p-4 rounded-lg">
+                      <h4 className="font-medium mb-2">Optimal Planting Windows</h4>
+                      <ul className="space-y-1 text-sm">
+                        <li><span className="font-semibold">Rice:</span> June-July for aman, December-January for boro</li>
+                        <li><span className="font-semibold">Wheat:</span> November-December</li>
+                        <li><span className="font-semibold">Potato:</span> October-November</li>
+                        <li><span className="font-semibold">Jute:</span> March-April</li>
+                      </ul>
+                    </div>
+                    
+                    <div className="bg-muted p-4 rounded-lg">
+                      <h4 className="font-medium mb-2">Expected Yields (Good Conditions)</h4>
+                      <ul className="space-y-1 text-sm">
+                        <li><span className="font-semibold">Rice:</span> 45-60 quintals/hectare</li>
+                        <li><span className="font-semibold">Wheat:</span> 35-45 quintals/hectare</li>
+                        <li><span className="font-semibold">Potato:</span> 200-250 quintals/hectare</li>
+                        <li><span className="font-semibold">Jute:</span> 25-32 quintals/hectare</li>
+                      </ul>
+                    </div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+          
+          <TabsContent value="disease" className="space-y-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {Object.entries(diseaseRisk).map(([crop, diseases]) => (
+                <Card key={crop}>
+                  <CardHeader className="pb-2">
+                    <CardTitle className="capitalize">{crop} Disease Risk</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <table className="w-full">
+                      <thead>
+                        <tr className="border-b">
+                          <th className="text-left py-2">Disease</th>
+                          <th className="text-right py-2">Risk Level</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {Object.entries(diseases).map(([disease, risk]) => (
+                          <tr key={disease} className="border-b last:border-0">
+                            <td className="py-2">{disease}</td>
+                            <td className="py-2 text-right">
+                              <span className={`px-2 py-1 rounded text-xs font-medium ${
+                                risk === "High" 
+                                  ? "bg-red-100 text-red-800" 
+                                  : risk === "Medium"
+                                  ? "bg-yellow-100 text-yellow-800"
+                                  : "bg-green-100 text-green-800"
+                              }`}>
+                                {risk}
+                              </span>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                    
+                    <div className="mt-4 text-sm text-muted-foreground">
+                      <p>Disease risk assessment based on current weather conditions and historical disease patterns in West Bengal.</p>
+                    </div>
+                    
+                    <Button 
+                      className="mt-4 w-full"
+                      variant="outline"
+                      onClick={() => {
+                        toast({
+                          title: "Prevention Tips",
+                          description: `Prevention recommendations for ${crop} diseases have been sent to your email.`,
+                        });
+                      }}
+                    >
+                      Get Prevention Recommendations
+                    </Button>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+            
+            <Alert className="bg-yellow-50 border-yellow-200">
+              <AlertCircle className="h-4 w-4 text-yellow-800" />
+              <AlertTitle>Increased Disease Risk Alert</AlertTitle>
+              <AlertDescription>
+                Recent humidity levels have increased the risk of fungal diseases. Consider preventive spraying for susceptible crops.
+              </AlertDescription>
+            </Alert>
+          </TabsContent>
+          
+          <TabsContent value="market" className="space-y-4">
+            <Card>
+              <CardHeader>
+                <CardTitle>Market Price Forecasting</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="h-80">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <BarChart
+                      data={marketForecastData}
+                      margin={{ top: 20, right: 30, left: 20, bottom: 5 }}
+                    >
+                      <CartesianGrid strokeDasharray="3 3" />
+                      <XAxis dataKey="month" />
+                      <YAxis yAxisId="left" orientation="left" stroke="#8884d8" />
+                      <YAxis yAxisId="right" orientation="right" stroke="#82ca9d" />
+                      <Tooltip />
+                      <Legend />
+                      <Bar yAxisId="left" dataKey="price" name="Price (₹ per quintal)" fill="#8884d8" />
+                      <Bar yAxisId="right" dataKey="demand" name="Demand Index" fill="#82ca9d" />
+                    </BarChart>
+                  </ResponsiveContainer>
+                </div>
+                
+                <div className="mt-6 grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div className="space-y-4">
+                    <h3 className="font-semibold">Price Trends Analysis</h3>
+                    <div className="space-y-2">
+                      <div className="flex justify-between text-sm">
+                        <span>Current Price:</span>
+                        <span className="font-medium">₹2,200 per quintal</span>
+                      </div>
+                      <div className="flex justify-between text-sm">
+                        <span>30-Day Forecast:</span>
+                        <span className="font-medium text-green-600">₹2,350 per quintal (+6.8%)</span>
+                      </div>
+                      <div className="flex justify-between text-sm">
+                        <span>90-Day Forecast:</span>
+                        <span className="font-medium text-red-600">₹2,180 per quintal (-0.9%)</span>
+                      </div>
+                    </div>
+                    
+                    <Alert>
+                      <AlertCircle className="h-4 w-4" />
+                      <AlertTitle>Market Advisory</AlertTitle>
+                      <AlertDescription>
+                        Price expected to peak in April-May. Consider storing crops if storage is available and affordable.
+                      </AlertDescription>
+                    </Alert>
+                  </div>
+                  
                   <div>
-                    <h3 className="font-semibold text-lg">Optimal Harvest Window</h3>
-                    <p className="text-gray-600 text-sm">Based on crop condition and weather forecast</p>
-                  </div>
-                  <div className="flex items-center gap-4">
-                    <div className="text-center">
-                      <div className="bg-agri-primary text-white font-bold py-2 px-4 rounded">
-                        <Calendar className="h-4 w-4 inline mr-2" />
-                        April 10, 2024
-                      </div>
-                      <p className="text-xs mt-1 text-gray-500">Earliest</p>
-                    </div>
-                    <div className="text-center">
-                      <div className="bg-agri-accent text-agri-dark font-bold py-2 px-4 rounded">
-                        <Calendar className="h-4 w-4 inline mr-2" />
-                        April 20, 2024
-                      </div>
-                      <p className="text-xs mt-1 text-gray-500">Optimal</p>
-                    </div>
-                    <div className="text-center">
-                      <div className="bg-red-100 text-red-600 font-bold py-2 px-4 rounded">
-                        <Calendar className="h-4 w-4 inline mr-2" />
-                        April 30, 2024
-                      </div>
-                      <p className="text-xs mt-1 text-gray-500">Latest</p>
-                    </div>
-                  </div>
-                </div>
-                
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  <div className="bg-white rounded-lg border p-4">
-                    <div className="flex items-center justify-between mb-2">
-                      <h4 className="font-medium">Expected Yield</h4>
-                      <Info className="h-4 w-4 text-gray-400" />
-                    </div>
-                    <div className="text-2xl font-bold text-agri-primary">48.5 q/ha</div>
-                    <p className="text-sm text-green-600 flex items-center">
-                      <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" strokeWidth="2" fill="none" strokeLinecap="round" strokeLinejoin="round" className="mr-1">
-                        <polyline points="22 7 13.5 15.5 8.5 10.5 2 17"></polyline>
-                        <polyline points="16 7 22 7 22 13"></polyline>
-                      </svg>
-                      5.2% above average
-                    </p>
-                  </div>
-                  
-                  <div className="bg-white rounded-lg border p-4">
-                    <div className="flex items-center justify-between mb-2">
-                      <h4 className="font-medium">Quality Prediction</h4>
-                      <Info className="h-4 w-4 text-gray-400" />
-                    </div>
-                    <div className="text-2xl font-bold text-agri-primary">Grade A</div>
-                    <p className="text-sm text-gray-600">
-                      Based on current growth patterns
-                    </p>
-                  </div>
-                  
-                  <div className="bg-white rounded-lg border p-4">
-                    <div className="flex items-center justify-between mb-2">
-                      <h4 className="font-medium">Total Expected Harvest</h4>
-                      <Info className="h-4 w-4 text-gray-400" />
-                    </div>
-                    <div className="text-2xl font-bold text-agri-primary">97 quintals</div>
-                    <p className="text-sm text-gray-600">
-                      For 5 acres of land
-                    </p>
+                    <h3 className="font-semibold mb-4">Regional Price Variations</h3>
+                    <table className="w-full">
+                      <thead>
+                        <tr className="border-b">
+                          <th className="text-left py-2">Market</th>
+                          <th className="text-right py-2">Current Price</th>
+                        </tr>
+                      </thead>
+                      <tbody className="text-sm">
+                        <tr className="border-b">
+                          <td className="py-2">Kolkata Wholesale Market</td>
+                          <td className="py-2 text-right">₹2,250 per quintal</td>
+                        </tr>
+                        <tr className="border-b">
+                          <td className="py-2">Siliguri Agricultural Market</td>
+                          <td className="py-2 text-right">₹2,180 per quintal</td>
+                        </tr>
+                        <tr className="border-b">
+                          <td className="py-2">Burdwan Mandi</td>
+                          <td className="py-2 text-right">₹2,220 per quintal</td>
+                        </tr>
+                        <tr className="border-b">
+                          <td className="py-2">Howrah Farmers Market</td>
+                          <td className="py-2 text-right">₹2,200 per quintal</td>
+                        </tr>
+                        <tr>
+                          <td className="py-2">Durgapur Trading Center</td>
+                          <td className="py-2 text-right">₹2,190 per quintal</td>
+                        </tr>
+                      </tbody>
+                    </table>
+                    
+                    <Button 
+                      className="mt-4 w-full"
+                      onClick={() => {
+                        toast({
+                          title: "Price Alert Set",
+                          description: "You'll receive notifications when prices reach your target level.",
+                        });
+                      }}
+                    >
+                      Set Price Alert
+                    </Button>
                   </div>
                 </div>
-                
-                <Tabs defaultValue="yield">
-                  <TabsList className="bg-agri-light">
-                    <TabsTrigger value="yield" className="data-[state=active]:bg-agri-primary data-[state=active]:text-white">
-                      <BarChart className="h-4 w-4 mr-2" />
-                      Yield Projection
-                    </TabsTrigger>
-                    <TabsTrigger value="weather" className="data-[state=active]:bg-agri-primary data-[state=active]:text-white">
-                      <CloudRain className="h-4 w-4 mr-2" />
-                      Weather Forecast
-                    </TabsTrigger>
-                    <TabsTrigger value="market" className="data-[state=active]:bg-agri-primary data-[state=active]:text-white">
-                      <BarChart className="h-4 w-4 mr-2" />
-                      Market Timing
-                    </TabsTrigger>
-                  </TabsList>
-                  <TabsContent value="yield" className="mt-4">
-                    <div className="bg-white rounded-lg border p-4">
-                      <div className="flex items-center justify-between mb-4">
-                        <h4 className="font-medium">Yield Projection Over Time</h4>
-                        <Select defaultValue="quintals">
-                          <SelectTrigger className="w-[130px]">
-                            <SelectValue placeholder="Unit" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="quintals">Quintals</SelectItem>
-                            <SelectItem value="tonnes">Tonnes</SelectItem>
-                            <SelectItem value="kg">Kilograms</SelectItem>
-                          </SelectContent>
-                        </Select>
-                      </div>
-                      <img 
-                        src={chartImage} 
-                        alt="Yield Projection Chart"
-                        className="w-full h-auto object-contain rounded" 
-                      />
-                      <div className="mt-4 text-sm text-gray-600">
-                        <div className="flex items-center gap-2 mb-2">
-                          <HelpCircle className="h-4 w-4 text-agri-primary" />
-                          <span>Peak yield is expected between April 15-20 based on current growth rate and weather patterns.</span>
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <HelpCircle className="h-4 w-4 text-yellow-500" />
-                          <span>Harvesting after April 25 may result in reduced quality due to predicted high temperatures.</span>
-                        </div>
-                      </div>
-                    </div>
-                  </TabsContent>
-                  <TabsContent value="weather" className="mt-4">
-                    <div className="bg-white rounded-lg border p-4">
-                      <h4 className="font-medium mb-4">14-Day Weather Forecast</h4>
-                      <img 
-                        src={weatherImage} 
-                        alt="Weather Forecast"
-                        className="w-full h-auto object-contain rounded" 
-                      />
-                      <div className="mt-4 grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
-                        <div className="bg-agri-light p-3 rounded">
-                          <div className="flex items-center justify-between">
-                            <div className="font-medium">Temperature</div>
-                            <Thermometer className="h-4 w-4 text-red-500" />
-                          </div>
-                          <p>Avg: 30°C, Max: 36°C</p>
-                          <p className="text-xs mt-1 text-gray-600">Trending warmer than usual for April</p>
-                        </div>
-                        <div className="bg-agri-light p-3 rounded">
-                          <div className="flex items-center justify-between">
-                            <div className="font-medium">Rainfall</div>
-                            <CloudRain className="h-4 w-4 text-blue-500" />
-                          </div>
-                          <p>2 days expected (15mm)</p>
-                          <p className="text-xs mt-1 text-gray-600">Lower than average for the season</p>
-                        </div>
-                        <div className="bg-agri-light p-3 rounded">
-                          <div className="flex items-center justify-between">
-                            <div className="font-medium">Wind</div>
-                            <Cloud className="h-4 w-4 text-gray-600" />
-                          </div>
-                          <p>5-10 km/h, NW direction</p>
-                          <p className="text-xs mt-1 text-gray-600">Favorable for harvesting operations</p>
-                        </div>
-                      </div>
-                      <div className="mt-4 p-3 border border-yellow-200 bg-yellow-50 rounded-lg flex items-start gap-2">
-                        <Info className="h-5 w-5 text-yellow-500 flex-shrink-0 mt-0.5" />
-                        <div>
-                          <span className="font-medium">Weather Alert:</span> Possibility of unseasonal rain in the third week of April. Consider advancing harvest if your crop is ready by April 15.
-                        </div>
-                      </div>
-                    </div>
-                  </TabsContent>
-                  <TabsContent value="market" className="mt-4">
-                    <div className="bg-white rounded-lg border p-4">
-                      <h4 className="font-medium mb-4">Market Price Projection</h4>
-                      <div className="bg-agri-light p-4 rounded-lg mb-4">
-                        <div className="flex flex-col md:flex-row justify-between md:items-center">
-                          <div>
-                            <h5 className="font-semibold">Recommended Selling Window</h5>
-                            <p className="text-sm text-gray-600">Based on historical trends and current market signals</p>
-                          </div>
-                          <div className="mt-3 md:mt-0 flex items-center gap-2">
-                            <Clock className="h-5 w-5 text-agri-primary" />
-                            <span className="font-bold text-lg">April 25 - May 10, 2024</span>
-                          </div>
-                        </div>
-                      </div>
-                      <img 
-                        src={chartImage} 
-                        alt="Market Price Projection Chart"
-                        className="w-full h-auto object-contain rounded" 
-                      />
-                      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
-                        <div className="border rounded p-3">
-                          <h5 className="font-medium text-sm text-gray-600">Current Market Price</h5>
-                          <p className="text-xl font-bold text-agri-primary">₹2,150/q</p>
-                        </div>
-                        <div className="border rounded p-3">
-                          <h5 className="font-medium text-sm text-gray-600">Projected Peak Price</h5>
-                          <p className="text-xl font-bold text-green-600">₹2,350/q</p>
-                        </div>
-                        <div className="border rounded p-3">
-                          <h5 className="font-medium text-sm text-gray-600">Potential Increase</h5>
-                          <p className="text-xl font-bold text-agri-accent">+9.3%</p>
-                        </div>
-                      </div>
-                      <div className="mt-4 text-sm text-gray-600">
-                        <p className="mb-2"><span className="font-medium">Market Analysis:</span> Government procurement at MSP will begin on April 15, but market prices are expected to rise above MSP by end-April due to export demand and lower production in neighboring states.</p>
-                        <p><span className="font-medium">Recommendation:</span> Consider holding your harvest until late April if storage facilities are available, or opt for a staggered selling approach.</p>
-                      </div>
-                    </div>
-                  </TabsContent>
-                </Tabs>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-        
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <Card>
-            <CardHeader className="pb-3">
-              <CardTitle className="text-xl font-semibold">Your Crop History</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                <div className="border rounded-lg overflow-hidden">
-                  <div className="bg-agri-light p-3">
-                    <h4 className="font-medium">Previous Wheat Harvests</h4>
-                  </div>
-                  <div className="divide-y">
-                    {[
-                      {year: "2023", yield: "45.2 q/ha", quality: "Grade B+", sellPrice: "₹2,050/q"},
-                      {year: "2022", yield: "42.8 q/ha", quality: "Grade A", sellPrice: "₹2,125/q"},
-                      {year: "2021", yield: "38.5 q/ha", quality: "Grade B", sellPrice: "₹1,975/q"},
-                    ].map((crop, index) => (
-                      <div key={index} className="p-3 flex justify-between items-center">
-                        <div>
-                          <span className="font-medium">Wheat {crop.year}</span>
-                          <p className="text-sm text-gray-600">HD 2967 Variety</p>
-                        </div>
-                        <div className="grid grid-cols-3 gap-4 text-sm">
-                          <div className="text-center">
-                            <p className="text-gray-600">Yield</p>
-                            <p className="font-medium">{crop.yield}</p>
-                          </div>
-                          <div className="text-center">
-                            <p className="text-gray-600">Quality</p>
-                            <p className="font-medium">{crop.quality}</p>
-                          </div>
-                          <div className="text-center">
-                            <p className="text-gray-600">Sold At</p>
-                            <p className="font-medium">{crop.sellPrice}</p>
-                          </div>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-                
-                <div className="bg-green-50 border border-green-200 rounded-lg p-4">
-                  <div className="flex items-start gap-3">
-                    <div className="w-10 h-10 rounded-full bg-green-100 flex items-center justify-center flex-shrink-0">
-                      <BarChart className="h-5 w-5 text-green-600" />
-                    </div>
-                    <div>
-                      <h4 className="font-medium">Growth Trend Analysis</h4>
-                      <p className="text-sm text-gray-600 mt-1">
-                        Your wheat yields have been improving year-over-year, with a 6.5% average annual increase. This is better than the regional average of 3.8%.
-                      </p>
-                      <Button variant="link" className="text-agri-primary p-0 h-auto mt-1">
-                        View detailed analysis
-                      </Button>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-          
-          <Card>
-            <CardHeader className="pb-3">
-              <CardTitle className="text-xl font-semibold">Recommendations</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                <div className="bg-agri-light rounded-lg p-4">
-                  <h4 className="font-medium mb-2">Harvest Timing Advice</h4>
-                  <ul className="space-y-2 text-sm">
-                    <li className="flex items-start gap-2">
-                      <Check className="h-5 w-5 text-agri-primary flex-shrink-0" />
-                      <span>Wait until grain moisture content drops to 14-16% for optimal quality.</span>
-                    </li>
-                    <li className="flex items-start gap-2">
-                      <Check className="h-5 w-5 text-agri-primary flex-shrink-0" />
-                      <span>Check for clear weather forecast for 3-4 days after your planned harvest date.</span>
-                    </li>
-                    <li className="flex items-start gap-2">
-                      <Check className="h-5 w-5 text-agri-primary flex-shrink-0" />
-                      <span>Consider harvesting in phases if your crop is ripening unevenly.</span>
-                    </li>
-                  </ul>
-                </div>
-                
-                <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-                  <h4 className="font-medium flex items-center">
-                    <Info className="h-5 w-5 text-blue-500 mr-2" />
-                    Market Insights
-                  </h4>
-                  <div className="mt-3 space-y-3 text-sm">
-                    <p>Government procurement operations at MSP (₹2,125/q) will begin from April 15 at all major mandis.</p>
-                    <p>Private flour mills are expected to offer 5-10% above MSP by end of April due to quality concerns in other growing regions.</p>
-                    <p>Export demand is strong this year, potentially pushing prices higher for Grade A wheat.</p>
-                  </div>
-                </div>
-                
-                <div className="rounded-lg border p-4">
-                  <h4 className="font-medium mb-3">Post-Harvest Processing Options</h4>
-                  <div className="space-y-2">
-                    <div className="flex items-center justify-between text-sm p-2 hover:bg-gray-50 rounded">
-                      <span>Drying & Cleaning Services</span>
-                      <Button variant="link" className="text-agri-primary p-0 h-auto">View Nearby</Button>
-                    </div>
-                    <div className="flex items-center justify-between text-sm p-2 hover:bg-gray-50 rounded">
-                      <span>Storage Facilities</span>
-                      <Button variant="link" className="text-agri-primary p-0 h-auto">View Nearby</Button>
-                    </div>
-                    <div className="flex items-center justify-between text-sm p-2 hover:bg-gray-50 rounded">
-                      <span>Quality Grading Centers</span>
-                      <Button variant="link" className="text-agri-primary p-0 h-auto">View Nearby</Button>
-                    </div>
-                    <div className="flex items-center justify-between text-sm p-2 hover:bg-gray-50 rounded">
-                      <span>Transportation Services</span>
-                      <Button variant="link" className="text-agri-primary p-0 h-auto">View Nearby</Button>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+        </Tabs>
       </div>
     </Layout>
   );

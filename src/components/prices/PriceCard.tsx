@@ -31,7 +31,7 @@ export const PriceCard = ({
         <div className="flex items-center">
           <IndianRupee className="mr-2 h-4 w-4 text-agri-primary" />
           <span className="text-3xl font-bold text-agri-primary">
-            {displayPrice}
+            {displayPrice.toFixed(2)}
           </span>
           <span className="ml-2 text-sm text-muted-foreground">
             {unit}
@@ -52,10 +52,10 @@ export const PriceCard = ({
                   : "text-red-600"
               }`}
             >
-              {isNaN(change) ? 0 : Math.abs(change)}%
+              {isNaN(change) ? 0 : Math.abs(change).toFixed(2)}%
             </span>
             <span className="ml-1 text-sm text-muted-foreground">
-              গত সপ্তাহ থেকে
+              from last week
             </span>
           </div>
         )}

@@ -1,59 +1,112 @@
 
-import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
-import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+import { serve } from "https://deno.land/std@0.177.0/http/server.ts";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2.31.0";
 
-const corsHeaders = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
-};
+// Create a Supabase client with the Auth context of the function
+const supabaseUrl = Deno.env.get("SUPABASE_URL") || "";
+const supabaseAnonKey = Deno.env.get("SUPABASE_ANON_KEY") || "";
+const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
-serve(async (req) => {
-  if (req.method === 'OPTIONS') {
-    return new Response(null, { headers: corsHeaders });
-  }
+const WEST_BENGAL_REGIONS = [
+  "Kolkata",
+  "Howrah",
+  "Siliguri",
+  "Durgapur",
+  "Asansol",
+  "Bardhaman",
+  "Malda",
+  "Baharampur",
+  "Jalpaiguri",
+  "Kharagpur"
+];
 
-  try {
-    // Initialize Supabase client
-    const supabaseClient = createClient(
-      'https://wjlonkphtcrkleerrgtj.supabase.co',
-      'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndqbG9ua3BodGNya2xlZXJyZ3RqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDQ3MzM2OTQsImV4cCI6MjA2MDMwOTY5NH0.XYLReiUnhSbnXT5G9FN6cTmKCvqO_3R6tqvLkp_riSA'
-    );
+const CROPS = ["rice", "wheat", "potato", "onion"];
 
-    // For demo purposes, we'll simulate real data with some random variations
-    const crops = ['rice', 'wheat', 'potato', 'onion'];
-    const regions = ['West Bengal', 'North Bengal', 'South Bengal', 'Central Bengal', 'Coastal Bengal'];
-    const baselinePrices = { rice: 2200, wheat: 2100, potato: 1200, onion: 1800 };
+// Function to generate random prices within a range
+function getRandomPrice(min: number, max: number): number {
+  return Number((Math.random() * (max - min) + min).toFixed(2));
+}
 
-    for (const crop of crops) {
-      for (const region of regions) {
-        const variation = Math.random() * 200 - 100; // Random variation between -100 and +100
-        const currentPrice = Math.max(0, baselinePrices[crop] + variation);
-        const previousPrice = Math.max(0, currentPrice - (Math.random() * 100 - 50));
-        const forecastPrice = Math.max(0, currentPrice + (Math.random() * 150 - 75));
+// Function to adjust existing price with a small variance
+function adjustPrice(basePrice: number, maxChangePercent: number = 5): number {
+  const changePercent = (Math.random() * maxChangePercent * 2) - maxChangePercent; // -5% to +5%
+  return Number((basePrice * (1 + changePercent / 100)).toFixed(2));
+}
 
-        await supabaseClient
-          .from('crop_prices')
-          .upsert({
+async function updateCropPrices() {
+  // Initial reference prices for different crops (per quintal in INR)
+  const basePrices = {
+    "rice": 2200,
+    "wheat": 1800,
+    "potato": 1500,
+    "onion": 2500
+  };
+
+  for (const crop of CROPS) {
+    // Get existing prices to update them with slight variations
+    const { data: existingPrices } = await supabase
+      .from("crop_prices")
+      .select("*")
+      .eq("crop_name", crop);
+
+    // If prices exist, update them with variations; otherwise create new ones
+    if (existingPrices && existingPrices.length > 0) {
+      for (const record of existingPrices) {
+        const currentPrice = adjustPrice(Number(record.current_price));
+        const forecastPrice = adjustPrice(currentPrice, 8); // Slightly higher variance for forecast
+        
+        await supabase
+          .from("crop_prices")
+          .update({
+            previous_price: record.current_price,
+            current_price: currentPrice,
+            forecast_price: forecastPrice,
+            updated_at: new Date().toISOString()
+          })
+          .eq("id", record.id);
+      }
+    } else {
+      // Create new price records for each region
+      for (const region of WEST_BENGAL_REGIONS) {
+        // Add some regional variance to base prices
+        const basePrice = basePrices[crop as keyof typeof basePrices];
+        const regionalVariance = getRandomPrice(-100, 150); // -₹100 to +₹150 regional difference
+        const currentPrice = basePrice + regionalVariance;
+        
+        // Calculate previous price (slightly different from current)
+        const previousPrice = adjustPrice(currentPrice, 3);
+        
+        // Calculate forecast price
+        const forecastPrice = adjustPrice(currentPrice, 10);
+        
+        await supabase
+          .from("crop_prices")
+          .insert({
             crop_name: crop,
             region: region,
-            current_price: Number(currentPrice.toFixed(2)),
-            previous_price: Number(previousPrice.toFixed(2)),
-            forecast_price: Number(forecastPrice.toFixed(2)),
-            updated_at: new Date().toISOString()
-          }, {
-            onConflict: 'crop_name,region'
+            current_price: currentPrice,
+            previous_price: previousPrice,
+            forecast_price: forecastPrice,
+            unit: "per quintal"
           });
       }
     }
+  }
+  
+  return { success: true, message: "Crop prices updated successfully" };
+}
 
-    return new Response(JSON.stringify({ success: true }), {
-      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+serve(async (req) => {
+  try {
+    const result = await updateCropPrices();
+    return new Response(JSON.stringify(result), {
+      headers: { "Content-Type": "application/json" },
+      status: 200,
     });
   } catch (error) {
-    console.error('Error updating crop prices:', error);
     return new Response(JSON.stringify({ error: error.message }), {
+      headers: { "Content-Type": "application/json" },
       status: 500,
-      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
   }
 });

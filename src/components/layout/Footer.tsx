@@ -7,74 +7,74 @@ const Footer = () => {
       <div className="container">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
           <div>
-            <h3 className="text-xl font-bold mb-4">কিষাণ কানেক্ট</h3>
+            <h3 className="text-xl font-bold mb-4">Kisan Connect</h3>
             <p className="text-sm">
-              পশ্চিমবঙ্গের কৃষকদের ফসল কাটার পরের ব্যবস্থাপনা উন্নত করতে এবং সরাসরি প্রসেসরদের সাথে যোগাযোগ করতে প্রযুক্তি দিয়ে ক্ষমতায়ন।
+              Empowering farmers in West Bengal with technology to improve post-harvest management and connect directly with processors.
             </p>
           </div>
           <div>
-            <h4 className="font-semibold mb-4">দ্রুত লিংক</h4>
+            <h4 className="font-semibold mb-4">Quick Links</h4>
             <ul className="space-y-2">
               <li>
                 <Link to="/" className="text-sm hover:text-agri-accent transition-colors">
-                  হোম
+                  Home
                 </Link>
               </li>
               <li>
                 <Link to="/marketplace" className="text-sm hover:text-agri-accent transition-colors">
-                  মার্কেটপ্লেস
+                  Marketplace
                 </Link>
               </li>
               <li>
                 <Link to="/forecasting" className="text-sm hover:text-agri-accent transition-colors">
-                  পূর্বাভাস
+                  Forecasting
                 </Link>
               </li>
               <li>
                 <Link to="/facilities" className="text-sm hover:text-agri-accent transition-colors">
-                  প্রসেসিং সুবিধা
+                  Processing Facilities
                 </Link>
               </li>
             </ul>
           </div>
           <div>
-            <h4 className="font-semibold mb-4">রিসোর্স</h4>
+            <h4 className="font-semibold mb-4">Resources</h4>
             <ul className="space-y-2">
               <li>
                 <Link to="/help" className="text-sm hover:text-agri-accent transition-colors">
-                  সাহায্য কেন্দ্র
+                  Help Center
                 </Link>
               </li>
               <li>
                 <Link to="/tutorials" className="text-sm hover:text-agri-accent transition-colors">
-                  টিউটোরিয়াল
+                  Tutorials
                 </Link>
               </li>
               <li>
                 <Link to="/faq" className="text-sm hover:text-agri-accent transition-colors">
-                  জিজ্ঞাসা
+                  FAQ
                 </Link>
               </li>
               <li>
                 <Link to="/contact" className="text-sm hover:text-agri-accent transition-colors">
-                  যোগাযোগ করুন
+                  Contact Us
                 </Link>
               </li>
             </ul>
           </div>
           <div>
-            <h4 className="font-semibold mb-4">যোগাযোগ</h4>
+            <h4 className="font-semibold mb-4">Contact</h4>
             <address className="not-italic text-sm space-y-2">
-              <p>কৃষি উদ্ভাবন কেন্দ্র</p>
-              <p>কলকাতা, পশ্চিমবঙ্গ, ভারত</p>
-              <p>ইমেল: info@kisanconnect.in</p>
-              <p>ফোন: +91 33 2345 6789</p>
+              <p>Agricultural Innovation Center</p>
+              <p>Kolkata, West Bengal, India</p>
+              <p>Email: info@kisanconnect.in</p>
+              <p>Phone: +91 33 2345 6789</p>
             </address>
           </div>
         </div>
         <div className="border-t border-agri-dark mt-8 pt-4">
           <p className="text-sm text-center">
-            &copy; {new Date().getFullYear()} কিষাণ কানেক্ট। সর্বস্বত্ব সংরক্ষিত।
+            &copy; {new Date().getFullYear()} Kisan Connect. All rights reserved.
           </p>
         </div>
       </div>

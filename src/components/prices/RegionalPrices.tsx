@@ -14,9 +14,9 @@ export const RegionalPrices = ({ regions, currentPrice }: RegionalPricesProps) =
           <table className="w-full">
             <thead>
               <tr className="bg-agri-light">
-                <th className="text-left p-3 border-b">অঞ্চল</th>
-                <th className="text-right p-3 border-b">দাম (₹)</th>
-                <th className="text-right p-3 border-b">পার্থক্য</th>
+                <th className="text-left p-3 border-b">Region</th>
+                <th className="text-right p-3 border-b">Price (₹)</th>
+                <th className="text-right p-3 border-b">Difference</th>
               </tr>
             </thead>
             <tbody>
@@ -25,10 +25,10 @@ export const RegionalPrices = ({ regions, currentPrice }: RegionalPricesProps) =
                 return (
                   <tr key={region} className="border-b last:border-0 hover:bg-muted/50">
                     <td className="p-3 text-left">{region}</td>
-                    <td className="p-3 text-right">₹{price}</td>
+                    <td className="p-3 text-right">₹{price.toFixed(2)}</td>
                     <td className="p-3 text-right">
                       <span className={difference > 0 ? "text-green-600" : difference < 0 ? "text-red-600" : ""}>
-                        {difference > 0 ? "+" : ""}{difference}
+                        {difference > 0 ? "+" : ""}{difference.toFixed(2)}
                       </span>
                     </td>
                   </tr>

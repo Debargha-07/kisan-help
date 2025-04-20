@@ -51,7 +51,7 @@ const Prices = () => {
         return data;
       } catch (error: any) {
         toast({
-          title: "ফসলের দাম লোড করতে ত্রুটি",
+          title: "Error loading crop prices",
           description: error.message,
           variant: "destructive"
         });
@@ -86,7 +86,8 @@ const Prices = () => {
     const priceChange = previousPrice ? 
       Number((((currentPrice - previousPrice) / previousPrice) * 100).toFixed(2)) : 0;
     
-    const trend = priceChange >= 0 ? 'up' : 'down';
+    // Fixed the type error by ensuring trend is always 'up' or 'down'
+    const trend: 'up' | 'down' = priceChange >= 0 ? 'up' : 'down';
 
     return { currentPrice, previousPrice, forecastPrice, priceChange, trend };
   };
@@ -123,27 +124,27 @@ const Prices = () => {
       <div className="py-6 space-y-6">
         <div className="flex flex-col space-y-2">
           <h1 className="text-3xl font-bold text-agri-primary">
-            ফসলের দাম প্রবণতা
+            Crop Price Trends
           </h1>
           <p className="text-muted-foreground">
-            পশ্চিমবঙ্গ জুড়ে প্রধান ফসলের বর্তমান বাজার দাম এবং পূর্বাভাস
+            Current market prices and forecasts for major crops across West Bengal
           </p>
         </div>
 
         <Alert className="bg-agri-light border-agri-primary">
           <AlertCircle className="h-4 w-4 text-agri-primary" />
-          <AlertTitle>মূল্য তথ্য</AlertTitle>
+          <AlertTitle>Price Information</AlertTitle>
           <AlertDescription>
-            পশ্চিমবঙ্গের প্রধান কৃষি বাজার (মন্ডি) থেকে প্রতিদিন দাম আপডেট করা হয়। আপনার উৎপাদন কখন বিক্রি করবেন সে সম্পর্কে সুচিন্তিত সিদ্ধান্ত নিতে এই তথ্য ব্যবহার করুন।
+            Prices are updated daily from major agricultural markets (mandis) in West Bengal. Use this information to make informed decisions about when to sell your produce.
           </AlertDescription>
         </Alert>
 
         <Tabs defaultValue="rice" onValueChange={setSelectedCrop} className="w-full">
           <TabsList className="grid grid-cols-2 md:grid-cols-4 mb-4">
-            <TabsTrigger value="rice">চাল</TabsTrigger>
-            <TabsTrigger value="wheat">গম</TabsTrigger>
-            <TabsTrigger value="potato">আলু</TabsTrigger>
-            <TabsTrigger value="onion">পেঁয়াজ</TabsTrigger>
+            <TabsTrigger value="rice">Rice</TabsTrigger>
+            <TabsTrigger value="wheat">Wheat</TabsTrigger>
+            <TabsTrigger value="potato">Potato</TabsTrigger>
+            <TabsTrigger value="onion">Onion</TabsTrigger>
           </TabsList>
 
           <TabsContent value={selectedCrop} className="mt-0">
@@ -154,27 +155,27 @@ const Prices = () => {
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <PriceCard
-                  title="বর্তমান দাম"
+                  title="Current Price"
                   price={currentPrice}
-                  unit="প্রতি কুইন্টাল"
+                  unit="per quintal"
                   change={priceChange}
                   trend={trend}
                 />
                 <PriceCard
-                  title="দাম পূর্বাভাস"
+                  title="Price Forecast"
                   price={forecastPrice}
-                  unit="প্রতি কুইন্টাল"
-                  subtitle="আগামী ৭ দিনে সম্ভাব্য দাম"
+                  unit="per quintal"
+                  subtitle="Expected price in next 7 days"
                 />
                 <Card>
                   <CardHeader className="pb-2">
-                    <CardTitle className="text-lg">বাজার পরামর্শ</CardTitle>
+                    <CardTitle className="text-lg">Market Advisory</CardTitle>
                   </CardHeader>
                   <CardContent>
                     <p className="text-sm">
                       {trend === "up"
-                        ? "দাম বাড়ছে। সংরক্ষণ উপলব্ধ থাকলে ১-২ সপ্তাহের জন্য আপনার উৎপাদন ধরে রাখার কথা বিবেচনা করুন।"
-                        : "দাম কমছে। আপনার যদি বাজারের জন্য প্রস্তুত ফসল থাকে তবে শীঘ্রই বিক্রি করার কথা বিবেচনা করুন।"}
+                        ? "Prices are rising. If storage is available, consider holding your produce for 1-2 weeks."
+                        : "Prices are falling. If you have market-ready produce, consider selling soon."}
                     </p>
                   </CardContent>
                 </Card>
@@ -183,7 +184,7 @@ const Prices = () => {
 
             {cropPrices && cropPrices.length > 0 && (
               <>
-                <h3 className="font-medium text-lg mt-6 mb-3">আঞ্চলিক দাম তুলনা</h3>
+                <h3 className="font-medium text-lg mt-6 mb-3">Regional Price Comparison</h3>
                 <RegionalPrices 
                   regions={regions}
                   currentPrice={currentPrice}

@@ -19,13 +19,13 @@ import {
   Search 
 } from "lucide-react";
 
-// Sample processing facilities data
+// Sample processing facilities data with West Bengal locations
 const processingFacilities = [
   {
     id: 1,
-    name: "Northern Agro Processors",
+    name: "Bengal Agro Processors",
     type: "Flour Mill",
-    location: "Ludhiana, Punjab",
+    location: "Howrah, West Bengal",
     distance: "12 km",
     rating: 4.5,
     capacity: "2000 MT/day",
@@ -33,13 +33,13 @@ const processingFacilities = [
     contact: "+91 98765-43210",
     crops: ["Wheat", "Barley"],
     services: ["Cleaning", "Milling", "Packaging"],
-    image: "https://source.unsplash.com/random/300x200/?factory",
+    image: "https://images.unsplash.com/photo-1626444344029-9dce0a64eb96?auto=format&fit=crop&q=80",
   },
   {
     id: 2,
     name: "Green Valley Food Processing",
     type: "Multi-purpose Processing",
-    location: "Jalandhar, Punjab",
+    location: "Burdwan, West Bengal",
     distance: "28 km",
     rating: 4.2,
     capacity: "1500 MT/day",
@@ -47,55 +47,55 @@ const processingFacilities = [
     contact: "+91 98123-45678",
     crops: ["Tomato", "Potato", "Onion"],
     services: ["Cleaning", "Sorting", "Packaging", "Cold Storage"],
-    image: "https://source.unsplash.com/random/300x200/?food+factory",
+    image: "https://images.unsplash.com/photo-1594616446683-a5bb0c70dabb?auto=format&fit=crop&q=80",
   },
   {
     id: 3,
-    name: "Punjab Rice Mills",
+    name: "Kolkata Rice Mills",
     type: "Rice Mill",
-    location: "Amritsar, Punjab",
-    distance: "45 km",
+    location: "Kolkata, West Bengal",
+    distance: "5 km",
     rating: 4.8,
     capacity: "3000 MT/day",
     status: "Available",
     contact: "+91 99876-54321",
     crops: ["Rice", "Paddy"],
     services: ["Drying", "Hulling", "Polishing", "Grading", "Packaging"],
-    image: "https://source.unsplash.com/random/300x200/?rice+mill",
+    image: "https://images.unsplash.com/photo-1626923329879-654a199b7462?auto=format&fit=crop&q=80",
   },
   {
     id: 4,
-    name: "Sugarcane Processing Center",
-    type: "Sugar Mill",
-    location: "Phagwara, Punjab",
+    name: "Darjeeling Tea Processing Center",
+    type: "Tea Processing",
+    location: "Siliguri, West Bengal",
     distance: "35 km",
     rating: 4.0,
-    capacity: "5000 MT/day",
+    capacity: "1000 MT/day",
     status: "Limited",
     contact: "+91 98555-12345",
-    crops: ["Sugarcane"],
-    services: ["Crushing", "Processing", "Refining"],
-    image: "https://source.unsplash.com/random/300x200/?sugar+mill",
+    crops: ["Tea"],
+    services: ["Withering", "Rolling", "Oxidation", "Drying", "Packaging"],
+    image: "https://images.unsplash.com/photo-1523920290372-5e2e8c4c93ab?auto=format&fit=crop&q=80",
   },
   {
     id: 5,
-    name: "Modern Cotton Ginning Mill",
-    type: "Cotton Gin",
-    location: "Bathinda, Punjab",
+    name: "Jute Processing Mill",
+    type: "Jute Mill",
+    location: "Malda, West Bengal",
     distance: "72 km",
     rating: 3.9,
     capacity: "1200 MT/day",
     status: "Available",
     contact: "+91 97123-98765",
-    crops: ["Cotton"],
-    services: ["Ginning", "Baling", "Grading"],
-    image: "https://source.unsplash.com/random/300x200/?cotton+mill",
+    crops: ["Jute"],
+    services: ["Sorting", "Retting", "Processing", "Baling"],
+    image: "https://images.unsplash.com/photo-1551300704-5c88d3dcc049?auto=format&fit=crop&q=80",
   },
   {
     id: 6,
     name: "Vegetable Processing Unit",
     type: "Vegetable Processing",
-    location: "Patiala, Punjab",
+    location: "Durgapur, West Bengal",
     distance: "52 km",
     rating: 4.3,
     capacity: "800 MT/day",
@@ -103,63 +103,63 @@ const processingFacilities = [
     contact: "+91 95678-12345",
     crops: ["Potato", "Tomato", "Carrot", "Peas"],
     services: ["Washing", "Grading", "Packaging", "Freezing"],
-    image: "https://source.unsplash.com/random/300x200/?vegetable+processing",
+    image: "https://images.unsplash.com/photo-1598639753959-abd76ed33809?auto=format&fit=crop&q=80",
   },
 ];
 
-// Sample storage facilities data
+// Sample storage facilities data with West Bengal locations
 const storageFacilities = [
   {
     id: 1,
-    name: "Punjab State Warehouse",
+    name: "Bengal State Warehouse",
     type: "Government Warehouse",
-    location: "Ludhiana, Punjab",
+    location: "Kolkata, West Bengal",
     distance: "10 km",
     rating: 4.1,
     capacity: "10000 MT",
     available: "4500 MT",
     cost: "₹40 per quintal/month",
     features: ["Temperature Controlled", "Pest Management", "24/7 Security"],
-    image: "https://source.unsplash.com/random/300x200/?warehouse",
+    image: "https://images.unsplash.com/photo-1586528116311-ad8dd3c8310d?auto=format&fit=crop&q=80",
   },
   {
     id: 2,
     name: "FCI Storage Facility",
     type: "Government Silo",
-    location: "Khanna, Punjab",
+    location: "Siliguri, West Bengal",
     distance: "25 km",
     rating: 4.6,
     capacity: "25000 MT",
     available: "8000 MT",
     cost: "₹35 per quintal/month",
     features: ["Modern Silos", "Moisture Control", "Automated Management"],
-    image: "https://source.unsplash.com/random/300x200/?grain+silo",
+    image: "https://images.unsplash.com/photo-1605618309770-5292d0299d97?auto=format&fit=crop&q=80",
   },
   {
     id: 3,
-    name: "Cold Chain Solutions",
+    name: "Bengal Cold Chain Solutions",
     type: "Cold Storage",
-    location: "Jalandhar, Punjab",
+    location: "Burdwan, West Bengal",
     distance: "30 km",
     rating: 4.4,
     capacity: "5000 MT",
     available: "1200 MT",
     cost: "₹75 per quintal/month",
     features: ["Temperature Range: -10°C to 10°C", "Humidity Control", "24/7 Power Backup"],
-    image: "https://source.unsplash.com/random/300x200/?cold+storage",
+    image: "https://images.unsplash.com/photo-1624926571755-2ff2b4133e6a?auto=format&fit=crop&q=80",
   },
   {
     id: 4,
     name: "Agri Logistics Hub",
     type: "Private Warehouse",
-    location: "Amritsar, Punjab",
+    location: "Asansol, West Bengal",
     distance: "48 km",
     rating: 4.2,
     capacity: "8000 MT",
     available: "3500 MT",
     cost: "₹45 per quintal/month",
     features: ["Pallet Storage", "Loading/Unloading Equipment", "Fire Protection"],
-    image: "https://source.unsplash.com/random/300x200/?logistics+warehouse",
+    image: "https://images.unsplash.com/photo-1593079831268-3381b0db4a77?auto=format&fit=crop&q=80",
   },
 ];
 
@@ -217,16 +217,16 @@ const Facilities = () => {
                     
                     <div>
                       <label className="text-sm font-medium mb-1 block">Location</label>
-                      <Select defaultValue="ludhiana">
+                      <Select defaultValue="kolkata">
                         <SelectTrigger>
                           <SelectValue placeholder="Select Location" />
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="ludhiana">Ludhiana</SelectItem>
-                          <SelectItem value="amritsar">Amritsar</SelectItem>
-                          <SelectItem value="jalandhar">Jalandhar</SelectItem>
-                          <SelectItem value="patiala">Patiala</SelectItem>
-                          <SelectItem value="bathinda">Bathinda</SelectItem>
+                          <SelectItem value="kolkata">Kolkata</SelectItem>
+                          <SelectItem value="howrah">Howrah</SelectItem>
+                          <SelectItem value="siliguri">Siliguri</SelectItem>
+                          <SelectItem value="durgapur">Durgapur</SelectItem>
+                          <SelectItem value="asansol">Asansol</SelectItem>
                         </SelectContent>
                       </Select>
                     </div>
@@ -242,8 +242,8 @@ const Facilities = () => {
                             <SelectItem value="all">All Types</SelectItem>
                             <SelectItem value="flour">Flour Mill</SelectItem>
                             <SelectItem value="rice">Rice Mill</SelectItem>
-                            <SelectItem value="sugar">Sugar Mill</SelectItem>
-                            <SelectItem value="cotton">Cotton Gin</SelectItem>
+                            <SelectItem value="tea">Tea Processing</SelectItem>
+                            <SelectItem value="jute">Jute Mill</SelectItem>
                             <SelectItem value="vegetable">Vegetable Processing</SelectItem>
                           </SelectContent>
                         </Select>
@@ -259,8 +259,8 @@ const Facilities = () => {
                             <SelectItem value="all">All Crops</SelectItem>
                             <SelectItem value="wheat">Wheat</SelectItem>
                             <SelectItem value="rice">Rice</SelectItem>
-                            <SelectItem value="sugarcane">Sugarcane</SelectItem>
-                            <SelectItem value="cotton">Cotton</SelectItem>
+                            <SelectItem value="tea">Tea</SelectItem>
+                            <SelectItem value="jute">Jute</SelectItem>
                             <SelectItem value="vegetables">Vegetables</SelectItem>
                           </SelectContent>
                         </Select>

@@ -28,22 +28,22 @@ export default function ProfileForm() {
     setIsLoading(true);
 
     try {
-      if (!profile?.id) throw new Error('কোনও প্রোফাইল আইডি পাওয়া যায়নি');
+      if (!profile?.id) throw new Error('No profile ID found');
 
-      // Use type assertion to tell TypeScript this is valid
+      // Fixed the table name issue - using correct table name in a type-safe way
       const { error } = await supabase
         .from('profiles')
-        .update(formData as any)
+        .update(formData)
         .eq('id', profile.id);
 
       if (error) throw error;
 
       toast({
-        title: "প্রোফাইল সফলভাবে আপডেট করা হয়েছে"
+        title: "Profile updated successfully"
       });
     } catch (error: any) {
       toast({
-        title: "প্রোফাইল আপডেট করার সময় ত্রুটি",
+        title: "Error updating profile",
         description: error.message,
         variant: "destructive"
       });
@@ -55,12 +55,12 @@ export default function ProfileForm() {
   return (
     <Card className="w-full max-w-md mx-auto">
       <CardHeader>
-        <CardTitle>প্রোফাইল আপডেট করুন</CardTitle>
+        <CardTitle>Update Profile</CardTitle>
       </CardHeader>
       <CardContent>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="full_name">সম্পূর্ণ নাম</Label>
+            <Label htmlFor="full_name">Full Name</Label>
             <Input
               id="full_name"
               value={formData.full_name}
@@ -68,7 +68,7 @@ export default function ProfileForm() {
             />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="phone">ফোন নম্বর</Label>
+            <Label htmlFor="phone">Phone Number</Label>
             <Input
               id="phone"
               value={formData.phone}
@@ -76,7 +76,7 @@ export default function ProfileForm() {
             />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="address">ঠিকানা</Label>
+            <Label htmlFor="address">Address</Label>
             <Input
               id="address"
               value={formData.address}
@@ -84,7 +84,7 @@ export default function ProfileForm() {
             />
           </div>
           <Button type="submit" className="w-full" disabled={isLoading}>
-            {isLoading ? "আপডেট করা হচ্ছে..." : "প্রোফাইল আপডেট করুন"}
+            {isLoading ? "Updating..." : "Update Profile"}
           </Button>
         </form>
       </CardContent>
