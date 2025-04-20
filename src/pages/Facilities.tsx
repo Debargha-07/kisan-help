@@ -1,4 +1,3 @@
-
 import Layout from "@/components/layout/Layout";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -35,7 +34,7 @@ const processingFacilities = [
     contact: "+91 98765-43210",
     crops: ["Wheat", "Barley"],
     services: ["Cleaning", "Milling", "Packaging"],
-    image: "https://images.unsplash.com/photo-1626444344029-9dce0a64eb96?auto=format&fit=crop&q=80",
+    image: "https://images.unsplash.com/photo-1487958449943-2429e8be8625?auto=format&fit=crop&q=80",
   },
   {
     id: 2,
@@ -49,7 +48,7 @@ const processingFacilities = [
     contact: "+91 98123-45678",
     crops: ["Tomato", "Potato", "Onion"],
     services: ["Cleaning", "Sorting", "Packaging", "Cold Storage"],
-    image: "https://images.unsplash.com/photo-1594616446683-a5bb0c70dabb?auto=format&fit=crop&q=80",
+    image: "https://images.unsplash.com/photo-1496307653780-42ee777d4833?auto=format&fit=crop&q=80",
   },
   {
     id: 3,
@@ -63,7 +62,7 @@ const processingFacilities = [
     contact: "+91 99876-54321",
     crops: ["Rice", "Paddy"],
     services: ["Drying", "Hulling", "Polishing", "Grading", "Packaging"],
-    image: "https://images.unsplash.com/photo-1626923329879-654a199b7462?auto=format&fit=crop&q=80",
+    image: "https://images.unsplash.com/photo-1431576901776-e539bd916ba2?auto=format&fit=crop&q=80",
   },
   {
     id: 4,
@@ -77,7 +76,7 @@ const processingFacilities = [
     contact: "+91 98555-12345",
     crops: ["Tea"],
     services: ["Withering", "Rolling", "Oxidation", "Drying", "Packaging"],
-    image: "https://images.unsplash.com/photo-1523920290372-5e2e8c4c93ab?auto=format&fit=crop&q=80",
+    image: "https://images.unsplash.com/photo-1449157291145-7efd050a4d0e?auto=format&fit=crop&q=80",
   },
   {
     id: 5,
@@ -91,7 +90,7 @@ const processingFacilities = [
     contact: "+91 97123-98765",
     crops: ["Jute"],
     services: ["Sorting", "Retting", "Processing", "Baling"],
-    image: "https://images.unsplash.com/photo-1551300704-5c88d3dcc049?auto=format&fit=crop&q=80",
+    image: "https://images.unsplash.com/photo-1459767129954-1b1c1f9b9ace?auto=format&fit=crop&q=80",
   },
   {
     id: 6,
@@ -122,7 +121,8 @@ const storageFacilities = [
     available: "4500 MT",
     cost: "₹40 per quintal/month",
     features: ["Temperature Controlled", "Pest Management", "24/7 Security"],
-    image: "https://images.unsplash.com/photo-1586528116311-ad8dd3c8310d?auto=format&fit=crop&q=80",
+    image: "https://images.unsplash.com/photo-1487252665478-49b61b47f302?auto=format&fit=crop&q=80",
+    contact: "+91 98765-43210"
   },
   {
     id: 2,
@@ -135,7 +135,8 @@ const storageFacilities = [
     available: "8000 MT",
     cost: "₹35 per quintal/month",
     features: ["Modern Silos", "Moisture Control", "Automated Management"],
-    image: "https://images.unsplash.com/photo-1605618309770-5292d0299d97?auto=format&fit=crop&q=80",
+    image: "https://images.unsplash.com/photo-1465379944081-7f47de8d74ac?auto=format&fit=crop&q=80",
+    contact: "+91 98123-45678"
   },
   {
     id: 3,
@@ -148,7 +149,8 @@ const storageFacilities = [
     available: "1200 MT",
     cost: "₹75 per quintal/month",
     features: ["Temperature Range: -10°C to 10°C", "Humidity Control", "24/7 Power Backup"],
-    image: "https://images.unsplash.com/photo-1624926571755-2ff2b4133e6a?auto=format&fit=crop&q=80",
+    image: "https://images.unsplash.com/photo-1452378174528-3090a4bba7b2?auto=format&fit=crop&q=80",
+    contact: "+91 99876-54321"
   },
   {
     id: 4,
@@ -161,7 +163,8 @@ const storageFacilities = [
     available: "3500 MT",
     cost: "₹45 per quintal/month",
     features: ["Pallet Storage", "Loading/Unloading Equipment", "Fire Protection"],
-    image: "https://images.unsplash.com/photo-1593079831268-3381b0db4a77?auto=format&fit=crop&q=80",
+    image: "https://images.unsplash.com/photo-1517022812141-23620dba5c23?auto=format&fit=crop&q=80",
+    contact: "+91 95678-12345"
   },
 ];
 
