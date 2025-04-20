@@ -6,30 +6,30 @@ import { ExternalLink, Tractor, Leaf, CoinsIcon } from "lucide-react";
 
 const schemes = [
   {
-    title: "পিএম-কিসান",
-    description: "যোগ্য কৃষক পরিবারকে তিনটি কিস্তিতে বছরে ৬,০০০ টাকা সরাসরি আয় সহায়তা।",
-    benefits: "কৃষি চাহিদার জন্য আর্থিক সহায়তা",
-    eligibility: "২ হেক্টরের কম জমি সহ ছোট ও প্রান্তিক কৃষক",
+    title: "PM-KISAN",
+    description: "Direct income support of ₹6,000 per year to eligible farmer families in three installments.",
+    benefits: "Financial assistance for agricultural needs",
+    eligibility: "Small and marginal farmers with less than 2 hectares of land",
     link: "https://pmkisan.gov.in/",
-    image: "https://images.pexels.com/photos/2165688/pexels-photo-2165688.jpeg",
+    image: "https://images.unsplash.com/photo-1595700281581-b6bd7c04ec98?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80",
     icon: Tractor
   },
   {
-    title: "প্রধানমন্ত্রী ফসল বীমা যোজনা (পিএমএফবিওয়াই)",
-    description: "প্রি-সোয়িং থেকে পোস্ট-হারভেস্ট ক্ষতি পর্যন্ত ব্যাপক ফসল বীমা কভারেজ।",
-    benefits: "প্রাকৃতিক দুর্যোগের কারণে ফসল ক্ষতির বিরুদ্ধে সুরক্ষা",
-    eligibility: "বিজ্ঞপ্তিযুক্ত ফসল উৎপাদনকারী সমস্ত কৃষক",
+    title: "Pradhan Mantri Fasal Bima Yojana (PMFBY)",
+    description: "Comprehensive crop insurance coverage from pre-sowing to post-harvest losses.",
+    benefits: "Protection against crop loss due to natural calamities",
+    eligibility: "All farmers growing notified crops",
     link: "https://pmfby.gov.in/",
-    image: "https://images.pexels.com/photos/247599/pexels-photo-247599.jpeg",
+    image: "https://images.unsplash.com/photo-1500937386664-56d1dfef3854?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80",
     icon: Leaf
   },
   {
-    title: "কিসান ক্রেডিট কার্ড (কেসিসি)",
-    description: "নমনীয় পরিশোধের বিকল্প সহ কৃষি চাহিদার জন্য সহজ ঋণ প্রাপ্তি।",
-    benefits: "কৃষি খরচের জন্য কম সুদের ঋণ",
-    eligibility: "ছোট কৃষক এবং ভাগচাষী সহ সমস্ত কৃষক",
+    title: "Kisan Credit Card (KCC)",
+    description: "Easy access to credit for agriculture needs with flexible repayment options.",
+    benefits: "Low-interest loans for farming expenses",
+    eligibility: "All farmers including small farmers and sharecroppers",
     link: "https://www.india.gov.in/spotlight/kisan-credit-card-kcc",
-    image: "https://images.pexels.com/photos/753267/pexels-photo-753267.jpeg",
+    image: "https://images.unsplash.com/photo-1532452119098-a3650b3c46d3?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80",
     icon: CoinsIcon
   }
 ];
@@ -38,9 +38,9 @@ const Schemes = () => {
   return (
     <Layout>
       <div className="container py-8">
-        <h1 className="text-3xl font-bold text-agri-primary mb-6">সরকারি কৃষক প্রকল্প</h1>
+        <h1 className="text-3xl font-bold text-agri-primary mb-6">Government Farmer Schemes</h1>
         <p className="text-gray-600 mb-8 text-lg">
-          আপনার জন্য উপলব্ধ গুরুত্বপূর্ণ সরকারি প্রকল্প। নীচের তথ্য পড়ুন এবং উপকৃত হোন।
+          Important government schemes available for you. Read the information below and benefit from these programs.
         </p>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -51,6 +51,10 @@ const Schemes = () => {
                   src={scheme.image} 
                   alt={scheme.title}
                   className="w-full h-full object-cover"
+                  onError={(e) => {
+                    // Fallback image if the primary one fails to load
+                    e.currentTarget.src = "https://images.unsplash.com/photo-1523741543316-beb7fc7023d8?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80";
+                  }}
                 />
               </div>
               <CardHeader>
@@ -64,12 +68,12 @@ const Schemes = () => {
                   <p className="text-gray-600">{scheme.description}</p>
                   
                   <div>
-                    <h4 className="font-semibold text-agri-primary mb-1">সুবিধা:</h4>
+                    <h4 className="font-semibold text-agri-primary mb-1">Benefits:</h4>
                     <p className="text-gray-600">{scheme.benefits}</p>
                   </div>
                   
                   <div>
-                    <h4 className="font-semibold text-agri-primary mb-1">যোগ্যতা:</h4>
+                    <h4 className="font-semibold text-agri-primary mb-1">Eligibility:</h4>
                     <p className="text-gray-600">{scheme.eligibility}</p>
                   </div>
 
@@ -77,7 +81,7 @@ const Schemes = () => {
                     className="w-full flex items-center justify-center gap-2"
                     onClick={() => window.open(scheme.link, '_blank')}
                   >
-                    আরও তথ্য
+                    More Information
                     <ExternalLink className="h-4 w-4" />
                   </Button>
                 </div>

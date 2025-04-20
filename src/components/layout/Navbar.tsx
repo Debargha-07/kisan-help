@@ -19,12 +19,12 @@ const Navbar = () => {
     try {
       await supabase.auth.signOut();
       toast({
-        title: "সফলভাবে লগআউট করা হয়েছে",
+        title: "Successfully logged out",
       });
       navigate('/');
     } catch (error: any) {
       toast({
-        title: "লগআউট করার সময় ত্রুটি",
+        title: "Error during logout",
         description: error.message,
         variant: "destructive",
       });
@@ -35,49 +35,49 @@ const Navbar = () => {
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="container flex h-16 items-center">
         <Link to="/" className="flex items-center gap-2 font-bold text-xl sm:text-2xl text-agri-primary">
-          <img src="/logo.svg" alt="কিষাণ কানেক্ট" className="h-8 w-8" />
-          <span>কিষাণ কানেক্ট</span>
+          <img src="/logo.svg" alt="Kisan Connect" className="h-8 w-8" />
+          <span>Kisan Connect</span>
         </Link>
 
         {/* Desktop Navigation */}
         <nav className="hidden md:flex mx-6 items-center space-x-4 lg:space-x-6 flex-1">
           <Link to="/" className="text-sm font-medium transition-colors hover:text-agri-accent">
-            হোম
+            Home
           </Link>
           <Link to="/marketplace" className="text-sm font-medium transition-colors hover:text-agri-accent">
-            মন্ডি
+            Marketplace
           </Link>
           <Link to="/forecasting" className="text-sm font-medium transition-colors hover:text-agri-accent">
-            আবহাওয়া
+            Forecasting
           </Link>
           <Link to="/facilities" className="text-sm font-medium transition-colors hover:text-agri-accent">
-            সুবিধা
+            Facilities
           </Link>
           <Link to="/schemes" className="text-sm font-medium transition-colors hover:text-agri-accent">
-            প্রকল্প
+            Schemes
           </Link>
           <Link to="/prices" className="text-sm font-medium transition-colors hover:text-agri-accent">
-            দাম
+            Prices
           </Link>
         </nav>
 
         <div className="hidden md:flex items-center gap-4 ml-auto">
           {user ? (
             <>
-              <Button variant="ghost" size="icon" aria-label="বিজ্ঞপ্তি">
+              <Button variant="ghost" size="icon" aria-label="Notifications">
                 <Bell className="h-5 w-5" />
               </Button>
               <Button 
                 variant="ghost" 
                 size="icon" 
-                aria-label="ব্যবহারকারী অ্যাকাউন্ট"
+                aria-label="User Account"
                 onClick={() => navigate('/profile')}
               >
                 <User className="h-5 w-5" />
               </Button>
               <Button variant="default" className="bg-agri-primary hover:bg-agri-dark" onClick={handleLogout}>
                 <LogOut className="h-4 w-4 mr-2" />
-                লগআউট
+                Logout
               </Button>
             </>
           ) : (
@@ -86,7 +86,7 @@ const Navbar = () => {
               className="bg-agri-primary hover:bg-agri-dark"
               onClick={() => navigate('/auth')}
             >
-              লগইন / রেজিস্টার
+              Login / Register
             </Button>
           )}
         </div>
@@ -94,34 +94,34 @@ const Navbar = () => {
         {/* Mobile Navigation */}
         <Sheet open={isOpen} onOpenChange={setIsOpen}>
           <SheetTrigger asChild className="md:hidden ml-auto">
-            <Button variant="ghost" size="icon" aria-label="মেনু">
+            <Button variant="ghost" size="icon" aria-label="Menu">
               <Menu className="h-5 w-5" />
             </Button>
           </SheetTrigger>
           <SheetContent side="left" className="bg-agri-light border-agri-primary">
             <div className="flex flex-col gap-8 py-6">
               <div className="flex items-center gap-2 font-bold text-xl text-agri-primary">
-                <img src="/logo.svg" alt="কিষাণ কানেক্ট" className="h-6 w-6" />
-                <span>কিষাণ কানেক্ট</span>
+                <img src="/logo.svg" alt="Kisan Connect" className="h-6 w-6" />
+                <span>Kisan Connect</span>
               </div>
               <nav className="flex flex-col gap-4">
                 <Link to="/" className="text-base font-medium" onClick={closeSheet}>
-                  হোম
+                  Home
                 </Link>
                 <Link to="/marketplace" className="text-base font-medium" onClick={closeSheet}>
-                  মন্ডি
+                  Marketplace
                 </Link>
                 <Link to="/forecasting" className="text-base font-medium" onClick={closeSheet}>
-                  আবহাওয়া
+                  Forecasting
                 </Link>
                 <Link to="/facilities" className="text-base font-medium" onClick={closeSheet}>
-                  প্রসেসিং
+                  Facilities
                 </Link>
                 <Link to="/schemes" className="text-base font-medium" onClick={closeSheet}>
-                  প্রকল্প
+                  Schemes
                 </Link>
                 <Link to="/prices" className="text-base font-medium" onClick={closeSheet}>
-                  দাম
+                  Prices
                 </Link>
               </nav>
               <div className="flex flex-col gap-2">
@@ -136,7 +136,7 @@ const Navbar = () => {
                       }}
                     >
                       <User className="mr-2 h-4 w-4" />
-                      প্রোফাইল
+                      Profile
                     </Button>
                     <Button 
                       variant="default" 
@@ -147,7 +147,7 @@ const Navbar = () => {
                       }}
                     >
                       <LogOut className="mr-2 h-4 w-4" />
-                      লগআউট
+                      Logout
                     </Button>
                   </>
                 ) : (
@@ -159,7 +159,7 @@ const Navbar = () => {
                       closeSheet();
                     }}
                   >
-                    লগইন / রেজিস্টার
+                    Login / Register
                   </Button>
                 )}
               </div>

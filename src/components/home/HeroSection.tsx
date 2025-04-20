@@ -1,3 +1,4 @@
+
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 import { Flag, Tractor } from "lucide-react";
@@ -58,6 +59,10 @@ const HeroSection = () => {
                 src="https://images.unsplash.com/photo-1595337797484-61f526ef3608?q=80&w=2071"
                 alt="Indian Farmer in Field" 
                 className="w-full h-[500px] object-cover"
+                onError={(e) => {
+                  // Fallback image if the primary one fails to load
+                  e.currentTarget.src = "https://images.unsplash.com/photo-1523741543316-beb7fc7023d8?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80";
+                }}
               />
               <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent" />
             </div>

@@ -21,11 +21,15 @@ export const RegionalPrices = ({ regions, currentPrice }: RegionalPricesProps) =
             </thead>
             <tbody>
               {Object.entries(regions).map(([region, price]) => {
-                const difference = price - currentPrice;
+                // Ensure price is a valid number to avoid NaN
+                const safePrice = isNaN(Number(price)) ? 0 : Number(price);
+                const safeCurrent = isNaN(Number(currentPrice)) ? 0 : Number(currentPrice);
+                const difference = safePrice - safeCurrent;
+                
                 return (
                   <tr key={region} className="border-b last:border-0 hover:bg-muted/50">
                     <td className="p-3 text-left">{region}</td>
-                    <td className="p-3 text-right">₹{price.toFixed(2)}</td>
+                    <td className="p-3 text-right">₹{safePrice.toFixed(2)}</td>
                     <td className="p-3 text-right">
                       <span className={difference > 0 ? "text-green-600" : difference < 0 ? "text-red-600" : ""}>
                         {difference > 0 ? "+" : ""}{difference.toFixed(2)}

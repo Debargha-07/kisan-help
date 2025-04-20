@@ -61,12 +61,10 @@ const FeatureSection = () => {
       <div className="container">
         <div className="text-center max-w-3xl mx-auto mb-16">
           <h2 className="text-3xl font-bold text-agri-dark mb-4">
-            किसानों के लिए समाधान (Solutions for Farmers)
+            Solutions for Farmers
           </h2>
           <p className="text-gray-600">
-            आपकी फसल की बिक्री और प्रबंधन में मदद करने के लिए हमारे टूल्स का उपयोग करें।
-            <br />
-            (Use our tools to help you sell and manage your crops.)
+            Use our tools to help you sell and manage your crops effectively.
           </p>
         </div>
 

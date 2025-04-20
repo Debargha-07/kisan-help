@@ -23,6 +23,31 @@ type CropPriceData = {
 const Prices = () => {
   const [selectedCrop, setSelectedCrop] = useState("rice");
 
+  // Call update-crop-prices edge function when component mounts
+  useEffect(() => {
+    const updatePrices = async () => {
+      try {
+        await supabase.functions.invoke('update-crop-prices');
+        console.log("Price update triggered");
+      } catch (error) {
+        console.error("Error triggering price update:", error);
+      }
+    };
+    
+    updatePrices();
+    
+    // Update prices every 5 minutes
+    const interval = setInterval(async () => {
+      try {
+        await supabase.functions.invoke('update-crop-prices');
+      } catch (error) {
+        console.error("Error updating crop prices:", error);
+      }
+    }, 300000);
+
+    return () => clearInterval(interval);
+  }, []);
+
   const { data: cropPrices, isLoading, error } = useQuery({
     queryKey: ['cropPrices', selectedCrop],
     queryFn: async () => {
@@ -58,7 +83,7 @@ const Prices = () => {
         return [];
       }
     },
-    retry: 1,
+    retry: 2,
     refetchOnWindowFocus: false,
   });
 
@@ -74,15 +99,24 @@ const Prices = () => {
       };
     }
 
-    const currentPrice = Number((cropPrices.reduce((sum, price) => 
-      sum + Number(price.current_price), 0) / cropPrices.length).toFixed(2));
-    
-    const previousPrice = Number((cropPrices.reduce((sum, price) => 
-      sum + Number(price.previous_price), 0) / cropPrices.length).toFixed(2));
-    
-    const forecastPrice = Number((cropPrices.reduce((sum, price) => 
-      sum + Number(price.forecast_price), 0) / cropPrices.length).toFixed(2));
+    // Ensure values are numbers to avoid NaN
+    const validPrices = cropPrices.map(price => ({
+      ...price,
+      current_price: Number(price.current_price) || 0,
+      previous_price: Number(price.previous_price) || 0,
+      forecast_price: Number(price.forecast_price) || 0
+    }));
 
+    const currentPrice = Number((validPrices.reduce((sum, price) => 
+      sum + price.current_price, 0) / validPrices.length).toFixed(2));
+    
+    const previousPrice = Number((validPrices.reduce((sum, price) => 
+      sum + price.previous_price, 0) / validPrices.length).toFixed(2));
+    
+    const forecastPrice = Number((validPrices.reduce((sum, price) => 
+      sum + price.forecast_price, 0) / validPrices.length).toFixed(2));
+
+    // Calculate percentage change safely
     const priceChange = previousPrice ? 
       Number((((currentPrice - previousPrice) / previousPrice) * 100).toFixed(2)) : 0;
     
@@ -99,25 +133,12 @@ const Prices = () => {
     }
     
     return Object.fromEntries(
-      cropPrices.map(price => [price.region, Number(price.current_price)])
+      cropPrices.map(price => [price.region, Number(price.current_price) || 0])
     );
   };
 
   const { currentPrice, previousPrice, forecastPrice, priceChange, trend } = calculateAverages();
   const regions = getRegionData();
-
-  useEffect(() => {
-    // Update prices every 5 minutes
-    const interval = setInterval(async () => {
-      try {
-        await supabase.functions.invoke('update-crop-prices');
-      } catch (error) {
-        console.error("Error updating crop prices:", error);
-      }
-    }, 300000);
-
-    return () => clearInterval(interval);
-  }, []);
 
   return (
     <Layout>

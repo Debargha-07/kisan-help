@@ -64,8 +64,8 @@ export const FarmerTips = () => {
         <AlertTitle>Market Information Resources</AlertTitle>
         <AlertDescription className="text-sm">
           Stay informed through our price alerts, the "e-NAM" (National Agriculture Market) platform, 
-          and local agricultural extension services. Accurate and timely information is key to making 
-          profitable selling decisions.
+          and local agricultural extension services in West Bengal. Accurate and timely information 
+          is key to making profitable selling decisions.
         </AlertDescription>
       </Alert>
     </div>

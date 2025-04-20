@@ -42,58 +42,81 @@ async function updateCropPrices() {
     "onion": 2500
   };
 
-  for (const crop of CROPS) {
-    // Get existing prices to update them with slight variations
-    const { data: existingPrices } = await supabase
-      .from("crop_prices")
-      .select("*")
-      .eq("crop_name", crop);
+  try {
+    for (const crop of CROPS) {
+      // Get existing prices to update them with slight variations
+      const { data: existingPrices, error: fetchError } = await supabase
+        .from("crop_prices")
+        .select("*")
+        .eq("crop_name", crop);
 
-    // If prices exist, update them with variations; otherwise create new ones
-    if (existingPrices && existingPrices.length > 0) {
-      for (const record of existingPrices) {
-        const currentPrice = adjustPrice(Number(record.current_price));
-        const forecastPrice = adjustPrice(currentPrice, 8); // Slightly higher variance for forecast
-        
-        await supabase
-          .from("crop_prices")
-          .update({
-            previous_price: record.current_price,
-            current_price: currentPrice,
-            forecast_price: forecastPrice,
-            updated_at: new Date().toISOString()
-          })
-          .eq("id", record.id);
+      if (fetchError) {
+        console.error(`Error fetching prices for ${crop}: ${fetchError.message}`);
+        continue;
       }
-    } else {
-      // Create new price records for each region
-      for (const region of WEST_BENGAL_REGIONS) {
-        // Add some regional variance to base prices
-        const basePrice = basePrices[crop as keyof typeof basePrices];
-        const regionalVariance = getRandomPrice(-100, 150); // -₹100 to +₹150 regional difference
-        const currentPrice = basePrice + regionalVariance;
-        
-        // Calculate previous price (slightly different from current)
-        const previousPrice = adjustPrice(currentPrice, 3);
-        
-        // Calculate forecast price
-        const forecastPrice = adjustPrice(currentPrice, 10);
-        
-        await supabase
-          .from("crop_prices")
-          .insert({
-            crop_name: crop,
-            region: region,
-            current_price: currentPrice,
-            previous_price: previousPrice,
-            forecast_price: forecastPrice,
-            unit: "per quintal"
-          });
+
+      // If prices exist, update them with variations; otherwise create new ones
+      if (existingPrices && existingPrices.length > 0) {
+        for (const record of existingPrices) {
+          // Ensure current_price is a number before adjusting
+          const currentPriceBase = typeof record.current_price === 'number' ? 
+            record.current_price : 
+            basePrices[crop as keyof typeof basePrices];
+          
+          const currentPrice = adjustPrice(currentPriceBase);
+          const forecastPrice = adjustPrice(currentPrice, 8); // Slightly higher variance for forecast
+          
+          const { error: updateError } = await supabase
+            .from("crop_prices")
+            .update({
+              previous_price: record.current_price,
+              current_price: currentPrice,
+              forecast_price: forecastPrice,
+              updated_at: new Date().toISOString()
+            })
+            .eq("id", record.id);
+
+          if (updateError) {
+            console.error(`Error updating price for ${crop} in ${record.region}: ${updateError.message}`);
+          }
+        }
+      } else {
+        // Create new price records for each region
+        for (const region of WEST_BENGAL_REGIONS) {
+          // Add some regional variance to base prices
+          const basePrice = basePrices[crop as keyof typeof basePrices];
+          const regionalVariance = getRandomPrice(-100, 150); // -₹100 to +₹150 regional difference
+          const currentPrice = basePrice + regionalVariance;
+          
+          // Calculate previous price (slightly different from current)
+          const previousPrice = adjustPrice(currentPrice, 3);
+          
+          // Calculate forecast price
+          const forecastPrice = adjustPrice(currentPrice, 10);
+          
+          const { error: insertError } = await supabase
+            .from("crop_prices")
+            .insert({
+              crop_name: crop,
+              region: region,
+              current_price: currentPrice,
+              previous_price: previousPrice,
+              forecast_price: forecastPrice,
+              unit: "per quintal"
+            });
+
+          if (insertError) {
+            console.error(`Error inserting price for ${crop} in ${region}: ${insertError.message}`);
+          }
+        }
       }
     }
+    
+    return { success: true, message: "Crop prices updated successfully" };
+  } catch (error) {
+    console.error(`Unexpected error updating crop prices: ${error.message}`);
+    return { success: false, error: error.message };
   }
-  
-  return { success: true, message: "Crop prices updated successfully" };
 }
 
 serve(async (req) => {

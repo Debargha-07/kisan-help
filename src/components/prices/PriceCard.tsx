@@ -20,7 +20,8 @@ export const PriceCard = ({
   subtitle 
 }: PriceCardProps) => {
   // Ensure price is a valid number
-  const displayPrice = isNaN(price) ? 0 : price;
+  const displayPrice = isNaN(Number(price)) ? 0 : Number(price);
+  const displayChange = change !== undefined && !isNaN(Number(change)) ? Number(change) : 0;
   
   return (
     <Card>
@@ -52,7 +53,7 @@ export const PriceCard = ({
                   : "text-red-600"
               }`}
             >
-              {isNaN(change) ? 0 : Math.abs(change).toFixed(2)}%
+              {Math.abs(displayChange).toFixed(2)}%
             </span>
             <span className="ml-1 text-sm text-muted-foreground">
               from last week
