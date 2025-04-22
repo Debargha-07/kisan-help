@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import Layout from "@/components/layout/Layout";
 import { Button } from "@/components/ui/button";
@@ -15,55 +14,53 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { toast } from "@/components/ui/use-toast";
 import { useQuery } from "@tanstack/react-query";
 
-// Import data services
-import { getWeatherForecast, longTermForecast, getSeasonalDescription } from "@/data/weatherData";
-import { getSoilProfile, getTypicalSoilParameters, getPredominantSoilType } from "@/data/soilData";
-import { getCropRecommendations, calculateYield, getCurrentSeason, getCropChallenges } from "@/data/cropData";
+const calculateSoilImpact = (soilType: string, region: string, ph: number, nitrogen: number, phosphorus: number, potassium: number) => {
+  let baseYield = 1;
+  if (soilType.toLowerCase().includes("black")) {
+    baseYield *= 1.18;
+  } else if (soilType.toLowerCase().includes("red")) {
+    baseYield *= 0.95;
+  } else if (soilType.toLowerCase().includes("alluvial")) {
+    baseYield *= 1.2;
+  } else if (soilType.toLowerCase().includes("usar") || soilType.toLowerCase().includes("calcareous")) {
+    baseYield *= 0.75;
+  } else if (soilType.toLowerCase().includes("laterite")) {
+    baseYield *= 0.8;
+  }
 
-// Helper function to generate soil health analysis based on parameters
-const analyzeSoilHealth = (ph: number, nitrogen: number, phosphorus: number, potassium: number) => {
+  baseYield *= (ph >= 6 && ph <= 7.5) ? 1.05 : 0.95;
+  baseYield *= (nitrogen > 300 && nitrogen < 400) ? 1.05 : 0.97;
+  baseYield *= (phosphorus > 15) ? 1.03 : 0.98;
+  baseYield *= (potassium > 210) ? 1.03 : 0.97;
+
+  return baseYield;
+};
+
+const calculateFixedYield = (crop: string, variety: string, area: number, soilType: string, region: string, ph: number, nitrogen: number, phosphorus: number, potassium: number) => {
+  const cropYields: Record<string, number> = {
+    rice: 50, wheat: 45, maize: 38, groundnut: 19, soybean: 16,
+    TAG24: 20, GG20: 18, TG37A: 17, JS335: 17, JS9560: 16, NRC37: 15,
+    IR36: 55, MTU7029: 53, BPT5204: 52, HD2967: 48, PBW550: 46, DBW17: 45,
+    DHM117: 41, DHM121: 43, "Vivek-27": 40,
+  };
+  let base = cropYields[variety] ?? cropYields[crop] ?? 25;
+  let soilImpact = calculateSoilImpact(soilType, region, ph, nitrogen, phosphorus, potassium);
+  let randomFactor = 0.97 + Math.random() * 0.06;
+  let predicted = base * soilImpact * area * randomFactor;
+
+  const idealPhRange = (ph >= 6 && ph <= 7.5);
+  const idealN = nitrogen > 300 && nitrogen < 400;
+  const matched = (idealPhRange && idealN);
+
   return {
-    ph: {
-      value: ph,
-      status: ph < 5.5 ? "Acidic" : ph > 7.5 ? "Alkaline" : "Neutral",
-      recommendation: ph < 5.5 
-        ? "Apply agricultural lime to increase pH" 
-        : ph > 7.5 
-        ? "Apply organic matter or sulfur to decrease pH"
-        : "Optimal pH range for most crops"
-    },
-    nitrogen: {
-      value: nitrogen,
-      status: nitrogen < 280 ? "Low" : nitrogen > 560 ? "High" : "Medium",
-      recommendation: nitrogen < 280 
-        ? "Apply nitrogen-rich fertilizers or grow leguminous crops" 
-        : nitrogen > 560 
-        ? "Reduce nitrogen application"
-        : "Maintain current nitrogen levels"
-    },
-    phosphorus: {
-      value: phosphorus,
-      status: phosphorus < 10 ? "Low" : phosphorus > 25 ? "High" : "Medium",
-      recommendation: phosphorus < 10 
-        ? "Apply phosphate fertilizers" 
-        : phosphorus > 25 
-        ? "Reduce phosphorus application"
-        : "Maintain current phosphorus levels"
-    },
-    potassium: {
-      value: potassium,
-      status: potassium < 110 ? "Low" : potassium > 280 ? "High" : "Medium",
-      recommendation: potassium < 110 
-        ? "Apply potassium-rich fertilizers" 
-        : potassium > 280 
-        ? "Reduce potassium application"
-        : "Maintain current potassium levels"
-    },
-    organicMatter: {
-      value: (Math.random() * 2 + 1).toFixed(1) + "%",
-      status: Math.random() > 0.6 ? "Medium" : "Low",
-      recommendation: "Add organic matter through compost or green manure"
-    }
+    expectedYield: predicted,
+    yieldRange: { min: predicted * 0.92, max: predicted * 1.08 },
+    confidence: matched ? 94 : 81,
+    factors: [
+      { name: "Soil Type", impact: soilImpact > 1 ? "Positive" : "Neutral", recommendation: `Soil "${soilType}" in ${region}` },
+      { name: "pH", impact: idealPhRange ? "Positive" : "Negative", recommendation: idealPhRange ? "Optimal pH for crop" : "Soil pH adjustment advised" },
+      { name: "Nitrogen", impact: idealN ? "Positive" : "Adjustment Needed", recommendation: idealN ? "Sufficient nitrogen for growth" : "Adjust nitrogen fertilizer for best results" },
+    ],
   };
 };
 
@@ -75,7 +72,6 @@ const Forecasting = () => {
   const [area, setArea] = useState(1);
   const [soilType, setSoilType] = useState("loam");
   
-  // Get soil parameters for selected location
   const defaultSoilParams = getTypicalSoilParameters(location);
   const [phValue, setPhValue] = useState(defaultSoilParams.ph);
   const [nitrogenValue, setNitrogenValue] = useState(defaultSoilParams.nitrogen);
@@ -87,23 +83,20 @@ const Forecasting = () => {
   const [cropRecommendations, setCropRecommendations] = useState<any>(null);
   const [showSoilHealthReport, setShowSoilHealthReport] = useState(false);
   
-  // Get weather forecast data
   const { data: weatherForecast, isLoading: isLoadingWeather } = useQuery({
     queryKey: ['weatherForecast', location],
     queryFn: () => Promise.resolve(getWeatherForecast(location)),
-    staleTime: 1000 * 60 * 30, // 30 minutes
-    refetchOnWindowFocus: false
-  });
-  
-  // Long-term climate forecast data is static for now
-  const { data: longTermData, isLoading: isLoadingLongTerm } = useQuery({
-    queryKey: ['longTermForecast'],
-    queryFn: () => Promise.resolve(longTermForecast),
-    staleTime: 1000 * 60 * 60, // 1 hour
+    staleTime: 1000 * 60 * 30,
     refetchOnWindowFocus: false
   });
 
-  // Update soil parameters when location changes
+  const { data: longTermData, isLoading: isLoadingLongTerm } = useQuery({
+    queryKey: ['longTermForecast'],
+    queryFn: () => Promise.resolve(longTermForecast),
+    staleTime: 1000 * 60 * 60,
+    refetchOnWindowFocus: false
+  });
+
   useEffect(() => {
     const soilParams = getTypicalSoilParameters(location);
     setPhValue(soilParams.ph);
@@ -111,36 +104,32 @@ const Forecasting = () => {
     setPhosphorusValue(soilParams.phosphorus);
     setPotassiumValue(soilParams.potassium);
     
-    // Get predominant soil type for this region
     const predominantSoil = getPredominantSoilType(location);
     setSoilType(predominantSoil);
     
-    // Update crop recommendations
     updateCropRecommendations();
   }, [location]);
 
   const calculateYieldPrediction = async () => {
     setIsCalculating(true);
     try {
-      // Simulate API delay
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      const result = calculateYield(selectedCrop, selectedVariety, area, soilType, location);
+      await new Promise(resolve => setTimeout(resolve, 950));
+      const result = calculateFixedYield(
+        selectedCrop, selectedVariety, area, soilType, location,
+        phValue, nitrogenValue, phosphorusValue, potassiumValue
+      );
       setYieldResult(result);
-      
-      // Add challenges based on season, crop and region
       result.factors = result.factors.concat(
         getCropChallenges(selectedCrop, location, getCurrentSeason())
-          .map(challenge => ({ 
-            name: "Seasonal Challenge", 
-            impact: "Medium", 
-            recommendation: challenge 
+          .map(challenge => ({
+            name: "Seasonal Challenge",
+            impact: "Medium",
+            recommendation: challenge
           }))
       );
-      
       toast({
         title: "Yield Calculation Complete",
-        description: `Based on current conditions, expected yield for ${selectedCrop} is ${result.expectedYield.toFixed(2)} quintals.`,
+        description: `Based on your entry, expected yield for ${selectedCrop} (${selectedVariety}) is ${result.expectedYield.toFixed(2)} quintals.`,
       });
     } catch (error) {
       console.error("Error calculating yield:", error);
@@ -156,15 +145,11 @@ const Forecasting = () => {
 
   const updateCropRecommendations = async () => {
     try {
-      // Simulate API delay
-      await new Promise(resolve => setTimeout(resolve, 800));
-      
       const season = getCurrentSeason();
       const predominantSoil = getPredominantSoilType(location);
       
       const recommendations = getCropRecommendations(location, predominantSoil, season);
       
-      // Add challenges to each recommendation
       recommendations.primary = recommendations.primary.map(crop => ({
         ...crop,
         challenges: getCropChallenges(crop.crop, location, season)
@@ -192,7 +177,6 @@ const Forecasting = () => {
   };
 
   useEffect(() => {
-    // Get crop recommendations when the component loads
     updateCropRecommendations();
   }, []);
 
@@ -204,12 +188,12 @@ const Forecasting = () => {
             Advanced Harvest Forecasting
           </h1>
           <p className="text-muted-foreground">
-            AI-powered crop yield prediction and recommendations based on climate data and soil conditions
+            AI-powered predictions for crop yield, with soil and weather-based recommendations tailored to your region.
           </p>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
-          <Card className="col-span-2">
+          <Card className="col-span-1 order-2 lg:order-1">
             <CardHeader className="pb-3">
               <div className="flex justify-between items-center">
                 <CardTitle>Weather Forecast</CardTitle>
@@ -219,7 +203,7 @@ const Forecasting = () => {
                     value={location}
                     onValueChange={setLocation}
                   >
-                    <SelectTrigger className="w-[180px]">
+                    <SelectTrigger className="w-[168px]">
                       <SelectValue placeholder="Select region" />
                     </SelectTrigger>
                     <SelectContent>
@@ -233,7 +217,7 @@ const Forecasting = () => {
                 </div>
               </div>
             </CardHeader>
-            <CardContent className="max-h-[400px] overflow-y-auto">
+            <CardContent className="max-h-[320px] overflow-y-auto">
               {isLoadingWeather ? (
                 <div className="flex justify-center items-center h-40">
                   <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-agri-primary"></div>
@@ -285,7 +269,7 @@ const Forecasting = () => {
             </CardContent>
           </Card>
 
-          <Card>
+          <Card className="col-span-2 order-1 lg:order-2">
             <CardHeader className="pb-2">
               <CardTitle>Yield Calculator</CardTitle>
             </CardHeader>
@@ -405,7 +389,7 @@ const Forecasting = () => {
                 </Select>
               </div>
 
-              <Button className="w-full bg-agri-primary hover:bg-agri-dark" onClick={calculateYieldPrediction}>
+              <Button className="w-full bg-agri-primary hover:bg-agri-dark mt-2" onClick={calculateYieldPrediction}>
                 {isCalculating ? 
                   <span className="flex items-center"><span className="animate-spin mr-2">⟳</span> Calculating...</span> : 
                   "Calculate Expected Yield"}

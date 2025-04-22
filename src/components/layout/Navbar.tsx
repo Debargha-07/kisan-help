@@ -1,4 +1,3 @@
-
 import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Menu, User, Bell, LogOut } from "lucide-react";
@@ -46,9 +45,6 @@ const Navbar = () => {
           </Link>
           <Link to="/forecasting" className="text-sm font-medium transition-colors hover:text-agri-accent">
             Forecasting
-          </Link>
-          <Link to="/prices" className="text-sm font-medium transition-colors hover:text-agri-accent">
-            Prices
           </Link>
         </nav>
 
@@ -101,9 +97,6 @@ const Navbar = () => {
                 </Link>
                 <Link to="/forecasting" className="text-base font-medium" onClick={closeSheet}>
                   Forecasting
-                </Link>
-                <Link to="/prices" className="text-base font-medium" onClick={closeSheet}>
-                  Prices
                 </Link>
               </nav>
               <div className="flex flex-col gap-2">

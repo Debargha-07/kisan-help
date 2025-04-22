@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import Layout from "@/components/layout/Layout";
 import { PriceCard } from "@/components/prices/PriceCard";
@@ -12,17 +11,10 @@ import { AlertCircle, ArrowDown, ArrowUp } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { toast } from "@/components/ui/use-toast";
 
-// We'll create a utility to fetch crop price data
 async function fetchCropPriceData(crop: string) {
   try {
-    // In a real app, this would call a weather API
-    // For now, we'll simulate the API response
     console.log(`Fetching price data for ${crop}`);
-    
-    // Simulate API delay
     await new Promise(resolve => setTimeout(resolve, 1000));
-    
-    // Dummy data structure that would come from an API
     const dummyData = {
       rice: {
         currentPrice: 2205,
@@ -97,11 +89,9 @@ async function fetchCropPriceData(crop: string) {
         }
       }
     };
-    
     if (!dummyData[crop as keyof typeof dummyData]) {
       throw new Error("Crop data not available");
     }
-    
     return dummyData[crop as keyof typeof dummyData];
   } catch (error) {
     console.error("Error fetching crop price data:", error);
@@ -109,7 +99,16 @@ async function fetchCropPriceData(crop: string) {
   }
 }
 
-const Index = () => {
+const crops = [
+  { img: "/photo-1465146344425-f00d5f5c8f07", label: "Marigold", variety: "Flower Crop" },
+  { img: "/photo-1493962853295-0fd70327578a", label: "Bullock", variety: "Cattle on farm" },
+  { img: "/photo-1506744038136-46273834b3fb", label: "Lakeview", variety: "Rich Water Resources" },
+  { img: "/photo-1466721591366-2d5fba72006d", label: "Antelope", variety: "Sustainable Land" },
+  { img: "/photo-1518495973542-4542c06a5843", label: "Sunbeam", variety: "Natural Climate" },
+  { img: "/photo-1472396961693-142e6e269027", label: "Deer Fields", variety: "Biodiversity" },
+];
+
+export default function Index() {
   const [selectedCrop, setSelectedCrop] = useState("rice");
   const todayDate = new Date().toLocaleDateString('en-IN', { 
     day: 'numeric', month: 'long', year: 'numeric' 
@@ -123,19 +122,44 @@ const Index = () => {
   });
 
   useEffect(() => {
-    // Simulate daily data update
     const updateInterval = setInterval(() => {
       toast({
         title: "Price Data Updated",
         description: `Latest crop price data has been refreshed as of ${new Date().toLocaleTimeString('en-IN')}`,
       });
-    }, 3600000); // Update every hour
+    }, 3600000);
 
     return () => clearInterval(updateInterval);
   }, []);
 
   return (
     <Layout>
+      <section className="relative py-8 md:py-14">
+        <div className="container flex flex-col md:flex-row items-center gap-8 animate-fade-in">
+          <div className="flex-1">
+            <h1 className="text-4xl md:text-5xl font-extrabold text-agri-primary mb-4 leading-tight">
+              Empowering Farmers With <span className="text-green-600">Data &amp; AI</span>
+            </h1>
+            <p className="text-lg text-gray-600 mb-5">
+              Simple, Accurate, and Reliable tools for weather, crops, and farm planning.
+            </p>
+            <Button asChild size="lg" className="bg-agri-primary hover:bg-agri-dark w-full md:w-auto">
+              <Link to="/forecasting">Go to Advanced Forecasting</Link>
+            </Button>
+          </div>
+          <div className="flex-1 grid grid-cols-3 gap-3">
+            {crops.map((c, idx) => (
+              <div key={idx} className="rounded-xl shadow hover-scale overflow-hidden">
+                <img src={c.img} alt={c.label} className="object-cover w-full h-28" />
+                <div className="bg-white bg-opacity-80 p-1 text-center">
+                  <span className="text-xs font-medium">{c.label}</span>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
       <div className="container py-6 space-y-6">
         <div className="flex flex-col space-y-2">
           <h1 className="text-3xl font-bold text-agri-primary">
@@ -289,6 +313,4 @@ const Index = () => {
       </div>
     </Layout>
   );
-};
-
-export default Index;
+}
