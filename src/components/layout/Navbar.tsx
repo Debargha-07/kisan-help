@@ -44,17 +44,8 @@ const Navbar = () => {
           <Link to="/" className="text-sm font-medium transition-colors hover:text-agri-accent">
             Home
           </Link>
-          <Link to="/marketplace" className="text-sm font-medium transition-colors hover:text-agri-accent">
-            Marketplace
-          </Link>
           <Link to="/forecasting" className="text-sm font-medium transition-colors hover:text-agri-accent">
             Forecasting
-          </Link>
-          <Link to="/facilities" className="text-sm font-medium transition-colors hover:text-agri-accent">
-            Facilities
-          </Link>
-          <Link to="/schemes" className="text-sm font-medium transition-colors hover:text-agri-accent">
-            Schemes
           </Link>
           <Link to="/prices" className="text-sm font-medium transition-colors hover:text-agri-accent">
             Prices
@@ -108,17 +99,8 @@ const Navbar = () => {
                 <Link to="/" className="text-base font-medium" onClick={closeSheet}>
                   Home
                 </Link>
-                <Link to="/marketplace" className="text-base font-medium" onClick={closeSheet}>
-                  Marketplace
-                </Link>
                 <Link to="/forecasting" className="text-base font-medium" onClick={closeSheet}>
                   Forecasting
-                </Link>
-                <Link to="/facilities" className="text-base font-medium" onClick={closeSheet}>
-                  Facilities
-                </Link>
-                <Link to="/schemes" className="text-base font-medium" onClick={closeSheet}>
-                  Schemes
                 </Link>
                 <Link to="/prices" className="text-base font-medium" onClick={closeSheet}>
                   Prices

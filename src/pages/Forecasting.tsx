@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import Layout from "@/components/layout/Layout";
 import { Button } from "@/components/ui/button";
@@ -8,7 +9,7 @@ import { Input } from "@/components/ui/input";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer, BarChart, Bar, Legend } from "recharts";
-import { CalendarIcon, ChevronDown, CloudSun, Droplets, Thermometer, Wind, AlertCircle, Info, Seedling, Wheat, Tractor, Umbrella } from "lucide-react";
+import { CalendarIcon, ChevronDown, CloudSun, Droplets, Thermometer, Wind, AlertCircle, Info, Leaf, Wheat, Tractor, Umbrella } from "lucide-react";
 import { format } from "date-fns";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { toast } from "@/components/ui/use-toast";
@@ -456,7 +457,7 @@ const Forecasting = () => {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="space-y-4">
                   <Alert className="bg-amber-50 border-amber-200">
-                    <Seedling className="h-4 w-4 text-amber-600" />
+                    <Leaf className="h-4 w-4 text-amber-600" />
                     <AlertTitle className="text-amber-800">Regional Soil Profile</AlertTitle>
                     <AlertDescription className="text-amber-700">
                       {getSoilProfile(location).soilTypes[soilType]?.description || 
@@ -523,7 +524,7 @@ const Forecasting = () => {
                   {!showSoilHealthReport ? (
                     <div className="flex flex-col items-center justify-center h-full gap-4">
                       <div className="flex items-center justify-center h-16 w-16 rounded-full bg-amber-100">
-                        <Seedling className="h-8 w-8 text-amber-600" />
+                        <Leaf className="h-8 w-8 text-amber-600" />
                       </div>
                       <p className="text-center text-muted-foreground">
                         Soil data is preloaded based on regional analysis. You can adjust values based on your specific field test results.
