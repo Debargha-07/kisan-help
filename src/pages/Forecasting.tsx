@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import Layout from "@/components/layout/Layout";
 import { Button } from "@/components/ui/button";
@@ -13,6 +14,51 @@ import { format } from "date-fns";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { toast } from "@/components/ui/use-toast";
 import { useQuery } from "@tanstack/react-query";
+import { getSoilProfile, getPredominantSoilType, getTypicalSoilParameters } from "@/data/soilData";
+import { getWeatherForecast, getSeasonalDescription, longTermForecast } from "@/data/weatherData";
+import { getCropRecommendations, getCurrentSeason, getCropChallenges } from "@/data/cropData";
+
+// Soil health analysis function
+const analyzeSoilHealth = (ph: number, nitrogen: number, phosphorus: number, potassium: number) => {
+  return {
+    "pH": {
+      value: ph,
+      status: ph < 5.5 ? "Acidic" : ph > 7.5 ? "Alkaline" : "Optimal",
+      recommendation: ph < 5.5 
+        ? "Add lime to increase soil pH for better nutrient availability" 
+        : ph > 7.5 
+        ? "Add organic matter or sulfur to lower pH gradually" 
+        : "pH is in optimal range for most crops"
+    },
+    "nitrogen": {
+      value: nitrogen,
+      status: nitrogen < 250 ? "Low" : nitrogen > 450 ? "High" : "Medium",
+      recommendation: nitrogen < 250 
+        ? "Apply nitrogen-rich fertilizers or incorporate legumes in rotation" 
+        : nitrogen > 450 
+        ? "Reduce nitrogen application, consider nitrogen-consuming crops" 
+        : "Maintain current nitrogen management practices"
+    },
+    "phosphorus": {
+      value: phosphorus,
+      status: phosphorus < 12 ? "Low" : phosphorus > 25 ? "High" : "Medium",
+      recommendation: phosphorus < 12 
+        ? "Apply phosphate fertilizers and incorporate organic matter" 
+        : phosphorus > 25 
+        ? "Reduce phosphorus application to prevent runoff issues" 
+        : "Maintain current phosphorus levels with balanced fertilization"
+    },
+    "potassium": {
+      value: potassium,
+      status: potassium < 150 ? "Low" : potassium > 280 ? "High" : "Medium",
+      recommendation: potassium < 150 
+        ? "Apply potassium-rich fertilizers like potassium sulfate" 
+        : potassium > 280 
+        ? "Reduce potassium application in future seasons" 
+        : "Maintain current potassium management practices"
+    }
+  };
+};
 
 const calculateSoilImpact = (soilType: string, region: string, ph: number, nitrogen: number, phosphorus: number, potassium: number) => {
   let baseYield = 1;
@@ -33,21 +79,49 @@ const calculateSoilImpact = (soilType: string, region: string, ph: number, nitro
   baseYield *= (phosphorus > 15) ? 1.03 : 0.98;
   baseYield *= (potassium > 210) ? 1.03 : 0.97;
 
+  // Add region-specific factors
+  if (region === "Punjab") {
+    baseYield *= 1.15; // Punjab has highly productive agriculture
+  } else if (region === "Maharashtra") {
+    baseYield *= 0.92; // Challenges with drought in many areas
+  } else if (region === "Karnataka") {
+    baseYield *= 0.97; // Varied conditions
+  } else if (region === "Uttar Pradesh") {
+    baseYield *= 1.05; // Good alluvial soil in many parts
+  }
+
   return baseYield;
 };
 
 const calculateFixedYield = (crop: string, variety: string, area: number, soilType: string, region: string, ph: number, nitrogen: number, phosphorus: number, potassium: number) => {
+  // Base yields for different crops and varieties (quintals per hectare)
   const cropYields: Record<string, number> = {
     rice: 50, wheat: 45, maize: 38, groundnut: 19, soybean: 16,
-    TAG24: 20, GG20: 18, TG37A: 17, JS335: 17, JS9560: 16, NRC37: 15,
-    IR36: 55, MTU7029: 53, BPT5204: 52, HD2967: 48, PBW550: 46, DBW17: 45,
+    // Rice varieties
+    IR36: 55, MTU7029: 53, BPT5204: 52, 
+    // Wheat varieties
+    HD2967: 48, PBW550: 46, DBW17: 45,
+    // Maize varieties
     DHM117: 41, DHM121: 43, "Vivek-27": 40,
+    // Groundnut varieties
+    "TAG-24": 20, "GG-20": 18, "TG-37A": 17,
+    // Soybean varieties
+    "JS-335": 17, "JS-9560": 16, "NRC-37": 15,
   };
-  let base = cropYields[variety] ?? cropYields[crop] ?? 25;
+  
+  // Get the base yield from the specific variety, or fall back to crop, or default to 25
+  let base = cropYields[variety] ?? cropYields[crop.toLowerCase()] ?? 25;
+  
+  // Calculate soil impact factor based on soil type, region and parameters
   let soilImpact = calculateSoilImpact(soilType, region, ph, nitrogen, phosphorus, potassium);
+  
+  // Small random variation for realism (±3%)
   let randomFactor = 0.97 + Math.random() * 0.06;
+  
+  // Calculate predicted yield (quintals)
   let predicted = base * soilImpact * area * randomFactor;
 
+  // Create factors for the recommendation
   const idealPhRange = (ph >= 6 && ph <= 7.5);
   const idealN = nitrogen > 300 && nitrogen < 400;
   const matched = (idealPhRange && idealN);
@@ -57,9 +131,26 @@ const calculateFixedYield = (crop: string, variety: string, area: number, soilTy
     yieldRange: { min: predicted * 0.92, max: predicted * 1.08 },
     confidence: matched ? 94 : 81,
     factors: [
-      { name: "Soil Type", impact: soilImpact > 1 ? "Positive" : "Neutral", recommendation: `Soil "${soilType}" in ${region}` },
-      { name: "pH", impact: idealPhRange ? "Positive" : "Negative", recommendation: idealPhRange ? "Optimal pH for crop" : "Soil pH adjustment advised" },
-      { name: "Nitrogen", impact: idealN ? "Positive" : "Adjustment Needed", recommendation: idealN ? "Sufficient nitrogen for growth" : "Adjust nitrogen fertilizer for best results" },
+      { 
+        name: "Soil Type", 
+        impact: soilImpact > 1 ? "Positive" : "Neutral", 
+        recommendation: `Soil "${soilType}" in ${region} ${soilImpact > 1.1 ? "is excellent" : soilImpact > 1 ? "is good" : "is adequate"} for this crop` 
+      },
+      { 
+        name: "pH", 
+        impact: idealPhRange ? "Positive" : "Negative", 
+        recommendation: idealPhRange ? "Optimal pH for crop growth" : "Soil pH adjustment advised for better nutrient availability" 
+      },
+      { 
+        name: "Nitrogen", 
+        impact: idealN ? "Positive" : "Adjustment Needed", 
+        recommendation: idealN ? "Sufficient nitrogen for healthy growth" : "Adjust nitrogen fertilizer application for best results" 
+      },
+      {
+        name: "Region", 
+        impact: region === "Punjab" || region === "Uttar Pradesh" ? "Positive" : "Neutral",
+        recommendation: `${region} has ${region === "Punjab" ? "excellent" : region === "Uttar Pradesh" ? "very good" : "suitable"} conditions for this crop`
+      }
     ],
   };
 };

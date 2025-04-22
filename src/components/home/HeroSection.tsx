@@ -7,7 +7,7 @@ const HeroSection = () => {
   return (
     <div className="relative bg-agri-light py-16 sm:py-24">
       <div className="absolute inset-0 overflow-hidden">
-        <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1593349430443-4628b2e7d9bf?q=80&w=2069')] bg-cover bg-center opacity-10" />
+        <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1625246333195-78d9c38ad449?q=80&w=2070')] bg-cover bg-center opacity-10" />
       </div>
       <div className="container relative">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 items-center">
@@ -29,7 +29,7 @@ const HeroSection = () => {
                 <Link to="/marketplace">Explore Marketplace</Link>
               </Button>
               <Button asChild size="lg" variant="outline" className="border-agri-primary text-agri-primary hover:bg-agri-light">
-                <Link to="/learn-more">Learn More</Link>
+                <Link to="/forecasting">Try Forecasting</Link>
               </Button>
             </div>
             <div className="flex flex-wrap items-center gap-4 text-sm text-gray-600 mt-4">
@@ -56,12 +56,12 @@ const HeroSection = () => {
           <div className="relative">
             <div className="relative rounded-lg overflow-hidden shadow-xl">
               <img 
-                src="https://images.unsplash.com/photo-1595337797484-61f526ef3608?q=80&w=2071"
-                alt="Indian Farmer in Field" 
+                src="https://images.unsplash.com/photo-1588935365434-bdb30f959927?q=80&w=2070"
+                alt="Indian Farmers Working in Field" 
                 className="w-full h-[500px] object-cover"
                 onError={(e) => {
                   // Fallback image if the primary one fails to load
-                  e.currentTarget.src = "https://images.unsplash.com/photo-1523741543316-beb7fc7023d8?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80";
+                  e.currentTarget.src = "https://images.unsplash.com/photo-1625246333195-78d9c38ad449?q=80&w=2070";
                 }}
               />
               <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent" />
