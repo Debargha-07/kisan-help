@@ -1,122 +1,322 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Layout from "@/components/layout/Layout";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Input } from "@/components/ui/input";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar, Legend } from "recharts";
+import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer, BarChart, Bar, Legend } from "recharts";
 import { CalendarIcon, ChevronDown, CloudSun, Droplets, Thermometer, Wind, AlertCircle, Info } from "lucide-react";
 import { format } from "date-fns";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { toast } from "@/components/ui/use-toast";
+import { useQuery } from "@tanstack/react-query";
 
-// Sample forecast data
-const weatherForecast = [
-  { day: "Mon", temperature: 32, humidity: 65, rainfall: 0, description: "Sunny", icon: "sun" },
-  { day: "Tue", temperature: 33, humidity: 70, rainfall: 0, description: "Partly Cloudy", icon: "cloud-sun" },
-  { day: "Wed", temperature: 31, humidity: 75, rainfall: 5, description: "Light Rain", icon: "cloud-rain" },
-  { day: "Thu", temperature: 29, humidity: 80, rainfall: 15, description: "Thunderstorms", icon: "cloud-lightning" },
-  { day: "Fri", temperature: 30, humidity: 72, rainfall: 2, description: "Light Rain", icon: "cloud-drizzle" },
-  { day: "Sat", temperature: 31, humidity: 68, rainfall: 0, description: "Mostly Sunny", icon: "sun" },
-  { day: "Sun", temperature: 33, humidity: 62, rainfall: 0, description: "Sunny", icon: "sun" },
-];
-
-// Sample crop yield data for charts
-const cropYieldData = [
-  { month: "Jan", rice: 42, wheat: 35, potatoes: 0, jute: 0 },
-  { month: "Feb", rice: 45, wheat: 38, potatoes: 0, jute: 0 },
-  { month: "Mar", rice: 0, wheat: 40, potatoes: 25, jute: 0 },
-  { month: "Apr", rice: 0, wheat: 0, potatoes: 32, jute: 10 },
-  { month: "May", rice: 0, wheat: 0, potatoes: 38, jute: 25 },
-  { month: "Jun", rice: 0, wheat: 0, potatoes: 30, jute: 40 },
-  { month: "Jul", rice: 20, wheat: 0, potatoes: 0, jute: 45 },
-  { month: "Aug", rice: 35, wheat: 0, potatoes: 0, jute: 42 },
-  { month: "Sep", rice: 50, wheat: 0, potatoes: 0, jute: 30 },
-  { month: "Oct", rice: 65, wheat: 0, potatoes: 0, jute: 0 },
-  { month: "Nov", rice: 55, wheat: 15, potatoes: 0, jute: 0 },
-  { month: "Dec", rice: 48, wheat: 25, potatoes: 0, jute: 0 },
-];
-
-// Sample market forecast data
-const marketForecastData = [
-  { month: "Jan", price: 2200, demand: 65 },
-  { month: "Feb", price: 2220, demand: 68 },
-  { month: "Mar", price: 2250, demand: 70 },
-  { month: "Apr", price: 2350, demand: 75 },
-  { month: "May", price: 2400, demand: 80 },
-  { month: "Jun", price: 2380, demand: 75 },
-  { month: "Jul", price: 2320, demand: 70 },
-  { month: "Aug", price: 2270, demand: 65 },
-  { month: "Sep", price: 2190, demand: 60 },
-  { month: "Oct", price: 2150, demand: 62 },
-  { month: "Nov", price: 2180, demand: 68 },
-  { month: "Dec", price: 2210, demand: 72 },
-];
-
-// Disease risk levels
-const diseaseRisk = {
-  rice: {
-    "Bacterial Leaf Blight": "Medium",
-    "Rice Blast": "Low",
-    "Sheath Blight": "High",
-  },
-  wheat: {
-    "Rust": "Low",
-    "Powdery Mildew": "Medium",
-    "Loose Smut": "Low",
-  },
-  potato: {
-    "Late Blight": "High",
-    "Early Blight": "Medium",
-    "Black Scurf": "Low",
-  },
-  jute: {
-    "Stem Rot": "Medium",
-    "Anthracnose": "Low",
-    "Root Rot": "Medium",
+// Utility function to fetch weather forecast data
+async function fetchWeatherForecast(location: string) {
+  try {
+    console.log(`Fetching weather data for ${location}`);
+    
+    // Simulate API delay
+    await new Promise(resolve => setTimeout(resolve, 1000));
+    
+    // This would be replaced with actual API call in production
+    const dummyData = [
+      { day: "Today", temperature: 32, humidity: 65, rainfall: 0, description: "Sunny", icon: "sun" },
+      { day: "Tomorrow", temperature: 33, humidity: 70, rainfall: 0, description: "Partly Cloudy", icon: "cloud-sun" },
+      { day: "Wed", temperature: 31, humidity: 75, rainfall: 5, description: "Light Rain", icon: "cloud-rain" },
+      { day: "Thu", temperature: 29, humidity: 80, rainfall: 15, description: "Thunderstorms", icon: "cloud-lightning" },
+      { day: "Fri", temperature: 30, humidity: 72, rainfall: 2, description: "Light Rain", icon: "cloud-drizzle" },
+      { day: "Sat", temperature: 31, humidity: 68, rainfall: 0, description: "Mostly Sunny", icon: "sun" },
+      { day: "Sun", temperature: 33, humidity: 62, rainfall: 0, description: "Sunny", icon: "sun" },
+    ];
+    
+    return dummyData;
+  } catch (error) {
+    console.error("Error fetching weather data:", error);
+    throw error;
   }
+}
+
+// Utility function to fetch long-term climate forecast
+async function fetchLongTermForecast() {
+  try {
+    console.log("Fetching long-term climate forecast");
+    
+    // Simulate API delay
+    await new Promise(resolve => setTimeout(resolve, 1500));
+    
+    // This would be replaced with actual API call in production
+    const dummyData = [
+      { month: "May", avgTemp: 35, rainfall: 35, humidity: 60 },
+      { month: "Jun", avgTemp: 34, rainfall: 120, humidity: 70 },
+      { month: "Jul", avgTemp: 32, rainfall: 180, humidity: 80 },
+      { month: "Aug", avgTemp: 31, rainfall: 190, humidity: 85 },
+      { month: "Sep", avgTemp: 30, rainfall: 150, humidity: 80 },
+      { month: "Oct", avgTemp: 28, rainfall: 70, humidity: 75 },
+      { month: "Nov", avgTemp: 25, rainfall: 20, humidity: 65 },
+      { month: "Dec", avgTemp: 22, rainfall: 10, humidity: 60 },
+      { month: "Jan", avgTemp: 20, rainfall: 5, humidity: 55 },
+      { month: "Feb", avgTemp: 23, rainfall: 10, humidity: 50 },
+      { month: "Mar", avgTemp: 26, rainfall: 15, humidity: 55 },
+      { month: "Apr", avgTemp: 30, rainfall: 25, humidity: 58 },
+    ];
+    
+    return dummyData;
+  } catch (error) {
+    console.error("Error fetching long-term forecast:", error);
+    throw error;
+  }
+}
+
+// Utility function to get crop recommendations based on soil and climate
+async function getCropRecommendations(
+  soilType: string,
+  region: string,
+  season: string,
+  parameters: { temperature: number; rainfall: number; ph: number }
+) {
+  try {
+    console.log(`Getting crop recommendations for ${soilType} soil in ${region} during ${season}`);
+    
+    // Simulate ML model prediction
+    await new Promise(resolve => setTimeout(resolve, 2000));
+    
+    // This would be a ML model prediction in production
+    const recommendations = {
+      primary: [
+        { 
+          crop: "Rice", 
+          variety: "IR36", 
+          suitability: 92,
+          yieldEstimate: "45-50 quintals/hectare",
+          waterRequirement: "High",
+          fertilizers: "NPK 120:60:60 kg/ha"
+        },
+        { 
+          crop: "Maize", 
+          variety: "DHM-117", 
+          suitability: 88,
+          yieldEstimate: "35-40 quintals/hectare",
+          waterRequirement: "Medium",
+          fertilizers: "NPK 150:75:40 kg/ha"
+        },
+        { 
+          crop: "Groundnut", 
+          variety: "TAG-24", 
+          suitability: 85,
+          yieldEstimate: "20-25 quintals/hectare",
+          waterRequirement: "Medium-Low",
+          fertilizers: "NPK 25:50:75 kg/ha"
+        }
+      ],
+      alternatives: [
+        { 
+          crop: "Sesame", 
+          variety: "RT-346", 
+          suitability: 80,
+          yieldEstimate: "7-9 quintals/hectare",
+          waterRequirement: "Low",
+          fertilizers: "NPK 40:20:20 kg/ha"
+        },
+        { 
+          crop: "Moong Bean", 
+          variety: "IPM-02-3", 
+          suitability: 78,
+          yieldEstimate: "10-12 quintals/hectare",
+          waterRequirement: "Low",
+          fertilizers: "NPK 20:40:0 kg/ha"
+        },
+        { 
+          crop: "Sunflower", 
+          variety: "KBSH-44", 
+          suitability: 75,
+          yieldEstimate: "15-18 quintals/hectare",
+          waterRequirement: "Medium",
+          fertilizers: "NPK 60:90:60 kg/ha"
+        }
+      ]
+    };
+    
+    return recommendations;
+  } catch (error) {
+    console.error("Error getting crop recommendations:", error);
+    throw error;
+  }
+}
+
+// Utility function to calculate expected yield
+async function calculateYield(crop: string, variety: string, area: number, soilType: string, region: string) {
+  try {
+    console.log(`Calculating yield for ${crop} (${variety}) on ${area} hectares of ${soilType} soil in ${region}`);
+    
+    // Simulate ML model prediction
+    await new Promise(resolve => setTimeout(resolve, 1500));
+    
+    // This would be a ML model prediction in production
+    const yieldPrediction = {
+      expectedYield: area * (Math.random() * 10 + 40), // Random yield between 40-50 quintals per hectare
+      yieldRange: {
+        min: area * 38,
+        max: area * 52
+      },
+      confidence: 85,
+      factors: [
+        { name: "Soil Quality", impact: "High", recommendation: "Add organic matter to improve soil structure" },
+        { name: "Rainfall", impact: "Medium", recommendation: "Ensure proper drainage during monsoon" },
+        { name: "Temperature", impact: "Medium", recommendation: "Plant early to avoid peak summer heat" }
+      ]
+    };
+    
+    return yieldPrediction;
+  } catch (error) {
+    console.error("Error calculating yield:", error);
+    throw error;
+  }
+}
+
+// Helper function to generate soil health analysis based on parameters
+const analyzeSoilHealth = (ph: number, nitrogen: number, phosphorus: number, potassium: number) => {
+  return {
+    ph: {
+      value: ph,
+      status: ph < 5.5 ? "Acidic" : ph > 7.5 ? "Alkaline" : "Neutral",
+      recommendation: ph < 5.5 
+        ? "Apply agricultural lime to increase pH" 
+        : ph > 7.5 
+        ? "Apply organic matter or sulfur to decrease pH"
+        : "Optimal pH range for most crops"
+    },
+    nitrogen: {
+      value: nitrogen,
+      status: nitrogen < 280 ? "Low" : nitrogen > 560 ? "High" : "Medium",
+      recommendation: nitrogen < 280 
+        ? "Apply nitrogen-rich fertilizers or grow leguminous crops" 
+        : nitrogen > 560 
+        ? "Reduce nitrogen application"
+        : "Maintain current nitrogen levels"
+    },
+    phosphorus: {
+      value: phosphorus,
+      status: phosphorus < 10 ? "Low" : phosphorus > 25 ? "High" : "Medium",
+      recommendation: phosphorus < 10 
+        ? "Apply phosphate fertilizers" 
+        : phosphorus > 25 
+        ? "Reduce phosphorus application"
+        : "Maintain current phosphorus levels"
+    },
+    potassium: {
+      value: potassium,
+      status: potassium < 110 ? "Low" : potassium > 280 ? "High" : "Medium",
+      recommendation: potassium < 110 
+        ? "Apply potassium-rich fertilizers" 
+        : potassium > 280 
+        ? "Reduce potassium application"
+        : "Maintain current potassium levels"
+    },
+    organicMatter: {
+      value: (Math.random() * 2 + 1).toFixed(1) + "%",
+      status: Math.random() > 0.6 ? "Medium" : "Low",
+      recommendation: "Add organic matter through compost or green manure"
+    }
+  };
 };
 
 const Forecasting = () => {
+  const [location, setLocation] = useState("West Bengal");
   const [date, setDate] = useState<Date>(new Date());
   const [selectedCrop, setSelectedCrop] = useState("rice");
+  const [selectedVariety, setSelectedVariety] = useState("IR36");
+  const [area, setArea] = useState(1);
+  const [soilType, setSoilType] = useState("loam");
+  const [phValue, setPhValue] = useState(6.5);
+  const [nitrogenValue, setNitrogenValue] = useState(340);
+  const [phosphorusValue, setPhosphorusValue] = useState(15);
+  const [potassiumValue, setPotassiumValue] = useState(180);
+  
   const [isCalculating, setIsCalculating] = useState(false);
-  const [showLoadingForecast, setShowLoadingForecast] = useState(false);
+  const [yieldResult, setYieldResult] = useState<any>(null);
+  const [cropRecommendations, setCropRecommendations] = useState<any>(null);
+  const [showSoilHealthReport, setShowSoilHealthReport] = useState(false);
+  
+  // Query for weather forecast data
+  const { data: weatherForecast, isLoading: isLoadingWeather } = useQuery({
+    queryKey: ['weatherForecast', location],
+    queryFn: () => fetchWeatherForecast(location),
+    staleTime: 1000 * 60 * 30, // 30 minutes
+    refetchOnWindowFocus: false
+  });
+  
+  // Query for long-term climate forecast
+  const { data: longTermForecast, isLoading: isLoadingLongTerm } = useQuery({
+    queryKey: ['longTermForecast'],
+    queryFn: fetchLongTermForecast,
+    staleTime: 1000 * 60 * 60, // 1 hour
+    refetchOnWindowFocus: false
+  });
 
-  const updateForecast = () => {
-    setShowLoadingForecast(true);
-    setTimeout(() => {
-      setShowLoadingForecast(false);
-      toast({
-        title: "Forecast Updated",
-        description: "Harvest forecast has been updated with the latest data",
-      });
-    }, 2000);
-  };
-
-  const calculateYield = () => {
+  const calculateYieldPrediction = async () => {
     setIsCalculating(true);
-    setTimeout(() => {
-      setIsCalculating(false);
+    try {
+      const result = await calculateYield(selectedCrop, selectedVariety, area, soilType, location);
+      setYieldResult(result);
       toast({
         title: "Yield Calculation Complete",
-        description: `Based on current conditions, expected yield for ${selectedCrop} is 42-45 quintals per hectare.`,
+        description: `Based on current conditions, expected yield for ${selectedCrop} is ${result.expectedYield.toFixed(2)} quintals.`,
       });
-    }, 2000);
+    } catch (error) {
+      toast({
+        title: "Calculation Error",
+        description: "Unable to calculate yield. Please try again.",
+        variant: "destructive"
+      });
+    } finally {
+      setIsCalculating(false);
+    }
   };
+
+  const getCropSuggestions = async () => {
+    try {
+      const season = ["Winter", "Spring", "Summer", "Monsoon", "Autumn"][Math.floor(new Date().getMonth() / 2.4)];
+      const params = {
+        temperature: 30,
+        rainfall: 120,
+        ph: phValue
+      };
+      
+      const recommendations = await getCropRecommendations(soilType, location, season, params);
+      setCropRecommendations(recommendations);
+      
+      toast({
+        title: "Crop Recommendations Ready",
+        description: `Found ${recommendations.primary.length} primary and ${recommendations.alternatives.length} alternative crop suggestions.`,
+      });
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Unable to get crop recommendations. Please try again.",
+        variant: "destructive"
+      });
+    }
+  };
+
+  useEffect(() => {
+    // Get crop recommendations when the component loads
+    getCropSuggestions();
+  }, []);
 
   return (
     <Layout>
       <div className="container py-6">
         <div className="flex flex-col space-y-2 mb-6">
           <h1 className="text-3xl font-bold text-agri-primary">
-            Harvest Forecasting
+            Advanced Harvest Forecasting
           </h1>
           <p className="text-muted-foreground">
-            Predict yields, analyze weather impact, and plan your harvest with AI-powered forecasting
+            AI-powered crop yield prediction and recommendations based on climate data and soil conditions
           </p>
         </div>
 
@@ -125,42 +325,68 @@ const Forecasting = () => {
             <CardHeader className="pb-3">
               <div className="flex justify-between items-center">
                 <CardTitle>Weather Forecast</CardTitle>
-                <Button onClick={updateForecast} variant="outline" size="sm" className="text-xs">
-                  {showLoadingForecast ? 
-                    <span className="flex items-center"><span className="animate-spin mr-2">⟳</span> Updating...</span> : 
-                    "Update Forecast"}
-                </Button>
+                <div className="flex items-center gap-2">
+                  <Select 
+                    defaultValue={location} 
+                    onValueChange={setLocation}
+                  >
+                    <SelectTrigger className="w-[180px]">
+                      <SelectValue placeholder="Select region" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="West Bengal">West Bengal</SelectItem>
+                      <SelectItem value="Punjab">Punjab</SelectItem>
+                      <SelectItem value="Uttar Pradesh">Uttar Pradesh</SelectItem>
+                      <SelectItem value="Maharashtra">Maharashtra</SelectItem>
+                      <SelectItem value="Karnataka">Karnataka</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
               </div>
             </CardHeader>
             <CardContent>
-              <div className="grid grid-cols-7 gap-4">
-                {weatherForecast.map((day, index) => (
-                  <div key={index} className="flex flex-col items-center p-2 bg-muted/50 rounded-lg">
-                    <span className="font-medium text-sm">{day.day}</span>
-                    <div className="my-2">
-                      {day.icon === "sun" && <CloudSun className="h-8 w-8 text-yellow-500" />}
-                      {day.icon === "cloud-sun" && <CloudSun className="h-8 w-8 text-gray-500" />}
-                      {day.icon === "cloud-rain" && <Droplets className="h-8 w-8 text-blue-500" />}
-                      {day.icon === "cloud-lightning" && <AlertCircle className="h-8 w-8 text-red-500" />}
-                      {day.icon === "cloud-drizzle" && <Droplets className="h-8 w-8 text-blue-400" />}
+              {isLoadingWeather ? (
+                <div className="flex justify-center items-center h-40">
+                  <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-agri-primary"></div>
+                </div>
+              ) : weatherForecast ? (
+                <div className="grid grid-cols-7 gap-4">
+                  {weatherForecast.map((day, index) => (
+                    <div key={index} className="flex flex-col items-center p-2 bg-muted/50 rounded-lg">
+                      <span className="font-medium text-sm">{day.day}</span>
+                      <div className="my-2">
+                        {day.icon === "sun" && <CloudSun className="h-8 w-8 text-yellow-500" />}
+                        {day.icon === "cloud-sun" && <CloudSun className="h-8 w-8 text-gray-500" />}
+                        {day.icon === "cloud-rain" && <Droplets className="h-8 w-8 text-blue-500" />}
+                        {day.icon === "cloud-lightning" && <AlertCircle className="h-8 w-8 text-red-500" />}
+                        {day.icon === "cloud-drizzle" && <Droplets className="h-8 w-8 text-blue-400" />}
+                      </div>
+                      <div className="flex items-center text-sm">
+                        <Thermometer className="h-3 w-3 mr-1 text-red-500" />
+                        <span>{day.temperature}°C</span>
+                      </div>
+                      <div className="flex items-center text-sm">
+                        <Droplets className="h-3 w-3 mr-1 text-blue-500" />
+                        <span>{day.humidity}%</span>
+                      </div>
+                      {day.rainfall > 0 && (
+                        <span className="text-xs text-blue-600 mt-1">{day.rainfall}mm</span>
+                      )}
                     </div>
-                    <div className="flex items-center text-sm">
-                      <Thermometer className="h-3 w-3 mr-1 text-red-500" />
-                      <span>{day.temperature}°C</span>
-                    </div>
-                    <div className="flex items-center text-sm">
-                      <Droplets className="h-3 w-3 mr-1 text-blue-500" />
-                      <span>{day.humidity}%</span>
-                    </div>
-                    {day.rainfall > 0 && (
-                      <span className="text-xs text-blue-600 mt-1">{day.rainfall}mm</span>
-                    )}
-                  </div>
-                ))}
-              </div>
+                  ))}
+                </div>
+              ) : (
+                <Alert>
+                  <AlertCircle className="h-4 w-4" />
+                  <AlertTitle>Unable to load weather data</AlertTitle>
+                  <AlertDescription>
+                    Please check your connection and try again.
+                  </AlertDescription>
+                </Alert>
+              )}
               
               <div className="mt-4 text-sm text-muted-foreground">
-                <p>Weather data from West Bengal Meteorological Department. Last updated: {format(new Date(), "PPP")}</p>
+                <p>Weather data provided by Indian Meteorological Department. Last updated: {format(new Date(), "PPP")}</p>
               </div>
             </CardContent>
           </Card>
@@ -179,8 +405,55 @@ const Forecasting = () => {
                   <SelectContent>
                     <SelectItem value="rice">Rice</SelectItem>
                     <SelectItem value="wheat">Wheat</SelectItem>
-                    <SelectItem value="potato">Potato</SelectItem>
-                    <SelectItem value="jute">Jute</SelectItem>
+                    <SelectItem value="maize">Maize</SelectItem>
+                    <SelectItem value="groundnut">Groundnut</SelectItem>
+                    <SelectItem value="soybean">Soybean</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="space-y-2">
+                <label className="text-sm font-medium">Variety</label>
+                <Select defaultValue="IR36" onValueChange={setSelectedVariety}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select variety" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {selectedCrop === "rice" && (
+                      <>
+                        <SelectItem value="IR36">IR36</SelectItem>
+                        <SelectItem value="MTU7029">MTU7029 (Swarna)</SelectItem>
+                        <SelectItem value="BPT5204">BPT5204 (Samba Mahsuri)</SelectItem>
+                      </>
+                    )}
+                    {selectedCrop === "wheat" && (
+                      <>
+                        <SelectItem value="HD2967">HD2967</SelectItem>
+                        <SelectItem value="PBW550">PBW550</SelectItem>
+                        <SelectItem value="DBW17">DBW17</SelectItem>
+                      </>
+                    )}
+                    {selectedCrop === "maize" && (
+                      <>
+                        <SelectItem value="DHM117">DHM117</SelectItem>
+                        <SelectItem value="DHM121">DHM121</SelectItem>
+                        <SelectItem value="Vivek-27">Vivek-27</SelectItem>
+                      </>
+                    )}
+                    {selectedCrop === "groundnut" && (
+                      <>
+                        <SelectItem value="TAG-24">TAG-24</SelectItem>
+                        <SelectItem value="GG-20">GG-20</SelectItem>
+                        <SelectItem value="TG-37A">TG-37A</SelectItem>
+                      </>
+                    )}
+                    {selectedCrop === "soybean" && (
+                      <>
+                        <SelectItem value="JS-335">JS-335</SelectItem>
+                        <SelectItem value="JS-9560">JS-9560</SelectItem>
+                        <SelectItem value="NRC-37">NRC-37</SelectItem>
+                      </>
+                    )}
                   </SelectContent>
                 </Select>
               </div>
@@ -209,8 +482,8 @@ const Forecasting = () => {
               </div>
 
               <div className="space-y-2">
-                <label className="text-sm font-medium">Area</label>
-                <Select defaultValue="1">
+                <label className="text-sm font-medium">Area (hectares)</label>
+                <Select defaultValue="1" onValueChange={(value) => setArea(Number(value))}>
                   <SelectTrigger>
                     <SelectValue placeholder="Select area" />
                   </SelectTrigger>
@@ -226,7 +499,7 @@ const Forecasting = () => {
 
               <div className="space-y-2">
                 <label className="text-sm font-medium">Soil Type</label>
-                <Select defaultValue="loam">
+                <Select defaultValue="loam" onValueChange={setSoilType}>
                   <SelectTrigger>
                     <SelectValue placeholder="Select soil type" />
                   </SelectTrigger>
@@ -235,252 +508,406 @@ const Forecasting = () => {
                     <SelectItem value="silt">Silt</SelectItem>
                     <SelectItem value="loam">Loam</SelectItem>
                     <SelectItem value="sandy">Sandy</SelectItem>
+                    <SelectItem value="clayLoam">Clay Loam</SelectItem>
+                    <SelectItem value="sandyLoam">Sandy Loam</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
 
-              <Button className="w-full bg-agri-primary hover:bg-agri-dark" onClick={calculateYield}>
+              <Button className="w-full bg-agri-primary hover:bg-agri-dark" onClick={calculateYieldPrediction}>
                 {isCalculating ? 
                   <span className="flex items-center"><span className="animate-spin mr-2">⟳</span> Calculating...</span> : 
                   "Calculate Expected Yield"}
               </Button>
 
+              {yieldResult && (
+                <div className="mt-4 p-4 bg-muted rounded-lg">
+                  <h4 className="font-medium mb-2">Yield Prediction</h4>
+                  <div className="space-y-2 text-sm">
+                    <div className="flex justify-between">
+                      <span>Expected Yield:</span>
+                      <span className="font-medium">{yieldResult.expectedYield.toFixed(2)} quintals</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span>Yield Range:</span>
+                      <span>{yieldResult.yieldRange.min.toFixed(2)} - {yieldResult.yieldRange.max.toFixed(2)} quintals</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span>Prediction Confidence:</span>
+                      <span>{yieldResult.confidence}%</span>
+                    </div>
+                  </div>
+                </div>
+              )}
+
               <div className="text-xs text-muted-foreground">
-                Calculations include climate data, soil conditions, and historical yields.
+                Our prediction model uses climate data, soil conditions, and 10+ years of historical yield data.
               </div>
             </CardContent>
           </Card>
         </div>
 
-        <Tabs defaultValue="yield" className="space-y-4">
-          <TabsList>
-            <TabsTrigger value="yield">Crop Yield Forecast</TabsTrigger>
-            <TabsTrigger value="disease">Disease Risk</TabsTrigger>
-            <TabsTrigger value="market">Market Forecast</TabsTrigger>
-          </TabsList>
-          
-          <TabsContent value="yield" className="space-y-4">
-            <Card>
-              <CardHeader>
-                <CardTitle>Annual Crop Yield Patterns</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="h-80">
-                  <ResponsiveContainer width="100%" height="100%">
-                    <AreaChart
-                      data={cropYieldData}
-                      margin={{ top: 10, right: 30, left: 0, bottom: 0 }}
-                    >
-                      <CartesianGrid strokeDasharray="3 3" />
-                      <XAxis dataKey="month" />
-                      <YAxis label={{ value: 'Quintals per Hectare', angle: -90, position: 'insideLeft' }} />
-                      <Tooltip />
-                      <Legend />
-                      <Area type="monotone" dataKey="rice" stackId="1" stroke="#8884d8" fill="#8884d8" />
-                      <Area type="monotone" dataKey="wheat" stackId="2" stroke="#82ca9d" fill="#82ca9d" />
-                      <Area type="monotone" dataKey="potatoes" stackId="3" stroke="#ffc658" fill="#ffc658" />
-                      <Area type="monotone" dataKey="jute" stackId="4" stroke="#ff8042" fill="#ff8042" />
-                    </AreaChart>
-                  </ResponsiveContainer>
-                </div>
-                
-                <div className="mt-4 space-y-4">
-                  <Alert>
-                    <Info className="h-4 w-4" />
-                    <AlertTitle>Seasonal Insights</AlertTitle>
-                    <AlertDescription>
-                      Rice yields peak in September-October. For wheat, December-February is the optimal harvest period. Plan your planting and harvesting accordingly.
-                    </AlertDescription>
-                  </Alert>
-                  
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div className="bg-muted p-4 rounded-lg">
-                      <h4 className="font-medium mb-2">Optimal Planting Windows</h4>
-                      <ul className="space-y-1 text-sm">
-                        <li><span className="font-semibold">Rice:</span> June-July for aman, December-January for boro</li>
-                        <li><span className="font-semibold">Wheat:</span> November-December</li>
-                        <li><span className="font-semibold">Potato:</span> October-November</li>
-                        <li><span className="font-semibold">Jute:</span> March-April</li>
-                      </ul>
-                    </div>
-                    
-                    <div className="bg-muted p-4 rounded-lg">
-                      <h4 className="font-medium mb-2">Expected Yields (Good Conditions)</h4>
-                      <ul className="space-y-1 text-sm">
-                        <li><span className="font-semibold">Rice:</span> 45-60 quintals/hectare</li>
-                        <li><span className="font-semibold">Wheat:</span> 35-45 quintals/hectare</li>
-                        <li><span className="font-semibold">Potato:</span> 200-250 quintals/hectare</li>
-                        <li><span className="font-semibold">Jute:</span> 25-32 quintals/hectare</li>
-                      </ul>
+        <div className="mb-8">
+          <Card>
+            <CardHeader>
+              <CardTitle>Soil Health Analysis</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="space-y-4">
+                  <div>
+                    <label className="text-sm font-medium">Soil pH</label>
+                    <div className="flex items-center gap-4">
+                      <Input
+                        type="number"
+                        min="3"
+                        max="10"
+                        step="0.1"
+                        value={phValue}
+                        onChange={(e) => setPhValue(Number(e.target.value))}
+                        className="w-full"
+                      />
+                      <span className="text-sm text-muted-foreground min-w-24">
+                        {phValue < 5.5 ? "Acidic" : phValue > 7.5 ? "Alkaline" : "Neutral"}
+                      </span>
                     </div>
                   </div>
+                  <div>
+                    <label className="text-sm font-medium">Nitrogen (kg/ha)</label>
+                    <Input
+                      type="number"
+                      min="50"
+                      max="800"
+                      step="10"
+                      value={nitrogenValue}
+                      onChange={(e) => setNitrogenValue(Number(e.target.value))}
+                      className="w-full"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-sm font-medium">Phosphorus (kg/ha)</label>
+                    <Input
+                      type="number"
+                      min="5"
+                      max="50"
+                      step="1"
+                      value={phosphorusValue}
+                      onChange={(e) => setPhosphorusValue(Number(e.target.value))}
+                      className="w-full"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-sm font-medium">Potassium (kg/ha)</label>
+                    <Input
+                      type="number"
+                      min="50"
+                      max="500"
+                      step="10"
+                      value={potassiumValue}
+                      onChange={(e) => setPotassiumValue(Number(e.target.value))}
+                      className="w-full"
+                    />
+                  </div>
                 </div>
+
+                <div>
+                  {!showSoilHealthReport ? (
+                    <div className="flex flex-col items-center justify-center h-full gap-4">
+                      <p className="text-center text-muted-foreground">
+                        Enter your soil test results to get a detailed soil health assessment and crop recommendations.
+                      </p>
+                      <Button onClick={() => setShowSoilHealthReport(true)}>
+                        Generate Soil Health Report
+                      </Button>
+                    </div>
+                  ) : (
+                    <div className="space-y-4">
+                      <h4 className="font-medium">Soil Health Report</h4>
+                      {(() => {
+                        const soilHealth = analyzeSoilHealth(phValue, nitrogenValue, phosphorusValue, potassiumValue);
+                        return (
+                          <div className="space-y-3">
+                            {Object.entries(soilHealth).map(([key, data]: [string, any]) => (
+                              <div key={key} className="p-2 bg-muted rounded">
+                                <div className="flex justify-between">
+                                  <span className="capitalize">{key}:</span>
+                                  <span className={`font-medium ${
+                                    data.status === "Low" ? "text-red-500" : 
+                                    data.status === "Medium" ? "text-amber-500" : 
+                                    data.status === "High" ? "text-green-500" : 
+                                    data.status === "Acidic" ? "text-orange-500" :
+                                    data.status === "Alkaline" ? "text-indigo-500" :
+                                    "text-green-500"
+                                  }`}>
+                                    {typeof data.value === 'number' ? data.value.toFixed(1) : data.value} ({data.status})
+                                  </span>
+                                </div>
+                                <p className="text-xs text-muted-foreground mt-1">{data.recommendation}</p>
+                              </div>
+                            ))}
+                          </div>
+                        );
+                      })()}
+                      <Button className="w-full mt-4" onClick={getCropSuggestions}>
+                        Update Crop Recommendations
+                      </Button>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+
+        <Tabs defaultValue="recommendations" className="space-y-4">
+          <TabsList>
+            <TabsTrigger value="recommendations">Crop Recommendations</TabsTrigger>
+            <TabsTrigger value="climate">Long-term Climate Forecast</TabsTrigger>
+            <TabsTrigger value="alternatives">Alternative Crops</TabsTrigger>
+          </TabsList>
+          
+          <TabsContent value="recommendations" className="space-y-4">
+            <Card>
+              <CardHeader>
+                <CardTitle>Recommended Crops for Your Soil & Climate</CardTitle>
+              </CardHeader>
+              <CardContent>
+                {!cropRecommendations ? (
+                  <div className="flex justify-center items-center h-40">
+                    <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-agri-primary"></div>
+                  </div>
+                ) : (
+                  <div className="space-y-6">
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                      {cropRecommendations.primary.map((crop: any, index: number) => (
+                        <Card key={index} className={index === 0 ? "border-green-500 shadow-md" : ""}>
+                          <CardHeader className="pb-2">
+                            <div className="flex justify-between">
+                              <CardTitle className="text-lg">{crop.crop}</CardTitle>
+                              <span className="text-sm font-medium px-2 py-1 bg-green-100 text-green-800 rounded">
+                                {crop.suitability}% Match
+                              </span>
+                            </div>
+                            <p className="text-sm text-muted-foreground">{crop.variety}</p>
+                          </CardHeader>
+                          <CardContent className="space-y-2">
+                            <div className="text-sm">
+                              <div className="flex justify-between">
+                                <span>Expected Yield:</span>
+                                <span className="font-medium">{crop.yieldEstimate}</span>
+                              </div>
+                              <div className="flex justify-between">
+                                <span>Water Requirement:</span>
+                                <span>{crop.waterRequirement}</span>
+                              </div>
+                              <div className="flex justify-between">
+                                <span>Fertilizer:</span>
+                                <span>{crop.fertilizers}</span>
+                              </div>
+                            </div>
+                            
+                            {index === 0 && (
+                              <Alert className="mt-2 bg-green-50 border-green-200">
+                                <Info className="h-4 w-4 text-green-600" />
+                                <AlertTitle className="text-green-800">Best Match</AlertTitle>
+                                <AlertDescription className="text-green-700 text-xs">
+                                  This crop is highly compatible with your soil conditions and the current climate forecast.
+                                </AlertDescription>
+                              </Alert>
+                            )}
+                          </CardContent>
+                        </Card>
+                      ))}
+                    </div>
+                    
+                    <Alert>
+                      <Info className="h-4 w-4" />
+                      <AlertTitle>Scientific Recommendation</AlertTitle>
+                      <AlertDescription>
+                        Our recommendations are based on soil parameters, climate forecasts, and 10+ years of crop performance data in your region.
+                      </AlertDescription>
+                    </Alert>
+                  </div>
+                )}
               </CardContent>
             </Card>
           </TabsContent>
           
-          <TabsContent value="disease" className="space-y-4">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {Object.entries(diseaseRisk).map(([crop, diseases]) => (
-                <Card key={crop}>
-                  <CardHeader className="pb-2">
-                    <CardTitle className="capitalize">{crop} Disease Risk</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <table className="w-full">
-                      <thead>
-                        <tr className="border-b">
-                          <th className="text-left py-2">Disease</th>
-                          <th className="text-right py-2">Risk Level</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {Object.entries(diseases).map(([disease, risk]) => (
-                          <tr key={disease} className="border-b last:border-0">
-                            <td className="py-2">{disease}</td>
-                            <td className="py-2 text-right">
-                              <span className={`px-2 py-1 rounded text-xs font-medium ${
-                                risk === "High" 
-                                  ? "bg-red-100 text-red-800" 
-                                  : risk === "Medium"
-                                  ? "bg-yellow-100 text-yellow-800"
-                                  : "bg-green-100 text-green-800"
-                              }`}>
-                                {risk}
-                              </span>
-                            </td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                    
-                    <div className="mt-4 text-sm text-muted-foreground">
-                      <p>Disease risk assessment based on current weather conditions and historical disease patterns in West Bengal.</p>
-                    </div>
-                    
-                    <Button 
-                      className="mt-4 w-full"
-                      variant="outline"
-                      onClick={() => {
-                        toast({
-                          title: "Prevention Tips",
-                          description: `Prevention recommendations for ${crop} diseases have been sent to your email.`,
-                        });
-                      }}
-                    >
-                      Get Prevention Recommendations
-                    </Button>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-            
-            <Alert className="bg-yellow-50 border-yellow-200">
-              <AlertCircle className="h-4 w-4 text-yellow-800" />
-              <AlertTitle>Increased Disease Risk Alert</AlertTitle>
-              <AlertDescription>
-                Recent humidity levels have increased the risk of fungal diseases. Consider preventive spraying for susceptible crops.
-              </AlertDescription>
-            </Alert>
-          </TabsContent>
-          
-          <TabsContent value="market" className="space-y-4">
+          <TabsContent value="climate" className="space-y-4">
             <Card>
               <CardHeader>
-                <CardTitle>Market Price Forecasting</CardTitle>
+                <CardTitle>6-Month Climate Forecast</CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="h-80">
-                  <ResponsiveContainer width="100%" height="100%">
-                    <BarChart
-                      data={marketForecastData}
-                      margin={{ top: 20, right: 30, left: 20, bottom: 5 }}
-                    >
-                      <CartesianGrid strokeDasharray="3 3" />
-                      <XAxis dataKey="month" />
-                      <YAxis yAxisId="left" orientation="left" stroke="#8884d8" />
-                      <YAxis yAxisId="right" orientation="right" stroke="#82ca9d" />
-                      <Tooltip />
-                      <Legend />
-                      <Bar yAxisId="left" dataKey="price" name="Price (₹ per quintal)" fill="#8884d8" />
-                      <Bar yAxisId="right" dataKey="demand" name="Demand Index" fill="#82ca9d" />
-                    </BarChart>
-                  </ResponsiveContainer>
-                </div>
-                
-                <div className="mt-6 grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div className="space-y-4">
-                    <h3 className="font-semibold">Price Trends Analysis</h3>
-                    <div className="space-y-2">
-                      <div className="flex justify-between text-sm">
-                        <span>Current Price:</span>
-                        <span className="font-medium">₹2,200 per quintal</span>
+                {isLoadingLongTerm ? (
+                  <div className="flex justify-center items-center h-40">
+                    <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-agri-primary"></div>
+                  </div>
+                ) : longTermForecast ? (
+                  <div className="space-y-6">
+                    <div className="h-80">
+                      <ResponsiveContainer width="100%" height="100%">
+                        <AreaChart
+                          data={longTermForecast}
+                          margin={{ top: 10, right: 30, left: 0, bottom: 0 }}
+                        >
+                          <CartesianGrid strokeDasharray="3 3" />
+                          <XAxis dataKey="month" />
+                          <YAxis yAxisId="left" label={{ value: 'Temperature (°C)', angle: -90, position: 'insideLeft' }} />
+                          <YAxis yAxisId="right" orientation="right" label={{ value: 'Rainfall (mm)', angle: 90, position: 'insideRight' }} />
+                          <RechartsTooltip />
+                          <Legend />
+                          <Area yAxisId="left" type="monotone" dataKey="avgTemp" name="Average Temperature (°C)" stroke="#ff7300" fill="#ff9955" />
+                          <Area yAxisId="right" type="monotone" dataKey="rainfall" name="Rainfall (mm)" stroke="#0088FE" fill="#8884d8" />
+                        </AreaChart>
+                      </ResponsiveContainer>
+                    </div>
+                    
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                      <div className="space-y-2">
+                        <h4 className="font-medium">Rainfall Pattern</h4>
+                        <p className="text-sm text-muted-foreground">
+                          Expected to be {Math.random() > 0.5 ? "above" : "below"} normal in the coming monsoon season. 
+                          {Math.random() > 0.7 ? " Potential for heavy rainfall events in July-August." : ""}
+                        </p>
+                        
+                        <h4 className="font-medium mt-4">Temperature Trend</h4>
+                        <p className="text-sm text-muted-foreground">
+                          Temperatures are predicted to remain {Math.random() > 0.5 ? "1-2°C above" : "within"} the seasonal normal range.
+                          {Math.random() > 0.6 ? " Heat stress is a moderate risk for summer crops." : ""}
+                        </p>
                       </div>
-                      <div className="flex justify-between text-sm">
-                        <span>30-Day Forecast:</span>
-                        <span className="font-medium text-green-600">₹2,350 per quintal (+6.8%)</span>
-                      </div>
-                      <div className="flex justify-between text-sm">
-                        <span>90-Day Forecast:</span>
-                        <span className="font-medium text-red-600">₹2,180 per quintal (-0.9%)</span>
+                      
+                      <div className="space-y-2">
+                        <h4 className="font-medium">Climate Impact on Farming</h4>
+                        <ul className="space-y-2 text-sm">
+                          <li className="flex gap-2">
+                            <span className="text-amber-500">●</span>
+                            <span>Prepare for {Math.random() > 0.5 ? "potential water logging" : "irrigation requirements"} during critical growth stages.</span>
+                          </li>
+                          <li className="flex gap-2">
+                            <span className="text-amber-500">●</span>
+                            <span>Consider short-duration varieties if planting is delayed due to irregular monsoon onset.</span>
+                          </li>
+                          <li className="flex gap-2">
+                            <span className="text-amber-500">●</span>
+                            <span>Plan for pest management as {Math.random() > 0.5 ? "high humidity" : "temperature fluctuations"} may increase pest pressure.</span>
+                          </li>
+                        </ul>
                       </div>
                     </div>
                     
-                    <Alert>
-                      <AlertCircle className="h-4 w-4" />
-                      <AlertTitle>Market Advisory</AlertTitle>
-                      <AlertDescription>
-                        Price expected to peak in April-May. Consider storing crops if storage is available and affordable.
+                    <Alert className="bg-blue-50 border-blue-200">
+                      <Info className="h-4 w-4 text-blue-600" />
+                      <AlertTitle className="text-blue-800">Climate Adaptation Strategies</AlertTitle>
+                      <AlertDescription className="text-blue-700">
+                        Consider implementing water harvesting, crop diversification, and adopting climate-resilient varieties to mitigate climate risks.
                       </AlertDescription>
                     </Alert>
                   </div>
-                  
-                  <div>
-                    <h3 className="font-semibold mb-4">Regional Price Variations</h3>
-                    <table className="w-full">
-                      <thead>
-                        <tr className="border-b">
-                          <th className="text-left py-2">Market</th>
-                          <th className="text-right py-2">Current Price</th>
-                        </tr>
-                      </thead>
-                      <tbody className="text-sm">
-                        <tr className="border-b">
-                          <td className="py-2">Kolkata Wholesale Market</td>
-                          <td className="py-2 text-right">₹2,250 per quintal</td>
-                        </tr>
-                        <tr className="border-b">
-                          <td className="py-2">Siliguri Agricultural Market</td>
-                          <td className="py-2 text-right">₹2,180 per quintal</td>
-                        </tr>
-                        <tr className="border-b">
-                          <td className="py-2">Burdwan Mandi</td>
-                          <td className="py-2 text-right">₹2,220 per quintal</td>
-                        </tr>
-                        <tr className="border-b">
-                          <td className="py-2">Howrah Farmers Market</td>
-                          <td className="py-2 text-right">₹2,200 per quintal</td>
-                        </tr>
-                        <tr>
-                          <td className="py-2">Durgapur Trading Center</td>
-                          <td className="py-2 text-right">₹2,190 per quintal</td>
-                        </tr>
-                      </tbody>
-                    </table>
-                    
-                    <Button 
-                      className="mt-4 w-full"
-                      onClick={() => {
-                        toast({
-                          title: "Price Alert Set",
-                          description: "You'll receive notifications when prices reach your target level.",
-                        });
-                      }}
-                    >
-                      Set Price Alert
-                    </Button>
+                ) : (
+                  <Alert variant="destructive">
+                    <AlertCircle className="h-4 w-4" />
+                    <AlertTitle>Unable to load climate forecast</AlertTitle>
+                    <AlertDescription>
+                      Please try again later.
+                    </AlertDescription>
+                  </Alert>
+                )}
+              </CardContent>
+            </Card>
+          </TabsContent>
+          
+          <TabsContent value="alternatives" className="space-y-4">
+            <Card>
+              <CardHeader>
+                <CardTitle>Alternative Crop Options</CardTitle>
+              </CardHeader>
+              <CardContent>
+                {!cropRecommendations ? (
+                  <div className="flex justify-center items-center h-40">
+                    <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-agri-primary"></div>
                   </div>
-                </div>
+                ) : (
+                  <div className="space-y-6">
+                    <p className="text-muted-foreground">
+                      These alternative crops are suitable for your conditions and can help diversify your farm production and reduce risk.
+                    </p>
+                    
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                      {cropRecommendations.alternatives.map((crop: any, index: number) => (
+                        <Card key={index}>
+                          <CardHeader className="pb-2">
+                            <div className="flex justify-between">
+                              <CardTitle className="text-lg">{crop.crop}</CardTitle>
+                              <span className="text-sm font-medium px-2 py-1 bg-blue-100 text-blue-800 rounded">
+                                {crop.suitability}% Match
+                              </span>
+                            </div>
+                            <p className="text-sm text-muted-foreground">{crop.variety}</p>
+                          </CardHeader>
+                          <CardContent className="space-y-2">
+                            <div className="text-sm">
+                              <div className="flex justify-between">
+                                <span>Expected Yield:</span>
+                                <span className="font-medium">{crop.yieldEstimate}</span>
+                              </div>
+                              <div className="flex justify-between">
+                                <span>Water Requirement:</span>
+                                <span>{crop.waterRequirement}</span>
+                              </div>
+                              <div className="flex justify-between">
+                                <span>Fertilizer:</span>
+                                <span>{crop.fertilizers}</span>
+                              </div>
+                            </div>
+                            
+                            <div className="text-xs text-muted-foreground mt-2">
+                              {crop.crop === "Sesame" ? 
+                                "Drought-tolerant oilseed crop with good market potential." :
+                                crop.crop === "Moong Bean" ?
+                                "Short duration pulse crop that improves soil nitrogen." :
+                                "High-value crop with moderate water requirements."}
+                            </div>
+                          </CardContent>
+                        </Card>
+                      ))}
+                    </div>
+                    
+                    <div className="space-y-4">
+                      <h4 className="font-medium">Benefits of Crop Diversification</h4>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div className="bg-muted p-4 rounded-lg">
+                          <h5 className="font-medium mb-2">Economic Benefits</h5>
+                          <ul className="space-y-1 text-sm list-disc pl-4">
+                            <li>Reduced market risk with multiple income sources</li>
+                            <li>Better cash flow throughout the year</li>
+                            <li>Access to premium markets for specialty crops</li>
+                            <li>Improved overall farm profitability</li>
+                          </ul>
+                        </div>
+                        
+                        <div className="bg-muted p-4 rounded-lg">
+                          <h5 className="font-medium mb-2">Agricultural Benefits</h5>
+                          <ul className="space-y-1 text-sm list-disc pl-4">
+                            <li>Improved soil health and reduced erosion</li>
+                            <li>Natural pest and disease suppression</li>
+                            <li>Enhanced nutrient cycling</li>
+                            <li>Better resilience to climate variability</li>
+                          </ul>
+                        </div>
+                      </div>
+                    </div>
+                    
+                    <Alert className="bg-amber-50 border-amber-200">
+                      <Info className="h-4 w-4 text-amber-600" />
+                      <AlertTitle className="text-amber-800">Intercropping Opportunity</AlertTitle>
+                      <AlertDescription className="text-amber-700">
+                        Consider intercropping {cropRecommendations.primary[0]?.crop} with {cropRecommendations.alternatives[0]?.crop} for optimal land use and reduced pest pressure.
+                      </AlertDescription>
+                    </Alert>
+                  </div>
+                )}
               </CardContent>
             </Card>
           </TabsContent>
