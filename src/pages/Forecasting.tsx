@@ -9,174 +9,16 @@ import { Input } from "@/components/ui/input";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer, BarChart, Bar, Legend } from "recharts";
-import { CalendarIcon, ChevronDown, CloudSun, Droplets, Thermometer, Wind, AlertCircle, Info } from "lucide-react";
+import { CalendarIcon, ChevronDown, CloudSun, Droplets, Thermometer, Wind, AlertCircle, Info, Soil, Wheat, Tractor, Umbrella } from "lucide-react";
 import { format } from "date-fns";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { toast } from "@/components/ui/use-toast";
 import { useQuery } from "@tanstack/react-query";
 
-// Utility function to fetch weather forecast data
-async function fetchWeatherForecast(location: string) {
-  try {
-    console.log(`Fetching weather data for ${location}`);
-    
-    // Simulate API delay
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    
-    // This would be replaced with actual API call in production
-    const dummyData = [
-      { day: "Today", temperature: 32, humidity: 65, rainfall: 0, description: "Sunny", icon: "sun" },
-      { day: "Tomorrow", temperature: 33, humidity: 70, rainfall: 0, description: "Partly Cloudy", icon: "cloud-sun" },
-      { day: "Wed", temperature: 31, humidity: 75, rainfall: 5, description: "Light Rain", icon: "cloud-rain" },
-      { day: "Thu", temperature: 29, humidity: 80, rainfall: 15, description: "Thunderstorms", icon: "cloud-lightning" },
-      { day: "Fri", temperature: 30, humidity: 72, rainfall: 2, description: "Light Rain", icon: "cloud-drizzle" },
-      { day: "Sat", temperature: 31, humidity: 68, rainfall: 0, description: "Mostly Sunny", icon: "sun" },
-      { day: "Sun", temperature: 33, humidity: 62, rainfall: 0, description: "Sunny", icon: "sun" },
-    ];
-    
-    return dummyData;
-  } catch (error) {
-    console.error("Error fetching weather data:", error);
-    throw error;
-  }
-}
-
-// Utility function to fetch long-term climate forecast
-async function fetchLongTermForecast() {
-  try {
-    console.log("Fetching long-term climate forecast");
-    
-    // Simulate API delay
-    await new Promise(resolve => setTimeout(resolve, 1500));
-    
-    // This would be replaced with actual API call in production
-    const dummyData = [
-      { month: "May", avgTemp: 35, rainfall: 35, humidity: 60 },
-      { month: "Jun", avgTemp: 34, rainfall: 120, humidity: 70 },
-      { month: "Jul", avgTemp: 32, rainfall: 180, humidity: 80 },
-      { month: "Aug", avgTemp: 31, rainfall: 190, humidity: 85 },
-      { month: "Sep", avgTemp: 30, rainfall: 150, humidity: 80 },
-      { month: "Oct", avgTemp: 28, rainfall: 70, humidity: 75 },
-      { month: "Nov", avgTemp: 25, rainfall: 20, humidity: 65 },
-      { month: "Dec", avgTemp: 22, rainfall: 10, humidity: 60 },
-      { month: "Jan", avgTemp: 20, rainfall: 5, humidity: 55 },
-      { month: "Feb", avgTemp: 23, rainfall: 10, humidity: 50 },
-      { month: "Mar", avgTemp: 26, rainfall: 15, humidity: 55 },
-      { month: "Apr", avgTemp: 30, rainfall: 25, humidity: 58 },
-    ];
-    
-    return dummyData;
-  } catch (error) {
-    console.error("Error fetching long-term forecast:", error);
-    throw error;
-  }
-}
-
-// Utility function to get crop recommendations based on soil and climate
-async function getCropRecommendations(
-  soilType: string,
-  region: string,
-  season: string,
-  parameters: { temperature: number; rainfall: number; ph: number }
-) {
-  try {
-    console.log(`Getting crop recommendations for ${soilType} soil in ${region} during ${season}`);
-    
-    // Simulate ML model prediction
-    await new Promise(resolve => setTimeout(resolve, 2000));
-    
-    // This would be a ML model prediction in production
-    const recommendations = {
-      primary: [
-        { 
-          crop: "Rice", 
-          variety: "IR36", 
-          suitability: 92,
-          yieldEstimate: "45-50 quintals/hectare",
-          waterRequirement: "High",
-          fertilizers: "NPK 120:60:60 kg/ha"
-        },
-        { 
-          crop: "Maize", 
-          variety: "DHM-117", 
-          suitability: 88,
-          yieldEstimate: "35-40 quintals/hectare",
-          waterRequirement: "Medium",
-          fertilizers: "NPK 150:75:40 kg/ha"
-        },
-        { 
-          crop: "Groundnut", 
-          variety: "TAG-24", 
-          suitability: 85,
-          yieldEstimate: "20-25 quintals/hectare",
-          waterRequirement: "Medium-Low",
-          fertilizers: "NPK 25:50:75 kg/ha"
-        }
-      ],
-      alternatives: [
-        { 
-          crop: "Sesame", 
-          variety: "RT-346", 
-          suitability: 80,
-          yieldEstimate: "7-9 quintals/hectare",
-          waterRequirement: "Low",
-          fertilizers: "NPK 40:20:20 kg/ha"
-        },
-        { 
-          crop: "Moong Bean", 
-          variety: "IPM-02-3", 
-          suitability: 78,
-          yieldEstimate: "10-12 quintals/hectare",
-          waterRequirement: "Low",
-          fertilizers: "NPK 20:40:0 kg/ha"
-        },
-        { 
-          crop: "Sunflower", 
-          variety: "KBSH-44", 
-          suitability: 75,
-          yieldEstimate: "15-18 quintals/hectare",
-          waterRequirement: "Medium",
-          fertilizers: "NPK 60:90:60 kg/ha"
-        }
-      ]
-    };
-    
-    return recommendations;
-  } catch (error) {
-    console.error("Error getting crop recommendations:", error);
-    throw error;
-  }
-}
-
-// Utility function to calculate expected yield
-async function calculateYield(crop: string, variety: string, area: number, soilType: string, region: string) {
-  try {
-    console.log(`Calculating yield for ${crop} (${variety}) on ${area} hectares of ${soilType} soil in ${region}`);
-    
-    // Simulate ML model prediction
-    await new Promise(resolve => setTimeout(resolve, 1500));
-    
-    // This would be a ML model prediction in production
-    const yieldPrediction = {
-      expectedYield: area * (Math.random() * 10 + 40), // Random yield between 40-50 quintals per hectare
-      yieldRange: {
-        min: area * 38,
-        max: area * 52
-      },
-      confidence: 85,
-      factors: [
-        { name: "Soil Quality", impact: "High", recommendation: "Add organic matter to improve soil structure" },
-        { name: "Rainfall", impact: "Medium", recommendation: "Ensure proper drainage during monsoon" },
-        { name: "Temperature", impact: "Medium", recommendation: "Plant early to avoid peak summer heat" }
-      ]
-    };
-    
-    return yieldPrediction;
-  } catch (error) {
-    console.error("Error calculating yield:", error);
-    throw error;
-  }
-}
+// Import data services
+import { getWeatherForecast, longTermForecast, getSeasonalDescription } from "@/data/weatherData";
+import { getSoilProfile, getTypicalSoilParameters, getPredominantSoilType } from "@/data/soilData";
+import { getCropRecommendations, calculateYield, getCurrentSeason, getCropChallenges } from "@/data/cropData";
 
 // Helper function to generate soil health analysis based on parameters
 const analyzeSoilHealth = (ph: number, nitrogen: number, phosphorus: number, potassium: number) => {
@@ -232,42 +74,76 @@ const Forecasting = () => {
   const [selectedVariety, setSelectedVariety] = useState("IR36");
   const [area, setArea] = useState(1);
   const [soilType, setSoilType] = useState("loam");
-  const [phValue, setPhValue] = useState(6.5);
-  const [nitrogenValue, setNitrogenValue] = useState(340);
-  const [phosphorusValue, setPhosphorusValue] = useState(15);
-  const [potassiumValue, setPotassiumValue] = useState(180);
+  
+  // Get soil parameters for selected location
+  const defaultSoilParams = getTypicalSoilParameters(location);
+  const [phValue, setPhValue] = useState(defaultSoilParams.ph);
+  const [nitrogenValue, setNitrogenValue] = useState(defaultSoilParams.nitrogen);
+  const [phosphorusValue, setPhosphorusValue] = useState(defaultSoilParams.phosphorus);
+  const [potassiumValue, setPotassiumValue] = useState(defaultSoilParams.potassium);
   
   const [isCalculating, setIsCalculating] = useState(false);
   const [yieldResult, setYieldResult] = useState<any>(null);
   const [cropRecommendations, setCropRecommendations] = useState<any>(null);
   const [showSoilHealthReport, setShowSoilHealthReport] = useState(false);
   
-  // Query for weather forecast data
+  // Get weather forecast data
   const { data: weatherForecast, isLoading: isLoadingWeather } = useQuery({
     queryKey: ['weatherForecast', location],
-    queryFn: () => fetchWeatherForecast(location),
+    queryFn: () => Promise.resolve(getWeatherForecast(location)),
     staleTime: 1000 * 60 * 30, // 30 minutes
     refetchOnWindowFocus: false
   });
   
-  // Query for long-term climate forecast
-  const { data: longTermForecast, isLoading: isLoadingLongTerm } = useQuery({
+  // Long-term climate forecast data is static for now
+  const { data: longTermData, isLoading: isLoadingLongTerm } = useQuery({
     queryKey: ['longTermForecast'],
-    queryFn: fetchLongTermForecast,
+    queryFn: () => Promise.resolve(longTermForecast),
     staleTime: 1000 * 60 * 60, // 1 hour
     refetchOnWindowFocus: false
   });
 
+  // Update soil parameters when location changes
+  useEffect(() => {
+    const soilParams = getTypicalSoilParameters(location);
+    setPhValue(soilParams.ph);
+    setNitrogenValue(soilParams.nitrogen);
+    setPhosphorusValue(soilParams.phosphorus);
+    setPotassiumValue(soilParams.potassium);
+    
+    // Get predominant soil type for this region
+    const predominantSoil = getPredominantSoilType(location);
+    setSoilType(predominantSoil);
+    
+    // Update crop recommendations
+    updateCropRecommendations();
+  }, [location]);
+
   const calculateYieldPrediction = async () => {
     setIsCalculating(true);
     try {
-      const result = await calculateYield(selectedCrop, selectedVariety, area, soilType, location);
+      // Simulate API delay
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      
+      const result = calculateYield(selectedCrop, selectedVariety, area, soilType, location);
       setYieldResult(result);
+      
+      // Add challenges based on season, crop and region
+      result.factors = result.factors.concat(
+        getCropChallenges(selectedCrop, location, getCurrentSeason())
+          .map(challenge => ({ 
+            name: "Seasonal Challenge", 
+            impact: "Medium", 
+            recommendation: challenge 
+          }))
+      );
+      
       toast({
         title: "Yield Calculation Complete",
         description: `Based on current conditions, expected yield for ${selectedCrop} is ${result.expectedYield.toFixed(2)} quintals.`,
       });
     } catch (error) {
+      console.error("Error calculating yield:", error);
       toast({
         title: "Calculation Error",
         description: "Unable to calculate yield. Please try again.",
@@ -278,23 +154,35 @@ const Forecasting = () => {
     }
   };
 
-  const getCropSuggestions = async () => {
+  const updateCropRecommendations = async () => {
     try {
-      const season = ["Winter", "Spring", "Summer", "Monsoon", "Autumn"][Math.floor(new Date().getMonth() / 2.4)];
-      const params = {
-        temperature: 30,
-        rainfall: 120,
-        ph: phValue
-      };
+      // Simulate API delay
+      await new Promise(resolve => setTimeout(resolve, 800));
       
-      const recommendations = await getCropRecommendations(soilType, location, season, params);
+      const season = getCurrentSeason();
+      const predominantSoil = getPredominantSoilType(location);
+      
+      const recommendations = getCropRecommendations(location, predominantSoil, season);
+      
+      // Add challenges to each recommendation
+      recommendations.primary = recommendations.primary.map(crop => ({
+        ...crop,
+        challenges: getCropChallenges(crop.crop, location, season)
+      }));
+      
+      recommendations.alternatives = recommendations.alternatives.map(crop => ({
+        ...crop,
+        challenges: getCropChallenges(crop.crop, location, season)
+      }));
+      
       setCropRecommendations(recommendations);
       
       toast({
-        title: "Crop Recommendations Ready",
-        description: `Found ${recommendations.primary.length} primary and ${recommendations.alternatives.length} alternative crop suggestions.`,
+        title: "Crop Recommendations Updated",
+        description: `Found recommendations based on ${season} conditions in ${location}.`,
       });
     } catch (error) {
+      console.error("Error getting crop recommendations:", error);
       toast({
         title: "Error",
         description: "Unable to get crop recommendations. Please try again.",
@@ -305,7 +193,7 @@ const Forecasting = () => {
 
   useEffect(() => {
     // Get crop recommendations when the component loads
-    getCropSuggestions();
+    updateCropRecommendations();
   }, []);
 
   return (
@@ -328,6 +216,7 @@ const Forecasting = () => {
                 <div className="flex items-center gap-2">
                   <Select 
                     defaultValue={location} 
+                    value={location}
                     onValueChange={setLocation}
                   >
                     <SelectTrigger className="w-[180px]">
@@ -350,14 +239,14 @@ const Forecasting = () => {
                   <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-agri-primary"></div>
                 </div>
               ) : weatherForecast ? (
-                <div className="grid grid-cols-7 gap-4">
+                <div className="grid grid-cols-7 gap-2">
                   {weatherForecast.map((day, index) => (
                     <div key={index} className="flex flex-col items-center p-2 bg-muted/50 rounded-lg">
                       <span className="font-medium text-sm">{day.day}</span>
                       <div className="my-2">
                         {day.icon === "sun" && <CloudSun className="h-8 w-8 text-yellow-500" />}
                         {day.icon === "cloud-sun" && <CloudSun className="h-8 w-8 text-gray-500" />}
-                        {day.icon === "cloud-rain" && <Droplets className="h-8 w-8 text-blue-500" />}
+                        {day.icon === "cloud-rain" && <Umbrella className="h-8 w-8 text-blue-500" />}
                         {day.icon === "cloud-lightning" && <AlertCircle className="h-8 w-8 text-red-500" />}
                         {day.icon === "cloud-drizzle" && <Droplets className="h-8 w-8 text-blue-400" />}
                       </div>
@@ -385,8 +274,13 @@ const Forecasting = () => {
                 </Alert>
               )}
               
-              <div className="mt-4 text-sm text-muted-foreground">
-                <p>Weather data provided by Indian Meteorological Department. Last updated: {format(new Date(), "PPP")}</p>
+              <div className="mt-4 bg-muted/30 p-3 rounded-md">
+                <h4 className="font-medium mb-1">Seasonal Outlook</h4>
+                <p className="text-sm text-muted-foreground">{getSeasonalDescription(location)}</p>
+              </div>
+              
+              <div className="mt-2 text-xs text-muted-foreground">
+                <p>Weather data based on historical patterns for {location}. Last updated: {format(new Date(), "PPP")}</p>
               </div>
             </CardContent>
           </Card>
@@ -398,7 +292,7 @@ const Forecasting = () => {
             <CardContent className="space-y-4">
               <div className="space-y-2">
                 <label className="text-sm font-medium">Crop Type</label>
-                <Select defaultValue="rice" onValueChange={setSelectedCrop}>
+                <Select value={selectedCrop} onValueChange={setSelectedCrop}>
                   <SelectTrigger>
                     <SelectValue placeholder="Select crop" />
                   </SelectTrigger>
@@ -414,7 +308,7 @@ const Forecasting = () => {
 
               <div className="space-y-2">
                 <label className="text-sm font-medium">Variety</label>
-                <Select defaultValue="IR36" onValueChange={setSelectedVariety}>
+                <Select value={selectedVariety} onValueChange={setSelectedVariety}>
                   <SelectTrigger>
                     <SelectValue placeholder="Select variety" />
                   </SelectTrigger>
@@ -483,7 +377,7 @@ const Forecasting = () => {
 
               <div className="space-y-2">
                 <label className="text-sm font-medium">Area (hectares)</label>
-                <Select defaultValue="1" onValueChange={(value) => setArea(Number(value))}>
+                <Select defaultValue="1" value={area.toString()} onValueChange={(value) => setArea(Number(value))}>
                   <SelectTrigger>
                     <SelectValue placeholder="Select area" />
                   </SelectTrigger>
@@ -499,17 +393,14 @@ const Forecasting = () => {
 
               <div className="space-y-2">
                 <label className="text-sm font-medium">Soil Type</label>
-                <Select defaultValue="loam" onValueChange={setSoilType}>
+                <Select value={soilType} onValueChange={setSoilType}>
                   <SelectTrigger>
                     <SelectValue placeholder="Select soil type" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="clay">Clay</SelectItem>
-                    <SelectItem value="silt">Silt</SelectItem>
-                    <SelectItem value="loam">Loam</SelectItem>
-                    <SelectItem value="sandy">Sandy</SelectItem>
-                    <SelectItem value="clayLoam">Clay Loam</SelectItem>
-                    <SelectItem value="sandyLoam">Sandy Loam</SelectItem>
+                    {Object.keys(getSoilProfile(location).soilTypes).map((type) => (
+                      <SelectItem key={type} value={type}>{type.charAt(0).toUpperCase() + type.slice(1)}</SelectItem>
+                    ))}
                   </SelectContent>
                 </Select>
               </div>
@@ -536,12 +427,22 @@ const Forecasting = () => {
                       <span>Prediction Confidence:</span>
                       <span>{yieldResult.confidence}%</span>
                     </div>
+                    
+                    <h5 className="font-medium mt-3 mb-1">Key Factors:</h5>
+                    <div className="space-y-2">
+                      {yieldResult.factors.map((factor: any, index: number) => (
+                        <div key={index} className="text-xs">
+                          <span className="font-medium">{factor.name} ({factor.impact} Impact)</span>
+                          <p className="text-muted-foreground ml-1">{factor.recommendation}</p>
+                        </div>
+                      ))}
+                    </div>
                   </div>
                 </div>
               )}
 
               <div className="text-xs text-muted-foreground">
-                Our prediction model uses climate data, soil conditions, and 10+ years of historical yield data.
+                Our prediction model uses regional soil data, current weather patterns, and historical yield data from agricultural research institutions.
               </div>
             </CardContent>
           </Card>
@@ -550,11 +451,20 @@ const Forecasting = () => {
         <div className="mb-8">
           <Card>
             <CardHeader>
-              <CardTitle>Soil Health Analysis</CardTitle>
+              <CardTitle>Regional Soil Analysis</CardTitle>
             </CardHeader>
             <CardContent>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="space-y-4">
+                  <Alert className="bg-amber-50 border-amber-200">
+                    <Soil className="h-4 w-4 text-amber-600" />
+                    <AlertTitle className="text-amber-800">Regional Soil Profile</AlertTitle>
+                    <AlertDescription className="text-amber-700">
+                      {getSoilProfile(location).soilTypes[soilType]?.description || 
+                       "Typical soil profile for agricultural use in this region."}
+                    </AlertDescription>
+                  </Alert>
+                  
                   <div>
                     <label className="text-sm font-medium">Soil pH</label>
                     <div className="flex items-center gap-4">
@@ -613,16 +523,19 @@ const Forecasting = () => {
                 <div>
                   {!showSoilHealthReport ? (
                     <div className="flex flex-col items-center justify-center h-full gap-4">
+                      <div className="flex items-center justify-center h-16 w-16 rounded-full bg-amber-100">
+                        <Soil className="h-8 w-8 text-amber-600" />
+                      </div>
                       <p className="text-center text-muted-foreground">
-                        Enter your soil test results to get a detailed soil health assessment and crop recommendations.
+                        Soil data is preloaded based on regional analysis. You can adjust values based on your specific field test results.
                       </p>
                       <Button onClick={() => setShowSoilHealthReport(true)}>
-                        Generate Soil Health Report
+                        View Soil Health Analysis
                       </Button>
                     </div>
                   ) : (
                     <div className="space-y-4">
-                      <h4 className="font-medium">Soil Health Report</h4>
+                      <h4 className="font-medium">Soil Health Analysis</h4>
                       {(() => {
                         const soilHealth = analyzeSoilHealth(phValue, nitrogenValue, phosphorusValue, potassiumValue);
                         return (
@@ -648,7 +561,7 @@ const Forecasting = () => {
                           </div>
                         );
                       })()}
-                      <Button className="w-full mt-4" onClick={getCropSuggestions}>
+                      <Button className="w-full mt-4" onClick={updateCropRecommendations}>
                         Update Crop Recommendations
                       </Button>
                     </div>
@@ -669,7 +582,7 @@ const Forecasting = () => {
           <TabsContent value="recommendations" className="space-y-4">
             <Card>
               <CardHeader>
-                <CardTitle>Recommended Crops for Your Soil & Climate</CardTitle>
+                <CardTitle>Recommended Crops for {location}</CardTitle>
               </CardHeader>
               <CardContent>
                 {!cropRecommendations ? (
@@ -697,7 +610,11 @@ const Forecasting = () => {
                                 <span className="font-medium">{crop.yieldEstimate}</span>
                               </div>
                               <div className="flex justify-between">
-                                <span>Water Requirement:</span>
+                                <span>Growing Period:</span>
+                                <span>{crop.growingPeriod}</span>
+                              </div>
+                              <div className="flex justify-between">
+                                <span>Water Need:</span>
                                 <span>{crop.waterRequirement}</span>
                               </div>
                               <div className="flex justify-between">
@@ -706,12 +623,23 @@ const Forecasting = () => {
                               </div>
                             </div>
                             
+                            {crop.challenges && crop.challenges.length > 0 && (
+                              <div className="mt-2">
+                                <h5 className="text-xs font-medium mb-1">Potential Challenges:</h5>
+                                <ul className="text-xs text-muted-foreground">
+                                  {crop.challenges.map((challenge: string, idx: number) => (
+                                    <li key={idx} className="mb-1">• {challenge}</li>
+                                  ))}
+                                </ul>
+                              </div>
+                            )}
+                            
                             {index === 0 && (
                               <Alert className="mt-2 bg-green-50 border-green-200">
-                                <Info className="h-4 w-4 text-green-600" />
+                                <Wheat className="h-4 w-4 text-green-600" />
                                 <AlertTitle className="text-green-800">Best Match</AlertTitle>
                                 <AlertDescription className="text-green-700 text-xs">
-                                  This crop is highly compatible with your soil conditions and the current climate forecast.
+                                  Based on your region's soil profile and current seasonal conditions
                                 </AlertDescription>
                               </Alert>
                             )}
@@ -724,7 +652,7 @@ const Forecasting = () => {
                       <Info className="h-4 w-4" />
                       <AlertTitle>Scientific Recommendation</AlertTitle>
                       <AlertDescription>
-                        Our recommendations are based on soil parameters, climate forecasts, and 10+ years of crop performance data in your region.
+                        Our recommendations are based on soil parameters, climate forecasts, and regional agricultural data from research institutions.
                       </AlertDescription>
                     </Alert>
                   </div>
@@ -736,19 +664,19 @@ const Forecasting = () => {
           <TabsContent value="climate" className="space-y-4">
             <Card>
               <CardHeader>
-                <CardTitle>6-Month Climate Forecast</CardTitle>
+                <CardTitle>12-Month Climate Forecast</CardTitle>
               </CardHeader>
               <CardContent>
                 {isLoadingLongTerm ? (
                   <div className="flex justify-center items-center h-40">
                     <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-agri-primary"></div>
                   </div>
-                ) : longTermForecast ? (
+                ) : longTermData ? (
                   <div className="space-y-6">
                     <div className="h-80">
                       <ResponsiveContainer width="100%" height="100%">
                         <AreaChart
-                          data={longTermForecast}
+                          data={longTermData}
                           margin={{ top: 10, right: 30, left: 0, bottom: 0 }}
                         >
                           <CartesianGrid strokeDasharray="3 3" />
@@ -767,14 +695,14 @@ const Forecasting = () => {
                       <div className="space-y-2">
                         <h4 className="font-medium">Rainfall Pattern</h4>
                         <p className="text-sm text-muted-foreground">
-                          Expected to be {Math.random() > 0.5 ? "above" : "below"} normal in the coming monsoon season. 
-                          {Math.random() > 0.7 ? " Potential for heavy rainfall events in July-August." : ""}
+                          Expected to follow normal seasonal patterns with peak rainfall during monsoon months (June-September). 
+                          Prepare water management strategies accordingly.
                         </p>
                         
                         <h4 className="font-medium mt-4">Temperature Trend</h4>
                         <p className="text-sm text-muted-foreground">
-                          Temperatures are predicted to remain {Math.random() > 0.5 ? "1-2°C above" : "within"} the seasonal normal range.
-                          {Math.random() > 0.6 ? " Heat stress is a moderate risk for summer crops." : ""}
+                          Temperatures are expected to remain within normal ranges for {location} with some potential for higher than average
+                          temperatures during summer months.
                         </p>
                       </div>
                       
@@ -783,25 +711,25 @@ const Forecasting = () => {
                         <ul className="space-y-2 text-sm">
                           <li className="flex gap-2">
                             <span className="text-amber-500">●</span>
-                            <span>Prepare for {Math.random() > 0.5 ? "potential water logging" : "irrigation requirements"} during critical growth stages.</span>
+                            <span>Plan crop cycles to maximize rainfall utilization and avoid harvesting during peak monsoon.</span>
                           </li>
                           <li className="flex gap-2">
                             <span className="text-amber-500">●</span>
-                            <span>Consider short-duration varieties if planting is delayed due to irregular monsoon onset.</span>
+                            <span>Consider water conservation techniques during drier months (November-May).</span>
                           </li>
                           <li className="flex gap-2">
                             <span className="text-amber-500">●</span>
-                            <span>Plan for pest management as {Math.random() > 0.5 ? "high humidity" : "temperature fluctuations"} may increase pest pressure.</span>
+                            <span>Monitor disease pressure which may increase during periods of high humidity.</span>
                           </li>
                         </ul>
                       </div>
                     </div>
                     
                     <Alert className="bg-blue-50 border-blue-200">
-                      <Info className="h-4 w-4 text-blue-600" />
+                      <Umbrella className="h-4 w-4 text-blue-600" />
                       <AlertTitle className="text-blue-800">Climate Adaptation Strategies</AlertTitle>
                       <AlertDescription className="text-blue-700">
-                        Consider implementing water harvesting, crop diversification, and adopting climate-resilient varieties to mitigate climate risks.
+                        Consider implementing rainwater harvesting, crop diversification, and adopting climate-resilient varieties to mitigate climate risks.
                       </AlertDescription>
                     </Alert>
                   </div>
@@ -853,7 +781,11 @@ const Forecasting = () => {
                                 <span className="font-medium">{crop.yieldEstimate}</span>
                               </div>
                               <div className="flex justify-between">
-                                <span>Water Requirement:</span>
+                                <span>Growing Period:</span>
+                                <span>{crop.growingPeriod}</span>
+                              </div>
+                              <div className="flex justify-between">
+                                <span>Water Need:</span>
                                 <span>{crop.waterRequirement}</span>
                               </div>
                               <div className="flex justify-between">
@@ -862,13 +794,16 @@ const Forecasting = () => {
                               </div>
                             </div>
                             
-                            <div className="text-xs text-muted-foreground mt-2">
-                              {crop.crop === "Sesame" ? 
-                                "Drought-tolerant oilseed crop with good market potential." :
-                                crop.crop === "Moong Bean" ?
-                                "Short duration pulse crop that improves soil nitrogen." :
-                                "High-value crop with moderate water requirements."}
-                            </div>
+                            {crop.challenges && crop.challenges.length > 0 && (
+                              <div className="mt-2">
+                                <h5 className="text-xs font-medium mb-1">Potential Challenges:</h5>
+                                <ul className="text-xs text-muted-foreground">
+                                  {crop.challenges.map((challenge: string, idx: number) => (
+                                    <li key={idx} className="mb-1">• {challenge}</li>
+                                  ))}
+                                </ul>
+                              </div>
+                            )}
                           </CardContent>
                         </Card>
                       ))}
@@ -900,10 +835,14 @@ const Forecasting = () => {
                     </div>
                     
                     <Alert className="bg-amber-50 border-amber-200">
-                      <Info className="h-4 w-4 text-amber-600" />
+                      <Tractor className="h-4 w-4 text-amber-600" />
                       <AlertTitle className="text-amber-800">Intercropping Opportunity</AlertTitle>
                       <AlertDescription className="text-amber-700">
-                        Consider intercropping {cropRecommendations.primary[0]?.crop} with {cropRecommendations.alternatives[0]?.crop} for optimal land use and reduced pest pressure.
+                        {cropRecommendations.primary[0]?.crop && cropRecommendations.alternatives[0]?.crop ? (
+                          <>Consider intercropping {cropRecommendations.primary[0].crop} with {cropRecommendations.alternatives[0].crop} for optimal land use and reduced pest pressure.</>
+                        ) : (
+                          <>Intercropping compatible crops can improve land use efficiency and natural pest management.</>
+                        )}
                       </AlertDescription>
                     </Alert>
                   </div>
