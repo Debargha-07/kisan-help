@@ -100,12 +100,7 @@ async function fetchCropPriceData(crop: string) {
 }
 
 const crops = [
-  { img: "/photo-1465146344425-f00d5f5c8f07", label: "Marigold", variety: "Flower Crop" },
-  { img: "/photo-1493962853295-0fd70327578a", label: "Bullock", variety: "Cattle on farm" },
-  { img: "/photo-1506744038136-46273834b3fb", label: "Lakeview", variety: "Rich Water Resources" },
-  { img: "/photo-1466721591366-2d5fba72006d", label: "Antelope", variety: "Sustainable Land" },
-  { img: "/photo-1518495973542-4542c06a5843", label: "Sunbeam", variety: "Natural Climate" },
-  { img: "/photo-1472396961693-142e6e269027", label: "Deer Fields", variety: "Biodiversity" },
+  { img: "/farmers-working.jpg", label: "Farmers at Work", variety: "Sustainable Farming" }
 ];
 
 export default function Index() {
@@ -147,15 +142,12 @@ export default function Index() {
               <Link to="/forecasting">Go to Advanced Forecasting</Link>
             </Button>
           </div>
-          <div className="flex-1 grid grid-cols-3 gap-3">
-            {crops.map((c, idx) => (
-              <div key={idx} className="rounded-xl shadow hover-scale overflow-hidden">
-                <img src={c.img} alt={c.label} className="object-cover w-full h-28" />
-                <div className="bg-white bg-opacity-80 p-1 text-center">
-                  <span className="text-xs font-medium">{c.label}</span>
-                </div>
-              </div>
-            ))}
+          <div className="flex-1 flex justify-center items-center">
+            <img
+              src="/farmers-working.jpg"
+              alt="Farmers Working in Field"
+              className="object-cover w-full max-w-md h-44 rounded-xl shadow"
+            />
           </div>
         </div>
       </section>

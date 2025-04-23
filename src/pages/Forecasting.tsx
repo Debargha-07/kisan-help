@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import Layout from "@/components/layout/Layout";
 import { Button } from "@/components/ui/button";
@@ -18,7 +17,6 @@ import { getSoilProfile, getPredominantSoilType, getTypicalSoilParameters } from
 import { getWeatherForecast, getSeasonalDescription, longTermForecast } from "@/data/weatherData";
 import { getCropRecommendations, getCurrentSeason, getCropChallenges } from "@/data/cropData";
 
-// Soil health analysis function
 const analyzeSoilHealth = (ph: number, nitrogen: number, phosphorus: number, potassium: number) => {
   return {
     "pH": {
@@ -79,49 +77,37 @@ const calculateSoilImpact = (soilType: string, region: string, ph: number, nitro
   baseYield *= (phosphorus > 15) ? 1.03 : 0.98;
   baseYield *= (potassium > 210) ? 1.03 : 0.97;
 
-  // Add region-specific factors
   if (region === "Punjab") {
-    baseYield *= 1.15; // Punjab has highly productive agriculture
+    baseYield *= 1.15;
   } else if (region === "Maharashtra") {
-    baseYield *= 0.92; // Challenges with drought in many areas
+    baseYield *= 0.92;
   } else if (region === "Karnataka") {
-    baseYield *= 0.97; // Varied conditions
+    baseYield *= 0.97;
   } else if (region === "Uttar Pradesh") {
-    baseYield *= 1.05; // Good alluvial soil in many parts
+    baseYield *= 1.05;
   }
 
   return baseYield;
 };
 
 const calculateFixedYield = (crop: string, variety: string, area: number, soilType: string, region: string, ph: number, nitrogen: number, phosphorus: number, potassium: number) => {
-  // Base yields for different crops and varieties (quintals per hectare)
   const cropYields: Record<string, number> = {
     rice: 50, wheat: 45, maize: 38, groundnut: 19, soybean: 16,
-    // Rice varieties
     IR36: 55, MTU7029: 53, BPT5204: 52, 
-    // Wheat varieties
     HD2967: 48, PBW550: 46, DBW17: 45,
-    // Maize varieties
     DHM117: 41, DHM121: 43, "Vivek-27": 40,
-    // Groundnut varieties
     "TAG-24": 20, "GG-20": 18, "TG-37A": 17,
-    // Soybean varieties
     "JS-335": 17, "JS-9560": 16, "NRC-37": 15,
   };
   
-  // Get the base yield from the specific variety, or fall back to crop, or default to 25
   let base = cropYields[variety] ?? cropYields[crop.toLowerCase()] ?? 25;
   
-  // Calculate soil impact factor based on soil type, region and parameters
   let soilImpact = calculateSoilImpact(soilType, region, ph, nitrogen, phosphorus, potassium);
   
-  // Small random variation for realism (±3%)
   let randomFactor = 0.97 + Math.random() * 0.06;
   
-  // Calculate predicted yield (quintals)
   let predicted = base * soilImpact * area * randomFactor;
 
-  // Create factors for the recommendation
   const idealPhRange = (ph >= 6 && ph <= 7.5);
   const idealN = nitrogen > 300 && nitrogen < 400;
   const matched = (idealPhRange && idealN);
@@ -282,19 +268,18 @@ const Forecasting = () => {
             AI-powered predictions for crop yield, with soil and weather-based recommendations tailored to your region.
           </p>
         </div>
-
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
-          <Card className="col-span-1 order-2 lg:order-1">
+          <Card className="col-span-1 order-2 lg:order-1 max-w-md w-full mx-auto">
             <CardHeader className="pb-3">
               <div className="flex justify-between items-center">
                 <CardTitle>Weather Forecast</CardTitle>
                 <div className="flex items-center gap-2">
-                  <Select 
-                    defaultValue={location} 
+                  <Select
+                    defaultValue={location}
                     value={location}
                     onValueChange={setLocation}
                   >
-                    <SelectTrigger className="w-[168px]">
+                    <SelectTrigger className="w-[150px]">
                       <SelectValue placeholder="Select region" />
                     </SelectTrigger>
                     <SelectContent>
@@ -308,34 +293,42 @@ const Forecasting = () => {
                 </div>
               </div>
             </CardHeader>
-            <CardContent className="max-h-[320px] overflow-y-auto">
+            <CardContent className="max-h-[440px] overflow-y-auto pr-2">
               {isLoadingWeather ? (
                 <div className="flex justify-center items-center h-40">
                   <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-agri-primary"></div>
                 </div>
               ) : weatherForecast ? (
-                <div className="grid grid-cols-7 gap-2">
+                <div className="flex flex-col gap-2">
                   {weatherForecast.map((day, index) => (
-                    <div key={index} className="flex flex-col items-center p-2 bg-muted/50 rounded-lg">
-                      <span className="font-medium text-sm">{day.day}</span>
-                      <div className="my-2">
-                        {day.icon === "sun" && <CloudSun className="h-8 w-8 text-yellow-500" />}
-                        {day.icon === "cloud-sun" && <CloudSun className="h-8 w-8 text-gray-500" />}
-                        {day.icon === "cloud-rain" && <Umbrella className="h-8 w-8 text-blue-500" />}
-                        {day.icon === "cloud-lightning" && <AlertCircle className="h-8 w-8 text-red-500" />}
-                        {day.icon === "cloud-drizzle" && <Droplets className="h-8 w-8 text-blue-400" />}
+                    <div key={index} className="flex items-center gap-4 bg-muted/50 rounded-lg p-3">
+                      <div>
+                        <span className="font-medium text-sm block w-16">{day.day}</span>
+                        <div className="mt-1">
+                          {day.icon === "sun" && <CloudSun className="h-7 w-7 text-yellow-500" />}
+                          {day.icon === "cloud-sun" && <CloudSun className="h-7 w-7 text-gray-500" />}
+                          {day.icon === "cloud-rain" && <Umbrella className="h-7 w-7 text-blue-500" />}
+                          {day.icon === "cloud-drizzle" && <Droplets className="h-7 w-7 text-blue-400" />}
+                        </div>
                       </div>
-                      <div className="flex items-center text-sm">
-                        <Thermometer className="h-3 w-3 mr-1 text-red-500" />
-                        <span>{day.temperature}°C</span>
+                      <div className="flex-1 flex flex-col gap-1">
+                        <div className="flex items-center text-sm">
+                          <Thermometer className="h-3 w-3 mr-1 text-red-500" />
+                          <span>{day.temperature}°C</span>
+                        </div>
+                        <div className="flex items-center text-sm">
+                          <Droplets className="h-3 w-3 mr-1 text-blue-500" />
+                          <span>{day.humidity}%</span>
+                        </div>
+                        <div>
+                          {day.rainfall > 0 && (
+                            <span className="text-xs text-blue-600">{day.rainfall}mm</span>
+                          )}
+                        </div>
+                        <div className="text-xs text-muted-foreground">
+                          {day.description}
+                        </div>
                       </div>
-                      <div className="flex items-center text-sm">
-                        <Droplets className="h-3 w-3 mr-1 text-blue-500" />
-                        <span>{day.humidity}%</span>
-                      </div>
-                      {day.rainfall > 0 && (
-                        <span className="text-xs text-blue-600 mt-1">{day.rainfall}mm</span>
-                      )}
                     </div>
                   ))}
                 </div>
@@ -348,19 +341,16 @@ const Forecasting = () => {
                   </AlertDescription>
                 </Alert>
               )}
-              
               <div className="mt-4 bg-muted/30 p-3 rounded-md">
                 <h4 className="font-medium mb-1">Seasonal Outlook</h4>
                 <p className="text-sm text-muted-foreground">{getSeasonalDescription(location)}</p>
               </div>
-              
               <div className="mt-2 text-xs text-muted-foreground">
                 <p>Weather data based on historical patterns for {location}. Last updated: {format(new Date(), "PPP")}</p>
               </div>
             </CardContent>
           </Card>
-
-          <Card className="col-span-2 order-1 lg:order-2">
+          <Card className="col-span-2 order-1 lg:order-2 w-full lg:max-w-4xl mx-auto">
             <CardHeader className="pb-2">
               <CardTitle>Yield Calculator</CardTitle>
             </CardHeader>
@@ -502,7 +492,6 @@ const Forecasting = () => {
                       <span>Prediction Confidence:</span>
                       <span>{yieldResult.confidence}%</span>
                     </div>
-                    
                     <h5 className="font-medium mt-3 mb-1">Key Factors:</h5>
                     <div className="space-y-2">
                       {yieldResult.factors.map((factor: any, index: number) => (
@@ -511,6 +500,13 @@ const Forecasting = () => {
                           <p className="text-muted-foreground ml-1">{factor.recommendation}</p>
                         </div>
                       ))}
+                    </div>
+                    <h5 className="font-medium mt-3 mb-1">Calculation Formula</h5>
+                    <div className="text-xs text-muted-foreground">
+                      <p>
+                        Yield = BaseCropYield × SoilImpact × Area × RandomFactor <br />
+                        SoilImpact depends on soil type, pH, nitrogen, phosphorus, potassium, and region.
+                      </p>
                     </div>
                   </div>
                 </div>
