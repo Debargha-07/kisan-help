@@ -1,0 +1,55 @@
+
+<?xml version="1.0" standalone="no"?>
+<svg width="900" height="720" xmlns="http://www.w3.org/2000/svg" font-family="Arial" font-size="16">
+  <rect x="20" y="20" width="205" height="82" rx="12" fill="#c2f0c2" stroke="#202" stroke-width="2"/>
+  <text x="36" y="56" font-weight="bold">User Inputs</text>
+  <text x="36" y="80">➔ Region, Crop, Soil, Area</text>
+
+  <!-- API Arrows -->
+  <line x1="225" y1="61" x2="320" y2="61" stroke="#555" stroke-width="2" marker-end="url(#arrow)"/>
+  <rect x="320" y="20" width="250" height="115" rx="14" fill="#C5E8FA" stroke="#1a3a5c" stroke-width="2"/>
+  <text x="340" y="60">Weather Data API (OpenWeatherMap)</text>
+  <text x="340" y="82">Soil Data API (SoilGrids)</text>
+  <text x="340" y="104">Crop Price: Supabase DB (AGMARKNET)</text>
+  <text x="340" y="126">Crop Data: Supabase DB</text>
+
+  <line x1="570" y1="77" x2="800" y2="77" stroke="#555" stroke-width="2" marker-end="url(#arrow)"/>
+  <rect x="800" y="40" width="85" height="75" rx="10" fill="#ffe3ba" stroke="#b96d0d" stroke-width="2"/>
+  <text x="810" y="70" font-size="15">Response:</text>
+  <text x="810" y="95" font-size="14">Weather/Crop/
+    Price</text>
+
+  <!-- Prediction Model block -->
+  <rect x="320" y="180" width="250" height="170" rx="14" fill="#f0d2dc" stroke="#90164e" stroke-width="2"/>
+  <text x="340" y="205" font-weight="bold">Yield Prediction Model</text>
+  <text x="340" y="230">Regression Equation:</text>
+  <text x="345" y="252" font-size="13">
+    Yield = BaseYield × SoilImpact × Area × SeasonalFactor
+  </text>
+  <text x="345" y="276" font-size="12">
+    SoilImpact = f(soil type, pH, N, P, K)
+  </text>
+  <text x="345" y="300" font-size="12">
+    Confidence = Input similarity%
+  </text>
+  <text x="345" y="324" font-size="13">Data: Last 2 Years (Kaggle, Gov sources)</text>
+
+  <!-- Connections to model -->
+  <line x1="445" y1="135" x2="445" y2="180" stroke="#555" stroke-width="2" marker-end="url(#arrow)"/>
+  <line x1="445" y1="350" x2="680" y2="350" stroke="#555" stroke-width="2" marker-end="url(#arrow)"/>
+  <rect x="680" y="315" width="200" height="75" rx="12" fill="#fff2c0" stroke="#af9403" stroke-width="2"/>
+  <text x="692" y="347" font-size="14">Prediction Results</text>
+  <text x="692" y="372" font-size="13">Yield, Confidence, Price, Advice</text>
+
+  <!-- Definitions -->
+  <text x="10" y="420" font-size="17" font-weight="bold">Legend/Notes:</text>
+  <text x="10" y="440" font-size="13">- APIs: All core data uses real APIs and DB—no local mocks</text>
+  <text x="10" y="460" font-size="13">- Formulas: Regression, scoring as shown in process</text>
+  <text x="10" y="480" font-size="13">- Reference Datasets: 2 years' worth (Kaggle/Gov/Scraping)</text>
+
+  <defs>
+    <marker id="arrow" markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto" markerUnits="strokeWidth">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#222"/>
+    </marker>
+  </defs>
+</svg>
