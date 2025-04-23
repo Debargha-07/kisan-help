@@ -265,7 +265,7 @@ const Prices = () => {
                   title="Price Forecast"
                   price={forecastPrice}
                   unit="per quintal"
-                  subtitle="Expected price in next 7 days"
+                  // Removed: subtitle="Expected price in next 7 days"
                 />
                 <Card>
                   <CardHeader className="pb-2">

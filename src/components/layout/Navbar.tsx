@@ -1,12 +1,20 @@
 
 import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Menu, User, Bell, LogOut } from "lucide-react";
+import { Menu, User, Bell, LogOut, Home, ChevronDown } from "lucide-react";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { useState } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/components/ui/use-toast";
+
+// Navbar links config
+const navigationLinks = [
+  { title: "Home", href: "/" },
+  { title: "Forecasting", href: "/forecasting" },
+  { title: "Marketplace", href: "/marketplace" },
+  { title: "Schemes", href: "/schemes" }
+];
 
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -32,38 +40,49 @@ const Navbar = () => {
   };
 
   return (
-    <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-      <div className="container flex h-16 items-center">
-        <Link to="/" className="flex items-center gap-2 font-bold text-xl sm:text-2xl text-agri-primary">
+    <header className="sticky top-0 z-50 w-full bg-white/80 dark:bg-background/80 shadow backdrop-blur supports-[backdrop-filter]:bg-background/60 transition">
+      <div className="container mx-auto flex h-16 items-center justify-between px-2">
+        {/* Logo and Brand */}
+        <Link to="/" className="flex items-center gap-3 font-bold text-xl sm:text-2xl text-agri-primary hover:opacity-90 transition-opacity">
           <img src="/logo.svg" alt="Kisan Connect" className="h-8 w-8" />
-          <span>Kisan Connect</span>
+          <span className="tracking-tight">Kisan Connect</span>
         </Link>
 
-        {/* Desktop Navigation */}
-        <nav className="hidden md:flex mx-6 items-center space-x-4 lg:space-x-6 flex-1">
-          <Link to="/" className="text-sm font-medium transition-colors hover:text-agri-accent">
-            Home
-          </Link>
-          <Link to="/forecasting" className="text-sm font-medium transition-colors hover:text-agri-accent">
-            Forecasting
-          </Link>
+        {/* Desktop Menu */}
+        <nav className="hidden md:flex items-center space-x-6">
+          {navigationLinks.map(link => (
+            <Link
+              key={link.title}
+              to={link.href}
+              className="relative text-[1rem] font-medium text-foreground/90 transition-colors hover:text-agri-primary px-2 py-1 rounded hover-scale"
+            >
+              {link.title}
+              {link.title === "Marketplace" && (
+                <span className="ml-1">
+                  <ChevronDown className="inline-block h-3 w-3 -mt-1 text-muted-foreground" />
+                </span>
+              )}
+            </Link>
+          ))}
         </nav>
 
-        <div className="hidden md:flex items-center gap-4 ml-auto">
+        {/* User Actions */}
+        <div className="hidden md:flex items-center gap-2 ml-auto">
           {user ? (
             <>
-              <Button variant="ghost" size="icon" aria-label="Notifications">
-                <Bell className="h-5 w-5" />
+              <Button variant="ghost" size="icon" aria-label="Notifications" className="hover:bg-accent">
+                <Bell className="h-5 w-5 text-agri-primary" />
               </Button>
               <Button 
                 variant="ghost" 
                 size="icon" 
                 aria-label="User Account"
                 onClick={() => navigate('/profile')}
+                className="hover:bg-accent"
               >
-                <User className="h-5 w-5" />
+                <User className="h-5 w-5 text-agri-primary" />
               </Button>
-              <Button variant="default" className="bg-agri-primary hover:bg-agri-dark" onClick={handleLogout}>
+              <Button variant="default" className="bg-agri-primary hover:bg-agri-dark px-4 py-1" onClick={handleLogout}>
                 <LogOut className="h-4 w-4 mr-2" />
                 Logout
               </Button>
@@ -71,7 +90,7 @@ const Navbar = () => {
           ) : (
             <Button 
               variant="default" 
-              className="bg-agri-primary hover:bg-agri-dark"
+              className="bg-agri-primary hover:bg-agri-dark px-4 py-1"
               onClick={() => navigate('/auth')}
             >
               Login / Register
@@ -79,40 +98,40 @@ const Navbar = () => {
           )}
         </div>
 
-        {/* Mobile Navigation */}
+        {/* Mobile Menu Button and Drawer */}
         <Sheet open={isOpen} onOpenChange={setIsOpen}>
           <SheetTrigger asChild className="md:hidden ml-auto">
-            <Button variant="ghost" size="icon" aria-label="Menu">
-              <Menu className="h-5 w-5" />
+            <Button variant="outline" size="icon" className="border-agri-primary shadow-sm">
+              <Menu className="h-5 w-5 text-agri-primary" />
+              <span className="sr-only">Toggle Menu</span>
             </Button>
           </SheetTrigger>
-          <SheetContent side="left" className="bg-agri-light border-agri-primary">
-            <div className="flex flex-col gap-8 py-6">
-              <div className="flex items-center gap-2 font-bold text-xl text-agri-primary">
-                <img src="/logo.svg" alt="Kisan Connect" className="h-6 w-6" />
+          <SheetContent side="right" className="w-[240px] sm:w-[300px] bg-white/95 dark:bg-background/90 shadow-md">
+            <div className="flex flex-col gap-6 pt-5">
+              <div className="flex items-center gap-2 text-xl font-bold text-agri-primary mb-2">
+                <img src="/logo.svg" alt="Kisan Connect" className="h-7 w-7" />
                 <span>Kisan Connect</span>
               </div>
-              <nav className="flex flex-col gap-4">
-                <Link to="/" className="text-base font-medium" onClick={closeSheet}>
-                  Home
-                </Link>
-                <Link to="/forecasting" className="text-base font-medium" onClick={closeSheet}>
-                  Forecasting
-                </Link>
+              <nav className="flex flex-col gap-y-4 text-base font-medium">
+                {navigationLinks.map(link => (
+                  <Link
+                    key={link.title}
+                    to={link.href}
+                    onClick={() => setIsOpen(false)}
+                    className="px-2 py-1 rounded hover:bg-agri-light transition-colors text-foreground"
+                  >
+                    {link.title}
+                  </Link>
+                ))}
               </nav>
-              <div className="flex flex-col gap-2">
+              <div className="flex flex-col gap-2 mt-4">
                 {user ? (
                   <>
                     <Button 
                       variant="outline" 
-                      className="w-full justify-start" 
-                      onClick={() => {
-                        navigate('/profile');
-                        closeSheet();
-                      }}
-                    >
-                      <User className="mr-2 h-4 w-4" />
-                      Profile
+                      className="w-full justify-start"
+                      onClick={() => { navigate('/profile'); closeSheet(); }}>
+                      <User className="mr-2 h-5 w-5" /> Profile
                     </Button>
                     <Button 
                       variant="default" 
@@ -120,21 +139,18 @@ const Navbar = () => {
                       onClick={() => {
                         handleLogout();
                         closeSheet();
-                      }}
-                    >
-                      <LogOut className="mr-2 h-4 w-4" />
-                      Logout
+                      }}>
+                      <LogOut className="mr-2 h-5 w-5" /> Logout
                     </Button>
                   </>
                 ) : (
                   <Button 
                     variant="default" 
-                    className="w-full bg-agri-primary hover:bg-agri-dark" 
+                    className="w-full bg-agri-primary hover:bg-agri-dark"
                     onClick={() => {
                       navigate('/auth');
                       closeSheet();
-                    }}
-                  >
+                    }}>
                     Login / Register
                   </Button>
                 )}
