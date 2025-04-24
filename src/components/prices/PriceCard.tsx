@@ -5,7 +5,7 @@ import { ArrowUp, ArrowDown } from "lucide-react";
 
 interface PriceCardProps {
   title: string;
-  price: number;
+  price: number | undefined;
   unit: string;
   change?: number;
   trend?: 'up' | 'down';
@@ -20,7 +20,9 @@ export const PriceCard: React.FC<PriceCardProps> = ({ title, price, unit, change
       <CardContent>
         <div className="flex flex-col">
           <div className="flex items-baseline">
-            <span className="text-3xl font-bold">₹{price.toLocaleString()}</span>
+            <span className="text-3xl font-bold">
+              {price !== undefined ? `₹${price.toLocaleString()}` : "₹--"}
+            </span>
             <span className="ml-1 text-muted-foreground text-sm">{unit}</span>
           </div>
           {change !== undefined && trend && (

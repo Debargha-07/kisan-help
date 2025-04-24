@@ -41,7 +41,7 @@ export const RegionalPrices: React.FC<RegionalPricesProps> = ({ regions, current
             return (
               <TableRow key={region} className="hover:bg-agri-light/20">
                 <TableCell className="font-medium">{region}</TableCell>
-                <TableCell className="text-right">₹{price.toLocaleString()}</TableCell>
+                <TableCell className="text-right">₹{price !== undefined ? price.toLocaleString() : "--"}</TableCell>
                 <TableCell className="text-right">
                   <div className="flex items-center justify-end">
                     {difference > 0 ? (
@@ -71,4 +71,3 @@ export const RegionalPrices: React.FC<RegionalPricesProps> = ({ regions, current
     </div>
   );
 };
-
