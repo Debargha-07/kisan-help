@@ -244,11 +244,18 @@ export async function fetchSoilData(location, coordinates, soilType) {
             }
         };
         
+        // Ensure we have a valid location parameter
+        if (!location || typeof location !== 'string') {
+            console.error("Invalid location parameter:", location);
+            location = "West Bengal"; // Default fallback
+        }
+        
         // Try to get the soil profile based on location
         const soilProfile = soilProfiles[location] || soilProfiles["West Bengal"]; // Default to West Bengal if location not found
         
         // If soilType is not provided or not found in the profile, use the predominant type
         if (!soilType || !soilProfile.soilTypes[soilType]) {
+            console.log(`Soil type ${soilType} not found, using predominant type ${soilProfile.predominantType}`);
             soilType = soilProfile.predominantType;
         }
         
@@ -260,7 +267,7 @@ export async function fetchSoilData(location, coordinates, soilType) {
             throw new Error(`Soil type data not found for ${soilType}`);
         }
         
-        // Return the soil data
+        // Return the soil data with the specific soil type properties
         return {
             location,
             soil_type: soilType,

@@ -10,6 +10,12 @@ export async function fetchWeatherForecast(city) {
     try {
         console.log(`Fetching weather data for: ${city}`);
         
+        // Make sure we have a valid location parameter
+        if (!city || typeof city !== 'string') {
+            console.error("Invalid city parameter:", city);
+            throw new Error("Invalid location parameter");
+        }
+        
         const formattedCity = encodeURIComponent(city);
         const url = `https://api.openweathermap.org/data/2.5/forecast?q=${formattedCity}&appid=${API_KEY}&units=metric`;
         
@@ -21,6 +27,7 @@ export async function fetchWeatherForecast(city) {
         }
         
         const data = await response.json();
+        console.log("Weather API response:", data);
         
         // Process data to match expected format in the Forecasting component
         return processWeatherData(data, city);
@@ -47,12 +54,14 @@ function processWeatherData(data, city) {
     
     // Process forecast data
     data.list.forEach(item => {
+        if (!item || !item.dt) return; // Skip invalid items
+        
         const date = new Date(item.dt * 1000);
         const dayName = days[date.getDay()];
         const dayKey = date.toLocaleDateString();
         
         // Take one reading per day
-        if (!dayMap.has(dayKey)) {
+        if (!dayMap.has(dayKey) && item.main && item.weather && item.weather.length > 0) {
             dayMap.set(dayKey, {
                 dayName,
                 display: {
@@ -107,7 +116,7 @@ function getIconType(iconCode) {
 
 // Generate mock weather data for fallback when API fails
 function generateMockWeatherResponse(city) {
-    console.log("Falling back to mock weather data");
+    console.log("Falling back to mock weather data for", city);
     const now = new Date();
     const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
     const weatherTypes = ["sun", "cloud-sun", "cloud-rain", "cloud-drizzle"];
@@ -132,6 +141,7 @@ function generateMockWeatherResponse(city) {
         });
     }
     
+    console.log("Generated mock weather data:", result);
     return result;
 }
 

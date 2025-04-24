@@ -11,6 +11,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useQuery } from "@tanstack/react-query";
 import { toast } from "@/components/ui/use-toast";
+import { fetchCropPriceData } from "@/api/priceApi";
 
 type CropPriceData = {
   current_price: number;
@@ -24,16 +25,16 @@ type CropPriceData = {
 const FALLBACK_PRICES = {
   rice: {
     regions: {
-      "Kolkata": 2250,
-      "Howrah": 2230,
-      "Siliguri": 2180,
-      "Durgapur": 2210,
-      "Asansol": 2190,
-      "Bardhaman": 2240,
-      "Malda": 2170,
-      "Baharampur": 2200,
-      "Jalpaiguri": 2160,
-      "Kharagpur": 2220
+      "West Bengal": 2210,
+      "Punjab": 2280,
+      "Tamil Nadu": 2190,
+      "Bihar": 2150,
+      "Uttar Pradesh": 2230,
+      "Andhra Pradesh": 2200,
+      "Karnataka": 2170,
+      "Rajasthan": 2160,
+      "Gujarat": 2190,
+      "Madhya Pradesh": 2180
     },
     current: 2205,
     previous: 2150,
@@ -41,16 +42,16 @@ const FALLBACK_PRICES = {
   },
   wheat: {
     regions: {
-      "Kolkata": 1850,
-      "Howrah": 1830,
-      "Siliguri": 1790,
-      "Durgapur": 1810,
-      "Asansol": 1800,
-      "Bardhaman": 1840,
-      "Malda": 1780,
-      "Baharampur": 1820,
-      "Jalpaiguri": 1770,
-      "Kharagpur": 1830
+      "West Bengal": 1810,
+      "Punjab": 1840,
+      "Tamil Nadu": 1790,
+      "Bihar": 1800,
+      "Uttar Pradesh": 1820,
+      "Andhra Pradesh": 1800,
+      "Karnataka": 1830,
+      "Rajasthan": 1810,
+      "Gujarat": 1820,
+      "Madhya Pradesh": 1800
     },
     current: 1812,
     previous: 1780,
@@ -58,16 +59,16 @@ const FALLBACK_PRICES = {
   },
   potato: {
     regions: {
-      "Kolkata": 1530,
-      "Howrah": 1520,
-      "Siliguri": 1480,
-      "Durgapur": 1510,
-      "Asansol": 1500,
-      "Bardhaman": 1540,
-      "Malda": 1470,
-      "Baharampur": 1510,
-      "Jalpaiguri": 1460,
-      "Kharagpur": 1520
+      "West Bengal": 1500,
+      "Punjab": 1540,
+      "Tamil Nadu": 1470,
+      "Bihar": 1460,
+      "Uttar Pradesh": 1510,
+      "Andhra Pradesh": 1480,
+      "Karnataka": 1460,
+      "Rajasthan": 1450,
+      "Gujarat": 1490,
+      "Madhya Pradesh": 1480
     },
     current: 1504,
     previous: 1460,
@@ -75,16 +76,16 @@ const FALLBACK_PRICES = {
   },
   onion: {
     regions: {
-      "Kolkata": 2580,
-      "Howrah": 2560,
-      "Siliguri": 2510,
-      "Durgapur": 2540,
-      "Asansol": 2530,
-      "Bardhaman": 2590,
-      "Malda": 2500,
-      "Baharampur": 2550,
-      "Jalpaiguri": 2490,
-      "Kharagpur": 2570
+      "West Bengal": 2550,
+      "Punjab": 2600,
+      "Tamil Nadu": 2510,
+      "Bihar": 2520,
+      "Uttar Pradesh": 2570,
+      "Andhra Pradesh": 2530,
+      "Karnataka": 2520,
+      "Rajasthan": 2500,
+      "Gujarat": 2560,
+      "Madhya Pradesh": 2530
     },
     current: 2542,
     previous: 2380,
@@ -120,42 +121,19 @@ const Prices = () => {
     return () => clearInterval(interval);
   }, []);
 
-  const { data: cropPrices, isLoading, error } = useQuery({
+  const { data: cropPriceData, isLoading, error } = useQuery({
     queryKey: ['cropPrices', selectedCrop],
     queryFn: async () => {
       try {
-        const { data, error } = await supabase
-          .from('crop_prices')
-          .select('*')
-          .eq('crop_name', selectedCrop);
-
-        if (error) throw error;
-        
-        // If no data is returned, update prices and try again
-        if (!data || data.length === 0) {
-          await supabase.functions.invoke('update-crop-prices');
-          
-          // Try fetching again after update
-          const retryResponse = await supabase
-            .from('crop_prices')
-            .select('*')
-            .eq('crop_name', selectedCrop);
-            
-          if (retryResponse.error) throw retryResponse.error;
-          
-          // If still no data, use fallback data
-          if (!retryResponse.data || retryResponse.data.length === 0) {
-            return [];
-          }
-          
-          return retryResponse.data;
-        }
-        
-        return data;
+        return await fetchCropPriceData(selectedCrop);
       } catch (error: any) {
         console.error("Error loading crop prices:", error.message);
-        // Don't show error toast here as we'll fallback to static data
-        return [];
+        toast({
+          title: "Error loading prices",
+          description: "Using fallback price data instead.",
+          variant: "destructive"
+        });
+        throw error;
       }
     },
     retry: 2,
@@ -165,7 +143,8 @@ const Prices = () => {
   // Calculate average prices and trends
   const calculateAverages = () => {
     // If no data from API, use fallback data
-    if (!cropPrices || cropPrices.length === 0) {
+    if (!cropPriceData) {
+      console.log("Using fallback price data for", selectedCrop);
       const fallbackData = FALLBACK_PRICES[selectedCrop as keyof typeof FALLBACK_PRICES];
       
       return {
@@ -177,43 +156,24 @@ const Prices = () => {
       };
     }
 
-    // Ensure values are numbers to avoid NaN
-    const validPrices = cropPrices.map(price => ({
-      ...price,
-      current_price: Number(price.current_price) || 0,
-      previous_price: Number(price.previous_price) || 0,
-      forecast_price: Number(price.forecast_price) || 0
-    }));
-
-    const currentPrice = Number((validPrices.reduce((sum, price) => 
-      sum + price.current_price, 0) / validPrices.length).toFixed(2));
-    
-    const previousPrice = Number((validPrices.reduce((sum, price) => 
-      sum + price.previous_price, 0) / validPrices.length).toFixed(2));
-    
-    const forecastPrice = Number((validPrices.reduce((sum, price) => 
-      sum + price.forecast_price, 0) / validPrices.length).toFixed(2));
-
-    // Calculate percentage change safely
-    const priceChange = previousPrice ? 
-      Number((((currentPrice - previousPrice) / previousPrice) * 100).toFixed(2)) : 0;
-    
-    // Fixed the type error by ensuring trend is always 'up' or 'down'
-    const trend: 'up' | 'down' = priceChange >= 0 ? 'up' : 'down';
-
-    return { currentPrice, previousPrice, forecastPrice, priceChange, trend };
+    return {
+      currentPrice: cropPriceData.currentPrice,
+      previousPrice: cropPriceData.previousPrice,
+      forecastPrice: cropPriceData.currentPrice * 1.03, // Simple forecast estimate
+      priceChange: cropPriceData.priceChange,
+      trend: cropPriceData.trend as 'up' | 'down'
+    };
   };
 
   // Transform data for regional comparison
   const getRegionData = () => {
-    if (!cropPrices || cropPrices.length === 0) {
+    if (!cropPriceData || !cropPriceData.regions) {
+      console.log("Using fallback region data for", selectedCrop);
       // Use fallback data if no API data
       return FALLBACK_PRICES[selectedCrop as keyof typeof FALLBACK_PRICES].regions;
     }
     
-    return Object.fromEntries(
-      cropPrices.map(price => [price.region, Number(price.current_price) || 0])
-    );
+    return cropPriceData.regions;
   };
 
   const { currentPrice, previousPrice, forecastPrice, priceChange, trend } = calculateAverages();
@@ -227,7 +187,7 @@ const Prices = () => {
             Crop Price Trends
           </h1>
           <p className="text-muted-foreground">
-            Current market prices and forecasts for major crops across West Bengal
+            Current market prices and forecasts for major crops across India
           </p>
         </div>
 
@@ -235,7 +195,7 @@ const Prices = () => {
           <AlertCircle className="h-4 w-4 text-agri-primary" />
           <AlertTitle>Price Information</AlertTitle>
           <AlertDescription>
-            Prices are updated daily from major agricultural markets (mandis) in West Bengal. Use this information to make informed decisions about when to sell your produce.
+            Prices are updated daily from major agricultural markets across different states of India. Use this information to make informed decisions about when to sell your produce.
           </AlertDescription>
         </Alert>
 
@@ -283,7 +243,7 @@ const Prices = () => {
               </div>
             )}
 
-            <h3 className="font-medium text-lg mt-6 mb-3">Regional Price Comparison</h3>
+            <h3 className="font-medium text-lg mt-6 mb-3">State-wise Price Comparison</h3>
             <RegionalPrices 
               regions={regions}
               currentPrice={currentPrice}
