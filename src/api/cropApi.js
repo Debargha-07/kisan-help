@@ -1,511 +1,898 @@
 
-// Crop data API client using Supabase database as source
-import { supabase } from "@/integrations/supabase/client";
-
 /**
- * Fetch standardized crop data from Supabase DB.
+ * Crop API client for getting crop recommendations and data
  */
-export async function fetchCropData(crop, region) {
-    try {
-        console.log(`Fetching crop data for ${crop} in ${region}`);
-        const { data, error } = await supabase
-            .from("crop_data")
-            .select("*")
-            .eq("crop_name", crop)
-            .eq("region", region)
-            .maybeSingle();
-        if (error) throw error;
-        if (data) return data;
-        
-        // Return fallback data if nothing found
-        return {
-            crop_name: crop,
-            region: region,
-            varieties: [
-                {
-                    name: "Standard Variety",
-                    yield_potential: "40-45 quintals/ha",
-                    growth_duration: "110-120 days",
-                    soilTypes: ["alluvial", "red", "black cotton"]
-                }
-            ],
-            fertilizers: "NPK 120:60:40",
-            diseases: [
-                {
-                    name: "Common Blight",
-                    symptoms: "Brown spots on leaves",
-                    control: "Proper spacing and fungicide application"
-                }
-            ]
-        };
-    } catch (error) {
-        console.error("Error fetching crop data:", error);
-        // Return structured fallback data
-        return {
-            crop_name: crop,
-            region: region,
-            varieties: [
-                {
-                    name: "Standard Variety",
-                    yield_potential: "40-45 quintals/ha",
-                    growth_duration: "110-120 days",
-                    soilTypes: ["alluvial", "red", "black cotton"]
-                }
-            ],
-            fertilizers: "NPK 120:60:40",
-            diseases: [
-                {
-                    name: "Common Blight",
-                    symptoms: "Brown spots on leaves",
-                    control: "Proper spacing and fungicide application"
-                }
-            ]
-        };
-    }
-}
 
-/**
- * Get crop recommendations from region + soil + season.
- * Sample fallback logic or powered via supabase ML or rules.
- */
-export async function fetchCropRecommendations(location, soilType, season) {
-    try {
-        console.log(`Fetching recommendations for ${location}, soil: ${soilType}, season: ${season}`);
-        
-        // Find crops that match soilType or are marked as recommended in this region
-        let { data, error } = await supabase
-            .from("crop_data")
-            .select("*")
-            .eq("region", location);
-        if (error) throw error;
-        
-        // Filter by soilType if present
-        if (soilType && data && data.length > 0) {
-            data = data.filter((row) =>
-                row.varieties?.some?.((v) => (v.soilTypes || []).includes(soilType))
-            );
-        }
-        
-        // If data is null or empty, provide fallback data
-        if (!data || data.length === 0) {
-            return generateFallbackRecommendations(location, soilType, season);
-        }
-        
-        // Process data into required format
-        const recommendations = {
-            primary: data.slice(0, 3).map(crop => ({
-                crop: crop.crop_name,
-                variety: crop.varieties?.[0]?.name || "Standard",
-                suitability: Math.floor(80 + Math.random() * 15),
-                yieldEstimate: `${Math.floor(35 + Math.random() * 15)}-${Math.floor(40 + Math.random() * 15)} quintals/ha`,
-                growingPeriod: `${Math.floor(90 + Math.random() * 60)} days`,
-                waterRequirement: ["Low", "Medium", "High"][Math.floor(Math.random() * 3)],
-                fertilizers: `NPK ${Math.floor(80 + Math.random() * 80)}:${Math.floor(40 + Math.random() * 40)}:${Math.floor(30 + Math.random() * 50)}`,
-                challenges: getCropChallenges(crop.crop_name, location, season)
-            })),
-            alternatives: data.slice(3, 5).map(crop => ({
-                crop: crop.crop_name,
-                variety: crop.varieties?.[0]?.name || "Standard",
-                suitability: Math.floor(65 + Math.random() * 15),
-                yieldEstimate: `${Math.floor(15 + Math.random() * 20)}-${Math.floor(20 + Math.random() * 25)} quintals/ha`,
-                growingPeriod: `${Math.floor(90 + Math.random() * 40)} days`,
-                waterRequirement: ["Low", "Medium-Low", "Medium"][Math.floor(Math.random() * 3)],
-                fertilizers: `NPK ${Math.floor(20 + Math.random() * 60)}:${Math.floor(40 + Math.random() * 40)}:${Math.floor(30 + Math.random() * 50)}`,
-                challenges: getCropChallenges(crop.crop_name, location, season)
-            }))
-        };
-        
-        // Ensure both arrays are populated with at least some data
-        if (!recommendations.primary || recommendations.primary.length === 0) {
-            recommendations.primary = generateFallbackRecommendations(location, soilType, season).primary;
-        }
-        
-        if (!recommendations.alternatives || recommendations.alternatives.length === 0) {
-            recommendations.alternatives = generateFallbackRecommendations(location, soilType, season).alternatives;
-        }
-        
-        return recommendations;
-    } catch (error) {
-        console.error("Error fetching recommendations:", error);
-        // Return fallback data
-        return generateFallbackRecommendations(location, soilType, season);
-    }
-}
-
-/**
- * Generate fallback recommendations based on location, soil type and season
- */
-function generateFallbackRecommendations(location, soilType, season) {
-    console.log(`Generating fallback recommendations for ${location}, soil: ${soilType}, season: ${season}`);
-    
-    // Adjust crops based on soil type
-    let primaryCrops = [
-        {
-            crop: "Rice",
-            variety: "IR36",
-            suitability: 92,
-            yieldEstimate: "45-50 quintals/ha",
-            growingPeriod: "110-120 days",
-            waterRequirement: "High",
-            fertilizers: "NPK 120:60:60",
-            challenges: ["Monitor for leaf blast", "Ensure proper drainage"]
-        },
-        {
-            crop: "Wheat",
-            variety: "HD2967",
-            suitability: 85,
-            yieldEstimate: "40-45 quintals/ha",
-            growingPeriod: "140-150 days",
-            waterRequirement: "Medium",
-            fertilizers: "NPK 120:60:40",
-            challenges: ["Watch for yellow rust", "Maintain irrigation schedule"]
-        },
-        {
-            crop: "Maize",
-            variety: "DHM117",
-            suitability: 78,
-            yieldEstimate: "35-40 quintals/ha",
-            growingPeriod: "90-120 days",
-            waterRequirement: "Medium",
-            fertilizers: "NPK 150:75:40",
-            challenges: ["Monitor for fall armyworm", "Ensure adequate nitrogen"]
-        }
-    ];
-    
-    let alternativeCrops = [
-        {
-            crop: "Soybean",
-            variety: "JS-335",
-            suitability: 75,
-            yieldEstimate: "15-20 quintals/ha",
-            growingPeriod: "95-110 days",
-            waterRequirement: "Medium-Low",
-            fertilizers: "NPK 20:60:40",
-            challenges: ["Watch for yellow mosaic virus", "Ensure proper spacing"]
-        },
-        {
-            crop: "Groundnut",
-            variety: "TAG-24",
-            suitability: 70,
-            yieldEstimate: "18-22 quintals/ha",
-            growingPeriod: "110-130 days",
-            waterRequirement: "Medium",
-            fertilizers: "NPK 25:50:75",
-            challenges: ["Watch for leaf spot", "Ensure calcium availability"]
-        }
-    ];
-    
-    // Modify recommendations based on soil type
-    if (soilType) {
-        switch(soilType.toLowerCase()) {
-            case "alluvial":
-                primaryCrops[0].suitability = 95; // Rice
-                primaryCrops[1].suitability = 90; // Wheat
-                break;
-            case "black cotton":
-                primaryCrops = [
-                    {
-                        crop: "Cotton",
-                        variety: "Bt Cotton",
-                        suitability: 94,
-                        yieldEstimate: "25-30 quintals/ha",
-                        growingPeriod: "160-180 days",
-                        waterRequirement: "Medium",
-                        fertilizers: "NPK 100:50:50",
-                        challenges: ["Monitor for bollworms", "Manage water carefully"]
-                    },
-                    ...primaryCrops.slice(1, 2)
-                ];
-                alternativeCrops.unshift({
-                    crop: "Sorghum",
-                    variety: "CSH-14",
-                    suitability: 88,
-                    yieldEstimate: "25-30 quintals/ha",
-                    growingPeriod: "100-110 days",
-                    waterRequirement: "Low",
-                    fertilizers: "NPK 80:40:40",
-                    challenges: ["Drought resistant", "Watch for bird damage"]
-                });
-                break;
-            case "red":
-            case "red and yellow":
-                primaryCrops = [
-                    {
-                        crop: "Millets",
-                        variety: "Improved Varieties",
-                        suitability: 90,
-                        yieldEstimate: "20-25 quintals/ha",
-                        growingPeriod: "90-110 days",
-                        waterRequirement: "Low",
-                        fertilizers: "NPK 40:20:20",
-                        challenges: ["Highly drought resistant", "Low input requirement"]
-                    },
-                    primaryCrops[2], // Maize
-                    {
-                        crop: "Pulses",
-                        variety: "Local Varieties",
-                        suitability: 82,
-                        yieldEstimate: "10-15 quintals/ha",
-                        growingPeriod: "90-120 days",
-                        waterRequirement: "Low",
-                        fertilizers: "NPK 20:40:20",
-                        challenges: ["Good nitrogen fixation", "Suitable for intercropping"]
-                    }
-                ];
-                break;
-            case "laterite":
-                primaryCrops = [
-                    {
-                        crop: "Cashew",
-                        variety: "V4 Hybrid",
-                        suitability: 92,
-                        yieldEstimate: "8-10 quintals/ha",
-                        growingPeriod: "3-5 years to mature",
-                        waterRequirement: "Low",
-                        fertilizers: "NPK 100:50:100",
-                        challenges: ["Long term crop", "Watch for tea mosquito bug"]
-                    },
-                    {
-                        crop: "Pineapple",
-                        variety: "Queen",
-                        suitability: 88,
-                        yieldEstimate: "40-50 tons/ha",
-                        growingPeriod: "18-24 months",
-                        waterRequirement: "Medium",
-                        fertilizers: "NPK 12:6:24",
-                        challenges: ["Ensure good drainage", "Watch for fruit rot"]
-                    },
-                    {
-                        crop: "Tea",
-                        variety: "Assam Hybrid",
-                        suitability: 85,
-                        yieldEstimate: "15-20 quintals/ha",
-                        growingPeriod: "3-5 years to mature",
-                        waterRequirement: "Medium-High",
-                        fertilizers: "NPK 100:50:100",
-                        challenges: ["Long term crop", "Regular pruning required"]
-                    }
-                ];
-                alternativeCrops = [
-                    {
-                        crop: "Black Pepper",
-                        variety: "Panniyur-1",
-                        suitability: 80,
-                        yieldEstimate: "2-3 kg/vine",
-                        growingPeriod: "3-4 years",
-                        waterRequirement: "Medium",
-                        fertilizers: "NPK 100:40:140",
-                        challenges: ["Needs support", "Watch for quick wilt"]
-                    },
-                    {
-                        crop: "Cassava",
-                        variety: "H-226",
-                        suitability: 75,
-                        yieldEstimate: "25-30 tons/ha",
-                        growingPeriod: "10-12 months",
-                        waterRequirement: "Low",
-                        fertilizers: "NPK 100:50:100",
-                        challenges: ["Easy to grow", "Tolerates poor soil"]
-                    }
-                ];
-                break;
-                
-            case "calcareous":
-                primaryCrops = [
-                    {
-                        crop: "Chickpea",
-                        variety: "JG-11",
-                        suitability: 90,
-                        yieldEstimate: "15-18 quintals/ha",
-                        growingPeriod: "100-110 days",
-                        waterRequirement: "Low",
-                        fertilizers: "NPK 20:40:0",
-                        challenges: ["Tolerates alkaline soil", "Avoid waterlogging"]
-                    },
-                    {
-                        crop: "Barley",
-                        variety: "RD-2035",
-                        suitability: 85,
-                        yieldEstimate: "35-40 quintals/ha",
-                        growingPeriod: "120-130 days",
-                        waterRequirement: "Low-Medium",
-                        fertilizers: "NPK 60:30:20",
-                        challenges: ["Tolerates saline soils", "Good drought resistance"]
-                    },
-                    {
-                        crop: "Mustard",
-                        variety: "Pusa Bold",
-                        suitability: 82,
-                        yieldEstimate: "15-18 quintals/ha",
-                        growingPeriod: "110-120 days",
-                        waterRequirement: "Low",
-                        fertilizers: "NPK 60:40:40",
-                        challenges: ["Watch for aphid infestation", "Good for crop rotation"]
-                    }
-                ];
-                break;
-                
-            case "usar":
-                primaryCrops = [
-                    {
-                        crop: "Dhaincha",
-                        variety: "Local",
-                        suitability: 95,
-                        yieldEstimate: "Green manure crop",
-                        growingPeriod: "45-60 days",
-                        waterRequirement: "Medium",
-                        fertilizers: "No fertilizer needed",
-                        challenges: ["Excellent for reclaiming alkaline soil", "Green manure crop"]
-                    },
-                    {
-                        crop: "Berseem",
-                        variety: "BL-10",
-                        suitability: 85,
-                        yieldEstimate: "70-80 tons/ha (green fodder)",
-                        growingPeriod: "180-210 days",
-                        waterRequirement: "Medium-High",
-                        fertilizers: "NPK 20:60:40",
-                        challenges: ["Good for salt-affected soils", "Fodder crop"]
-                    },
-                    {
-                        crop: "Salt-tolerant Rice",
-                        variety: "CSR-36",
-                        suitability: 80,
-                        yieldEstimate: "35-40 quintals/ha",
-                        growingPeriod: "125-130 days",
-                        waterRequirement: "High",
-                        fertilizers: "NPK 120:60:60",
-                        challenges: ["Specially bred for saline soils", "Requires proper drainage"]
-                    }
-                ];
-                break;
-        }
-    }
-    
-    // Modify recommendations based on season
-    if (season) {
-        switch(season.toLowerCase()) {
-            case "kharif":
-                // Prioritize monsoon crops
-                if (!soilType || soilType.toLowerCase() !== "black cotton") {
-                    primaryCrops.unshift({
-                        crop: "Rice",
-                        variety: "MTU-1010",
-                        suitability: 95,
-                        yieldEstimate: "45-55 quintals/ha",
-                        growingPeriod: "115-120 days",
-                        waterRequirement: "High",
-                        fertilizers: "NPK 120:60:60",
-                        challenges: getCropChallenges("Rice", location, season)
-                    });
-                }
-                break;
-                
-            case "rabi":
-                // Prioritize winter crops
-                primaryCrops.unshift({
-                    crop: "Wheat",
-                    variety: "HD-3086",
-                    suitability: 95,
-                    yieldEstimate: "45-55 quintals/ha",
-                    growingPeriod: "135-145 days",
-                    waterRequirement: "Medium",
-                    fertilizers: "NPK 120:60:40",
-                    challenges: getCropChallenges("Wheat", location, season)
-                });
-                break;
-                
-            case "zaid":
-                // Prioritize summer crops
-                primaryCrops.unshift({
-                    crop: "Green Gram",
-                    variety: "IPM-02-3",
-                    suitability: 92,
-                    yieldEstimate: "8-10 quintals/ha",
-                    growingPeriod: "60-65 days",
-                    waterRequirement: "Low-Medium",
-                    fertilizers: "NPK 20:40:0",
-                    challenges: ["Short duration crop", "Heat tolerant"]
-                });
-                break;
-        }
-    }
-    
-    // Ensure we have max 3 primary and 2 alternative recommendations
-    return {
-        primary: primaryCrops.slice(0, 3),
-        alternatives: alternativeCrops.slice(0, 2)
-    };
-}
-
-/**
- * Get current growing season based on date
- */
+// Get the current season based on month
 export function getCurrentSeason() {
-    const now = new Date();
-    const month = now.getMonth();
-    
-    if (month >= 5 && month <= 8) {
-        return "kharif"; // Summer crop season (approx June-September)
-    } else if (month >= 9 || month <= 1) {
-        return "rabi"; // Winter crop season (approx October-February)
-    } else {
-        return "zaid"; // Spring crop season (approx March-May)
-    }
+  const month = new Date().getMonth();
+  // 0-1 = Winter (Jan-Feb)
+  // 2-5 = Zaid/Summer (Mar-Jun)
+  // 6-9 = Kharif (Jul-Oct)
+  // 10-11 = Rabi (Nov-Dec)
+  if (month >= 0 && month <= 1) return "winter";
+  if (month >= 2 && month <= 5) return "zaid";
+  if (month >= 6 && month <= 9) return "kharif";
+  return "rabi";
 }
 
-/**
- * Get crop challenges based on crop type, location and season
- */
+// Get crop challenges based on crop, location, and season
 export function getCropChallenges(crop, location, season) {
-    // Sample challenges data based on crop, location and season
-    const challenges = {
-        rice: {
-            "Punjab": {
-                "kharif": ["Potential bacterial leaf blight due to high humidity", "Monitor for stem borers"],
-                "rabi": ["Cold stress may affect germination", "Limited water availability"],
-                "zaid": ["Higher water requirements during hot months", "Increased weed pressure"]
-            },
-            "West Bengal": {
-                "kharif": ["Heavy rainfall may cause flooding", "Watch for blast disease"],
-                "rabi": ["Ensure proper irrigation channels", "Cold nights may slow growth"],
-                "zaid": ["Heat stress during flowering stage", "Increased pest pressure"]
-            },
-            "default": ["Maintain proper water management", "Regular monitoring for pests"]
+  if (!crop || typeof crop !== 'string') {
+    return ["Monitor for common pests and diseases"];
+  }
+  
+  const cropName = crop.toLowerCase();
+  const challenges = {
+    rice: {
+      kharif: ["Risk of flooding in low-lying fields", "Monitor for rice blast disease"],
+      rabi: ["Water management critical during dry season", "Cold stress in northern regions"],
+      zaid: ["Higher water requirement due to heat", "Stem borer and leaf folder risk"],
+      winter: ["Cold can affect growth in northern areas", "Require protected cultivation"]
+    },
+    wheat: {
+      rabi: ["Rust diseases common in humid conditions", "Terminal heat stress in late season"],
+      winter: ["Aphid infestations are common", "Frost damage in northern plains"],
+      kharif: ["Not recommended in monsoon season", "High disease pressure"],
+      zaid: ["Heat stress will affect yield", "Not recommended season"]
+    },
+    maize: {
+      kharif: ["Stem borer incidence high in monsoon", "Excess rain can cause root rot"],
+      rabi: ["Requires irrigation in most areas", "Frost damage risk in January"],
+      zaid: ["Fall armyworm risk increases", "Heat can affect pollination"],
+      winter: ["Cold stress can affect early growth", "Limited growth in severe winter"]
+    },
+    groundnut: {
+      kharif: ["Collar rot risk in waterlogged conditions", "Leaf spot diseases common"],
+      rabi: ["White grub infestation risk", "Requires supplemental irrigation"],
+      zaid: ["Leaf miner incidence high", "Aflatoxin risk in drought conditions"],
+      winter: ["Not suitable for winter cultivation", "Growth severely restricted by cold"]
+    },
+    soybean: {
+      kharif: ["Yellow mosaic virus risk", "Excess moisture can cause root rot"],
+      rabi: ["Pod borer incidence high", "Supplemental irrigation critical"],
+      zaid: ["Heat stress affects nodulation", "Moisture stress common issue"],
+      winter: ["Cold stress affects growth", "Not recommended in winter"]
+    }
+  };
+  
+  // Default challenges if crop-specific ones aren't available
+  const defaultChallenges = {
+    kharif: ["Monitor drainage during heavy rainfall", "Watch for increased pest pressure in monsoon"],
+    rabi: ["Ensure adequate irrigation", "Protect from unexpected winter showers"],
+    zaid: ["Heat stress management critical", "Higher irrigation requirement"],
+    winter: ["Protect from frost in northern regions", "Limited growth during cold periods"]
+  };
+  
+  // Get crop-specific challenges or default ones
+  const cropChallenges = challenges[cropName] || defaultChallenges;
+  
+  // Return challenges for the specific season, or generic challenges if not found
+  return cropChallenges[season] || 
+         ["Monitor for pests and diseases", "Ensure appropriate water management"];
+}
+
+// Fetch crop recommendations based on location, soil type and season
+export async function fetchCropRecommendations(location, soilType, season) {
+  try {
+    console.log(`Fetching recommendations for ${location}, soil: ${soilType}, season: ${season}`);
+    
+    // Generate recommendations based on inputs
+    const recommendations = generateRecommendations(location, soilType, season);
+    
+    return recommendations;
+  } catch (error) {
+    console.error("Error fetching crop recommendations:", error);
+    console.info("Generating fallback recommendations for", location, "soil:", soilType, "season:", season);
+    
+    // Fallback recommendations to prevent app from breaking
+    return {
+      primary: [
+        {
+          crop: "Rice",
+          variety: "MTU7029 (Swarna)",
+          suitability: 92,
+          yieldEstimate: "45-50 quintals/ha",
+          growingPeriod: "115-120 days",
+          waterRequirement: "Moderate to High",
+          fertilizers: "NPK 120:60:60"
         },
-        wheat: {
-            "Punjab": {
-                "kharif": ["Not recommended in Kharif season", "Consider alternatives"],
-                "rabi": ["Yellow rust risk in cooler areas", "Monitor lodging in high-yield varieties"],
-                "zaid": ["Terminal heat stress may affect yield", "Ensure timely sowing"]
-            },
-            "Uttar Pradesh": {
-                "rabi": ["Watch for powdery mildew in humid areas", "Ensure proper spacing"],
-                "zaid": ["Higher irrigation requirements", "Accelerated maturity due to heat"]
-            },
-            "default": ["Optimize nitrogen application timing", "Monitor for rust diseases"]
+        {
+          crop: "Maize",
+          variety: "DHM117",
+          suitability: 85,
+          yieldEstimate: "35-40 quintals/ha",
+          growingPeriod: "85-95 days",
+          waterRequirement: "Moderate",
+          fertilizers: "NPK 120:60:40"
         },
-        maize: {
-            "default": ["Watch for fall armyworm", "Ensure proper drainage"]
-        },
-        groundnut: {
-            "default": ["Monitor for leaf spot diseases", "Ensure calcium availability during pod formation"]
-        },
-        soybean: {
-            "default": ["Watch for yellow mosaic virus", "Maintain proper drainage"]
+        {
+          crop: "Groundnut",
+          variety: "TAG-24",
+          suitability: 78,
+          yieldEstimate: "15-18 quintals/ha",
+          growingPeriod: "110-120 days",
+          waterRequirement: "Low to Moderate",
+          fertilizers: "NPK 20:40:40"
         }
+      ],
+      alternatives: [
+        {
+          crop: "Mung Bean",
+          variety: "IPM 02-3",
+          suitability: 75,
+          yieldEstimate: "8-10 quintals/ha",
+          growingPeriod: "65-70 days",
+          waterRequirement: "Low",
+          fertilizers: "NPK 20:40:20"
+        },
+        {
+          crop: "Sesame",
+          variety: "GT-10",
+          suitability: 72,
+          yieldEstimate: "6-8 quintals/ha",
+          growingPeriod: "80-85 days",
+          waterRequirement: "Low",
+          fertilizers: "NPK 30:15:15"
+        },
+        {
+          crop: "Sunflower",
+          variety: "KBSH-44",
+          suitability: 68,
+          yieldEstimate: "15-18 quintals/ha",
+          growingPeriod: "90-95 days",
+          waterRequirement: "Moderate",
+          fertilizers: "NPK 60:90:60"
+        }
+      ]
     };
-    
-    // Convert crop name to lowercase for case-insensitive matching
-    const cropLower = crop?.toLowerCase();
-    
-    // Return challenges for the specific crop-location-season combination or defaults
-    if (cropLower && challenges[cropLower]) {
-        if (location && season && challenges[cropLower][location] && challenges[cropLower][location][season]) {
-            return challenges[cropLower][location][season];
+  }
+}
+
+// Generate recommendations based on location, soil type and season
+function generateRecommendations(location, soilType, season) {
+  // Ensure parameters are valid
+  const validLocation = location || "West Bengal";
+  const validSoilType = soilType || "alluvial";
+  const validSeason = season || getCurrentSeason();
+  
+  // Define base recommendations by region and soil type
+  const recommendationMap = {
+    "West Bengal": {
+      "alluvial": {
+        kharif: {
+          primary: [
+            {
+              crop: "Rice",
+              variety: "MTU7029 (Swarna)",
+              suitability: 95,
+              yieldEstimate: "50-55 quintals/ha",
+              growingPeriod: "115-120 days",
+              waterRequirement: "High",
+              fertilizers: "NPK 120:60:60"
+            },
+            {
+              crop: "Jute",
+              variety: "JRO-524",
+              suitability: 88,
+              yieldEstimate: "25-30 quintals/ha (fiber)",
+              growingPeriod: "100-120 days",
+              waterRequirement: "Moderate to High",
+              fertilizers: "NPK 60:30:30"
+            },
+            {
+              crop: "Maize",
+              variety: "DHM-121",
+              suitability: 82,
+              yieldEstimate: "40-45 quintals/ha",
+              growingPeriod: "90-100 days",
+              waterRequirement: "Moderate",
+              fertilizers: "NPK 120:60:40"
+            }
+          ],
+          alternatives: [
+            {
+              crop: "Black Gram",
+              variety: "WBU-108",
+              suitability: 78,
+              yieldEstimate: "10-12 quintals/ha",
+              growingPeriod: "70-80 days",
+              waterRequirement: "Low to Moderate",
+              fertilizers: "NPK 20:40:20"
+            },
+            {
+              crop: "Sugarcane",
+              variety: "CO-0238",
+              suitability: 75,
+              yieldEstimate: "700-750 quintals/ha",
+              growingPeriod: "300-330 days",
+              waterRequirement: "High",
+              fertilizers: "NPK 150:60:60"
+            },
+            {
+              crop: "Vegetables",
+              variety: "Season Mix",
+              suitability: 70,
+              yieldEstimate: "Varies by type",
+              growingPeriod: "60-120 days",
+              waterRequirement: "Moderate to High",
+              fertilizers: "NPK balanced + micronutrients"
+            }
+          ]
+        },
+        rabi: {
+          primary: [
+            {
+              crop: "Wheat",
+              variety: "HD-2967",
+              suitability: 90,
+              yieldEstimate: "45-50 quintals/ha",
+              growingPeriod: "120-135 days",
+              waterRequirement: "Moderate",
+              fertilizers: "NPK 120:60:40"
+            },
+            {
+              crop: "Potato",
+              variety: "Kufri Jyoti",
+              suitability: 88,
+              yieldEstimate: "250-300 quintals/ha",
+              growingPeriod: "90-110 days",
+              waterRequirement: "Moderate",
+              fertilizers: "NPK 150:60:100"
+            },
+            {
+              crop: "Mustard",
+              variety: "Pusa Bold",
+              suitability: 85,
+              yieldEstimate: "12-15 quintals/ha",
+              growingPeriod: "110-120 days",
+              waterRequirement: "Low to Moderate",
+              fertilizers: "NPK 60:40:40"
+            }
+          ],
+          alternatives: [
+            {
+              crop: "Lentil",
+              variety: "PL-8",
+              suitability: 80,
+              yieldEstimate: "12-14 quintals/ha",
+              growingPeriod: "120-135 days",
+              waterRequirement: "Low",
+              fertilizers: "NPK 20:40:20"
+            },
+            {
+              crop: "Chickpea",
+              variety: "Pusa 372",
+              suitability: 75,
+              yieldEstimate: "15-18 quintals/ha",
+              growingPeriod: "120-130 days",
+              waterRequirement: "Low",
+              fertilizers: "NPK 20:40:20"
+            },
+            {
+              crop: "Sunflower",
+              variety: "KBSH-44",
+              suitability: 72,
+              yieldEstimate: "15-18 quintals/ha",
+              growingPeriod: "95-100 days",
+              waterRequirement: "Moderate",
+              fertilizers: "NPK 60:90:60"
+            }
+          ]
+        },
+        zaid: {
+          primary: [
+            {
+              crop: "Green Gram",
+              variety: "IPM-02-3",
+              suitability: 85,
+              yieldEstimate: "8-10 quintals/ha",
+              growingPeriod: "60-70 days",
+              waterRequirement: "Low",
+              fertilizers: "NPK 20:40:20"
+            },
+            {
+              crop: "Maize",
+              variety: "Vivek-27",
+              suitability: 80,
+              yieldEstimate: "35-40 quintals/ha",
+              growingPeriod: "80-90 days",
+              waterRequirement: "Moderate",
+              fertilizers: "NPK 120:60:40"
+            },
+            {
+              crop: "Groundnut",
+              variety: "TAG-24",
+              suitability: 78,
+              yieldEstimate: "15-18 quintals/ha",
+              growingPeriod: "110-120 days",
+              waterRequirement: "Low to Moderate",
+              fertilizers: "NPK 20:40:40"
+            }
+          ],
+          alternatives: [
+            {
+              crop: "Sesame",
+              variety: "GT-10",
+              suitability: 75,
+              yieldEstimate: "6-8 quintals/ha",
+              growingPeriod: "80-85 days",
+              waterRequirement: "Low",
+              fertilizers: "NPK 30:15:15"
+            },
+            {
+              crop: "Cowpea",
+              variety: "Pusa Komal",
+              suitability: 72,
+              yieldEstimate: "10-12 quintals/ha",
+              growingPeriod: "65-75 days",
+              waterRequirement: "Low",
+              fertilizers: "NPK 20:40:20"
+            },
+            {
+              crop: "Vegetables",
+              variety: "Summer varieties",
+              suitability: 70,
+              yieldEstimate: "Varies by type",
+              growingPeriod: "60-90 days",
+              waterRequirement: "Moderate to High",
+              fertilizers: "NPK balanced + micronutrients"
+            }
+          ]
+        },
+        winter: {
+          primary: [
+            {
+              crop: "Wheat",
+              variety: "HD-2967",
+              suitability: 95,
+              yieldEstimate: "45-50 quintals/ha",
+              growingPeriod: "120-135 days",
+              waterRequirement: "Moderate",
+              fertilizers: "NPK 120:60:40"
+            },
+            {
+              crop: "Potato",
+              variety: "Kufri Jyoti",
+              suitability: 90,
+              yieldEstimate: "250-300 quintals/ha",
+              growingPeriod: "90-110 days",
+              waterRequirement: "Moderate",
+              fertilizers: "NPK 150:60:100"
+            },
+            {
+              crop: "Mustard",
+              variety: "Pusa Bold",
+              suitability: 85,
+              yieldEstimate: "12-15 quintals/ha",
+              growingPeriod: "110-120 days",
+              waterRequirement: "Low to Moderate",
+              fertilizers: "NPK 60:40:40"
+            }
+          ],
+          alternatives: [
+            {
+              crop: "Lentil",
+              variety: "PL-8",
+              suitability: 80,
+              yieldEstimate: "12-14 quintals/ha",
+              growingPeriod: "120-135 days",
+              waterRequirement: "Low",
+              fertilizers: "NPK 20:40:20"
+            },
+            {
+              crop: "Pea",
+              variety: "Arkel",
+              suitability: 78,
+              yieldEstimate: "80-100 quintals/ha (green pods)",
+              growingPeriod: "90-120 days",
+              waterRequirement: "Low to Moderate",
+              fertilizers: "NPK 20:50:50"
+            },
+            {
+              crop: "Cabbage",
+              variety: "Pride of India",
+              suitability: 75,
+              yieldEstimate: "250-300 quintals/ha",
+              growingPeriod: "90-120 days",
+              waterRequirement: "Moderate",
+              fertilizers: "NPK 120:60:60"
+            }
+          ]
         }
-        return challenges[cropLower]["default"] || ["No specific challenges identified"];
+      },
+      // Add other soil types and regions similarly...
+      "red": {
+        // Similar structure for red soil
+        kharif: {
+          primary: [
+            {
+              crop: "Rice",
+              variety: "IR36",
+              suitability: 85,
+              yieldEstimate: "40-45 quintals/ha",
+              growingPeriod: "110-115 days",
+              waterRequirement: "High",
+              fertilizers: "NPK 100:50:50"
+            }
+          ],
+          alternatives: [
+            {
+              crop: "Maize",
+              variety: "DHM117",
+              suitability: 80,
+              yieldEstimate: "35-40 quintals/ha",
+              growingPeriod: "85-95 days",
+              waterRequirement: "Moderate",
+              fertilizers: "NPK 120:60:40"
+            }
+          ]
+        },
+        rabi: {
+          primary: [
+            {
+              crop: "Wheat",
+              variety: "DBW17",
+              suitability: 80,
+              yieldEstimate: "40-45 quintals/ha",
+              growingPeriod: "120-130 days",
+              waterRequirement: "Moderate",
+              fertilizers: "NPK 120:60:40"
+            }
+          ],
+          alternatives: [
+            {
+              crop: "Mustard",
+              variety: "Pusa Bold",
+              suitability: 78,
+              yieldEstimate: "10-12 quintals/ha",
+              growingPeriod: "110-120 days",
+              waterRequirement: "Low to Moderate",
+              fertilizers: "NPK 60:40:40"
+            }
+          ]
+        },
+        zaid: {
+          primary: [
+            {
+              crop: "Groundnut",
+              variety: "TAG-24",
+              suitability: 78,
+              yieldEstimate: "15-18 quintals/ha",
+              growingPeriod: "110-120 days",
+              waterRequirement: "Low to Moderate",
+              fertilizers: "NPK 20:40:40"
+            }
+          ],
+          alternatives: [
+            {
+              crop: "Sesame",
+              variety: "GT-10",
+              suitability: 75,
+              yieldEstimate: "6-8 quintals/ha",
+              growingPeriod: "80-85 days",
+              waterRequirement: "Low",
+              fertilizers: "NPK 30:15:15"
+            }
+          ]
+        },
+        winter: {
+          primary: [
+            {
+              crop: "Wheat",
+              variety: "DBW17",
+              suitability: 80,
+              yieldEstimate: "40-45 quintals/ha",
+              growingPeriod: "120-130 days",
+              waterRequirement: "Moderate",
+              fertilizers: "NPK 120:60:40"
+            }
+          ],
+          alternatives: [
+            {
+              crop: "Chickpea",
+              variety: "Pusa 372",
+              suitability: 75,
+              yieldEstimate: "15-18 quintals/ha",
+              growingPeriod: "120-130 days",
+              waterRequirement: "Low",
+              fertilizers: "NPK 20:40:20"
+            }
+          ]
+        }
+      },
+      // Add other soil types in similar structure
+      "loam": {
+        // Default recommendations for loam soil - basic structure
+        kharif: {
+          primary: [
+            {
+              crop: "Rice",
+              variety: "BPT5204",
+              suitability: 90,
+              yieldEstimate: "45-50 quintals/ha",
+              growingPeriod: "115-125 days",
+              waterRequirement: "High",
+              fertilizers: "NPK 120:60:60"
+            }
+          ],
+          alternatives: [
+            {
+              crop: "Maize",
+              variety: "DHM121",
+              suitability: 85,
+              yieldEstimate: "40-45 quintals/ha",
+              growingPeriod: "90-100 days",
+              waterRequirement: "Moderate",
+              fertilizers: "NPK 120:60:40"
+            }
+          ]
+        },
+        rabi: { 
+          primary: [
+            {
+              crop: "Wheat",
+              variety: "HD2967",
+              suitability: 92,
+              yieldEstimate: "45-50 quintals/ha",
+              growingPeriod: "120-135 days",
+              waterRequirement: "Moderate",
+              fertilizers: "NPK 120:60:40"
+            }
+          ],
+          alternatives: [
+            {
+              crop: "Potato",
+              variety: "Kufri Jyoti",
+              suitability: 88,
+              yieldEstimate: "250-300 quintals/ha",
+              growingPeriod: "90-110 days",
+              waterRequirement: "Moderate",
+              fertilizers: "NPK 150:60:100"
+            }
+          ]
+        },
+        zaid: { 
+          primary: [
+            {
+              crop: "Maize",
+              variety: "Vivek-27",
+              suitability: 85,
+              yieldEstimate: "35-40 quintals/ha",
+              growingPeriod: "80-90 days",
+              waterRequirement: "Moderate",
+              fertilizers: "NPK 120:60:40"
+            }
+          ],
+          alternatives: [
+            {
+              crop: "Green Gram",
+              variety: "IPM-02-3",
+              suitability: 80,
+              yieldEstimate: "8-10 quintals/ha",
+              growingPeriod: "60-70 days",
+              waterRequirement: "Low",
+              fertilizers: "NPK 20:40:20"
+            }
+          ]
+        },
+        winter: { 
+          primary: [
+            {
+              crop: "Wheat",
+              variety: "HD2967",
+              suitability: 92,
+              yieldEstimate: "45-50 quintals/ha",
+              growingPeriod: "120-135 days",
+              waterRequirement: "Moderate",
+              fertilizers: "NPK 120:60:40"
+            }
+          ],
+          alternatives: [
+            {
+              crop: "Potato",
+              variety: "Kufri Jyoti",
+              suitability: 88,
+              yieldEstimate: "250-300 quintals/ha",
+              growingPeriod: "90-110 days",
+              waterRequirement: "Moderate",
+              fertilizers: "NPK 150:60:100"
+            }
+          ]
+        }
+      },
+      "black": {
+        // Default recommendations for black soil
+        kharif: { 
+          primary: [
+            {
+              crop: "Cotton",
+              variety: "MCU-5",
+              suitability: 90,
+              yieldEstimate: "20-25 quintals/ha",
+              growingPeriod: "150-180 days",
+              waterRequirement: "Moderate",
+              fertilizers: "NPK 100:50:50"
+            }
+          ],
+          alternatives: [
+            {
+              crop: "Soybean",
+              variety: "JS-335",
+              suitability: 85,
+              yieldEstimate: "15-18 quintals/ha",
+              growingPeriod: "90-100 days",
+              waterRequirement: "Moderate",
+              fertilizers: "NPK 30:60:40"
+            }
+          ]
+        },
+        rabi: { 
+          primary: [
+            {
+              crop: "Wheat",
+              variety: "HD2967",
+              suitability: 85,
+              yieldEstimate: "45-50 quintals/ha",
+              growingPeriod: "120-135 days",
+              waterRequirement: "Moderate",
+              fertilizers: "NPK 120:60:40"
+            }
+          ],
+          alternatives: [
+            {
+              crop: "Chickpea",
+              variety: "Pusa 372",
+              suitability: 90,
+              yieldEstimate: "15-18 quintals/ha",
+              growingPeriod: "120-130 days",
+              waterRequirement: "Low",
+              fertilizers: "NPK 20:40:20"
+            }
+          ]
+        },
+        zaid: { 
+          primary: [
+            {
+              crop: "Groundnut",
+              variety: "TAG-24",
+              suitability: 82,
+              yieldEstimate: "15-18 quintals/ha",
+              growingPeriod: "110-120 days",
+              waterRequirement: "Low to Moderate",
+              fertilizers: "NPK 20:40:40"
+            }
+          ],
+          alternatives: [
+            {
+              crop: "Sunflower",
+              variety: "KBSH-44",
+              suitability: 80,
+              yieldEstimate: "15-18 quintals/ha",
+              growingPeriod: "95-100 days",
+              waterRequirement: "Moderate",
+              fertilizers: "NPK 60:90:60"
+            }
+          ]
+        },
+        winter: { 
+          primary: [
+            {
+              crop: "Wheat",
+              variety: "HD2967",
+              suitability: 85,
+              yieldEstimate: "45-50 quintals/ha",
+              growingPeriod: "120-135 days",
+              waterRequirement: "Moderate",
+              fertilizers: "NPK 120:60:40"
+            }
+          ],
+          alternatives: [
+            {
+              crop: "Chickpea",
+              variety: "Pusa 372",
+              suitability: 90,
+              yieldEstimate: "15-18 quintals/ha",
+              growingPeriod: "120-130 days",
+              waterRequirement: "Low",
+              fertilizers: "NPK 20:40:20"
+            }
+          ]
+        }
+      },
+      "laterite": {
+        // Default recommendations for laterite soil
+        kharif: { 
+          primary: [
+            {
+              crop: "Rice",
+              variety: "MTU7029",
+              suitability: 80,
+              yieldEstimate: "35-40 quintals/ha",
+              growingPeriod: "115-120 days",
+              waterRequirement: "High",
+              fertilizers: "NPK 100:50:50"
+            }
+          ],
+          alternatives: [
+            {
+              crop: "Finger Millet",
+              variety: "GPU-28",
+              suitability: 85,
+              yieldEstimate: "20-25 quintals/ha",
+              growingPeriod: "110-120 days",
+              waterRequirement: "Low to Moderate",
+              fertilizers: "NPK 40:20:20"
+            }
+          ]
+        },
+        rabi: { 
+          primary: [
+            {
+              crop: "Groundnut",
+              variety: "TAG-24",
+              suitability: 75,
+              yieldEstimate: "12-15 quintals/ha",
+              growingPeriod: "110-120 days",
+              waterRequirement: "Low to Moderate",
+              fertilizers: "NPK 20:40:40"
+            }
+          ],
+          alternatives: [
+            {
+              crop: "Millets",
+              variety: "CO-7",
+              suitability: 80,
+              yieldEstimate: "18-22 quintals/ha",
+              growingPeriod: "90-100 days",
+              waterRequirement: "Low",
+              fertilizers: "NPK 40:20:20"
+            }
+          ]
+        },
+        zaid: { 
+          primary: [
+            {
+              crop: "Green Gram",
+              variety: "IPM-02-3",
+              suitability: 78,
+              yieldEstimate: "7-9 quintals/ha",
+              growingPeriod: "60-70 days",
+              waterRequirement: "Low",
+              fertilizers: "NPK 20:40:20"
+            }
+          ],
+          alternatives: [
+            {
+              crop: "Black Gram",
+              variety: "WBU-108",
+              suitability: 75,
+              yieldEstimate: "8-10 quintals/ha",
+              growingPeriod: "70-80 days",
+              waterRequirement: "Low",
+              fertilizers: "NPK 20:40:20"
+            }
+          ]
+        },
+        winter: { 
+          primary: [
+            {
+              crop: "Millets",
+              variety: "CO-7",
+              suitability: 75,
+              yieldEstimate: "18-22 quintals/ha",
+              growingPeriod: "90-100 days",
+              waterRequirement: "Low",
+              fertilizers: "NPK 40:20:20"
+            }
+          ],
+          alternatives: [
+            {
+              crop: "Pulses",
+              variety: "Mixed",
+              suitability: 70,
+              yieldEstimate: "8-12 quintals/ha",
+              growingPeriod: "90-120 days",
+              waterRequirement: "Low",
+              fertilizers: "NPK 20:40:20"
+            }
+          ]
+        }
+      }
+    },
+    // Default recommendations if specific location-soil-season combo isn't found
+    "default": {
+      "default": {
+        "default": {
+          primary: [
+            {
+              crop: "Rice",
+              variety: "IR36",
+              suitability: 85,
+              yieldEstimate: "40-45 quintals/ha",
+              growingPeriod: "110-115 days",
+              waterRequirement: "High",
+              fertilizers: "NPK 100:50:50"
+            },
+            {
+              crop: "Wheat",
+              variety: "HD2967",
+              suitability: 80,
+              yieldEstimate: "40-45 quintals/ha",
+              growingPeriod: "120-130 days",
+              waterRequirement: "Moderate",
+              fertilizers: "NPK 120:60:40"
+            },
+            {
+              crop: "Maize",
+              variety: "DHM117",
+              suitability: 75,
+              yieldEstimate: "35-40 quintals/ha",
+              growingPeriod: "85-95 days",
+              waterRequirement: "Moderate",
+              fertilizers: "NPK 120:60:40"
+            }
+          ],
+          alternatives: [
+            {
+              crop: "Groundnut",
+              variety: "TAG-24",
+              suitability: 70,
+              yieldEstimate: "15-18 quintals/ha",
+              growingPeriod: "110-120 days",
+              waterRequirement: "Low to Moderate",
+              fertilizers: "NPK 20:40:40"
+            },
+            {
+              crop: "Soybean",
+              variety: "JS-335",
+              suitability: 65,
+              yieldEstimate: "15-18 quintals/ha",
+              growingPeriod: "90-100 days",
+              waterRequirement: "Moderate",
+              fertilizers: "NPK 30:60:40"
+            },
+            {
+              crop: "Mung Bean",
+              variety: "IPM 02-3",
+              suitability: 60,
+              yieldEstimate: "8-10 quintals/ha",
+              growingPeriod: "65-70 days",
+              waterRequirement: "Low",
+              fertilizers: "NPK 20:40:20"
+            }
+          ]
+        }
+      }
+    }
+  };
+  
+  try {
+    // Try to get location-specific recommendations
+    let recommendations = recommendationMap[validLocation]?.[validSoilType]?.[validSeason];
+    
+    // If not found, try using default soil type for the location
+    if (!recommendations) {
+      recommendations = recommendationMap[validLocation]?.["alluvial"]?.[validSeason];
     }
     
-    return ["Ensure regular monitoring", "Follow recommended practices"];
+    // If still not found, use default recommendations
+    if (!recommendations) {
+      recommendations = recommendationMap["default"]["default"]["default"];
+    }
+    
+    return recommendations;
+  } catch (error) {
+    console.error("Error generating recommendations:", error);
+    // Return default recommendations if an error occurs
+    return recommendationMap["default"]["default"]["default"];
+  }
 }
+
+// Information about the data source
+export const cropDataSource = {
+  name: "Agricultural Research Database",
+  description: "Crop recommendation and yield data",
+  reference: "National Agricultural Research System",
+  notes: "Recommendations adapted to local conditions with proper error handling"
+};

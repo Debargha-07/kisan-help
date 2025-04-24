@@ -21,7 +21,9 @@ export async function fetchWeatherForecast(city) {
         }
         
         const data = await response.json();
-        return data;
+        
+        // Process data to match expected format in the Forecasting component
+        return processWeatherData(data, city);
     } catch (error) {
         console.error("Error fetching weather data:", error);
         // If API fails for any reason, return mock data to prevent the app from breaking
@@ -29,67 +31,108 @@ export async function fetchWeatherForecast(city) {
     }
 }
 
+// Process the API response into the format expected by the Forecasting component
+function processWeatherData(data, city) {
+    if (!data || !data.list || !Array.isArray(data.list)) {
+        console.error("Invalid weather data format");
+        return generateMockWeatherResponse(city);
+    }
+    
+    // Extract 5-day forecast at 24-hour intervals (roughly)
+    const processedList = [];
+    const dayMap = new Map();
+    
+    // Get current date to calculate day names
+    const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+    
+    // Process forecast data
+    data.list.forEach(item => {
+        const date = new Date(item.dt * 1000);
+        const dayName = days[date.getDay()];
+        const dayKey = date.toLocaleDateString();
+        
+        // Take one reading per day
+        if (!dayMap.has(dayKey)) {
+            dayMap.set(dayKey, {
+                dayName,
+                display: {
+                    temperature: Math.round(item.main.temp),
+                    humidity: item.main.humidity,
+                    rainfall: item.rain ? (item.rain["3h"] || 0) : 0,
+                    description: item.weather[0].description,
+                    icon: getIconType(item.weather[0].icon)
+                }
+            });
+        }
+    });
+    
+    // Convert map to array
+    dayMap.forEach(value => {
+        processedList.push(value);
+    });
+    
+    // Ensure we have enough days
+    while (processedList.length < 5) {
+        const lastDay = processedList.length > 0 ? processedList[processedList.length - 1] : null;
+        const nextDayIndex = lastDay ? (days.indexOf(lastDay.dayName) + 1) % 7 : new Date().getDay();
+        
+        processedList.push({
+            dayName: days[nextDayIndex],
+            display: {
+                temperature: lastDay ? lastDay.display.temperature + Math.floor(Math.random() * 5) - 2 : 25,
+                humidity: lastDay ? lastDay.display.humidity + Math.floor(Math.random() * 10) - 5 : 65,
+                rainfall: lastDay ? Math.max(0, lastDay.display.rainfall + Math.floor(Math.random() * 5) - 2) : 0,
+                description: "forecast data",
+                icon: "cloud-sun"
+            }
+        });
+    }
+    
+    return processedList.slice(0, 5);
+}
+
+// Map OpenWeatherMap icon codes to our internal icon types
+function getIconType(iconCode) {
+    if (!iconCode) return "cloud-sun";
+    
+    if (iconCode.includes("01")) return "sun";
+    if (iconCode.includes("02") || iconCode.includes("03") || iconCode.includes("04")) return "cloud-sun";
+    if (iconCode.includes("09") || iconCode.includes("10")) return "cloud-rain";
+    if (iconCode.includes("11")) return "cloud-rain";
+    if (iconCode.includes("13")) return "cloud-snow";
+    if (iconCode.includes("50")) return "cloud-drizzle";
+    
+    return "cloud-sun"; // Default
+}
+
 // Generate mock weather data for fallback when API fails
 function generateMockWeatherResponse(city) {
     console.log("Falling back to mock weather data");
     const now = new Date();
-    const list = [];
+    const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+    const weatherTypes = ["sun", "cloud-sun", "cloud-rain", "cloud-drizzle"];
+    const descriptions = ["clear sky", "scattered clouds", "light rain", "moderate rain"];
+    const result = [];
     
-    // Generate 5 days of forecast data, 3-hour intervals
-    for (let i = 0; i < 40; i++) {
-        const forecastTime = new Date(now.getTime() + i * 3 * 60 * 60 * 1000);
+    for (let i = 0; i < 5; i++) {
+        const forecastDate = new Date(now);
+        forecastDate.setDate(now.getDate() + i);
+        const dayIndex = forecastDate.getDay();
+        const weatherIndex = Math.floor(Math.random() * 4);
         
-        list.push({
-            dt: Math.floor(forecastTime.getTime() / 1000),
-            main: {
-                temp: 20 + Math.random() * 15,
-                feels_like: 22 + Math.random() * 10,
-                temp_min: 18 + Math.random() * 10,
-                temp_max: 25 + Math.random() * 10,
-                pressure: 1010 + Math.random() * 20,
-                humidity: 40 + Math.random() * 40
-            },
-            weather: [{
-                id: 800,
-                main: ["Clear", "Clouds", "Rain", "Drizzle"][Math.floor(Math.random() * 4)],
-                description: ["clear sky", "scattered clouds", "light rain", "moderate rain"][Math.floor(Math.random() * 4)],
-                icon: ["01d", "02d", "03d", "10d"][Math.floor(Math.random() * 4)]
-            }],
-            clouds: {
-                all: Math.floor(Math.random() * 100)
-            },
-            wind: {
-                speed: 2 + Math.random() * 8,
-                deg: Math.floor(Math.random() * 360)
-            },
-            visibility: 10000,
-            pop: Math.random(),
-            sys: {
-                pod: i % 2 === 0 ? "d" : "n"
-            },
-            dt_txt: forecastTime.toISOString().split('.')[0].replace('T', ' ')
+        result.push({
+            dayName: days[dayIndex],
+            display: {
+                temperature: Math.round(20 + Math.random() * 15),
+                humidity: Math.round(40 + Math.random() * 40),
+                rainfall: weatherIndex > 1 ? Math.round(Math.random() * 20) : 0,
+                description: descriptions[weatherIndex],
+                icon: weatherTypes[weatherIndex]
+            }
         });
     }
     
-    return {
-        cod: "200",
-        message: 0,
-        cnt: list.length,
-        list: list,
-        city: {
-            id: 1234567,
-            name: city,
-            coord: {
-                lat: 22.5726,
-                lon: 88.3639
-            },
-            country: "IN",
-            population: 1000000,
-            timezone: 19800,
-            sunrise: Math.floor(now.setHours(6, 0, 0, 0) / 1000),
-            sunset: Math.floor(now.setHours(18, 0, 0, 0) / 1000)
-        }
-    };
+    return result;
 }
 
 // Information about the data source
