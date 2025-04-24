@@ -1,38 +1,74 @@
 
 import React from 'react';
-import { Card, CardContent } from "@/components/ui/card";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import { ArrowDown, ArrowUp } from 'lucide-react';
 
 interface RegionalPricesProps {
-  regions: Record<string, number>;
+  regions: { [key: string]: number };
   currentPrice: number;
 }
 
 export const RegionalPrices: React.FC<RegionalPricesProps> = ({ regions, currentPrice }) => {
+  // Ensure regions exist and is an object
+  const hasRegions = regions && typeof regions === 'object' && Object.keys(regions).length > 0;
+  
+  if (!hasRegions) {
+    return <div className="text-center py-4 text-muted-foreground">No regional price data available</div>;
+  }
+
   return (
-    <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
-      {Object.entries(regions).map(([region, price]) => {
-        const diff = ((price - currentPrice) / currentPrice) * 100;
-        
-        return (
-          <Card key={region} className="shadow-sm">
-            <CardContent className="p-4">
-              <div className="flex flex-col">
-                <span className="font-medium text-sm mb-1">{region}</span>
-                <span className="text-lg font-semibold">₹{price}</span>
-                <div className={`text-xs mt-1 flex items-center ${diff > 0 ? 'text-green-600' : diff < 0 ? 'text-red-600' : 'text-gray-500'}`}>
-                  {diff > 0 ? (
-                    <span>+{diff.toFixed(1)}% above avg</span>
-                  ) : diff < 0 ? (
-                    <span>{diff.toFixed(1)}% below avg</span>
-                  ) : (
-                    <span>Average price</span>
-                  )}
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        );
-      })}
+    <div className="overflow-x-auto rounded-lg border border-gray-200 shadow">
+      <Table>
+        <TableHeader className="bg-agri-light/50">
+          <TableRow>
+            <TableHead className="font-medium">Region</TableHead>
+            <TableHead className="font-medium text-right">Price (₹)</TableHead>
+            <TableHead className="font-medium text-right">Difference</TableHead>
+          </TableRow>
+        </TableHeader>
+        <TableBody>
+          {Object.entries(regions).map(([region, price]) => {
+            const difference = price - currentPrice;
+            const percentDiff = ((difference / currentPrice) * 100).toFixed(1);
+            
+            return (
+              <TableRow key={region} className="hover:bg-agri-light/20">
+                <TableCell className="font-medium">{region}</TableCell>
+                <TableCell className="text-right">₹{price.toLocaleString()}</TableCell>
+                <TableCell className="text-right">
+                  <div className="flex items-center justify-end">
+                    {difference > 0 ? (
+                      <>
+                        <span className="text-green-600 flex items-center">
+                          <ArrowUp className="h-3 w-3 mr-1" />
+                          {`+${percentDiff}%`}
+                        </span>
+                      </>
+                    ) : difference < 0 ? (
+                      <>
+                        <span className="text-red-600 flex items-center">
+                          <ArrowDown className="h-3 w-3 mr-1" />
+                          {`${percentDiff}%`}
+                        </span>
+                      </>
+                    ) : (
+                      <span className="text-gray-500">0%</span>
+                    )}
+                  </div>
+                </TableCell>
+              </TableRow>
+            );
+          })}
+        </TableBody>
+      </Table>
     </div>
   );
 };
+

@@ -57,6 +57,7 @@ export default function Index() {
               src="/farmers-working.jpg"
               alt="Farmers Working in Field"
               className="object-cover w-full max-w-md h-48 md:h-56 rounded-3xl shadow-lg border border-agri-primary/20"
+              loading="eager"
             />
           </div>
         </div>
@@ -82,12 +83,12 @@ export default function Index() {
 
         <Tabs defaultValue="rice" onValueChange={setSelectedCrop} className="w-full">
           <TabsList className="grid grid-cols-2 md:grid-cols-6 mb-4 bg-agri-light/60 rounded-lg h-auto">
-            <TabsTrigger value="rice" className="py-2">Rice</TabsTrigger>
-            <TabsTrigger value="wheat" className="py-2">Wheat</TabsTrigger>
-            <TabsTrigger value="potato" className="py-2">Potato</TabsTrigger>
-            <TabsTrigger value="onion" className="py-2">Onion</TabsTrigger>
-            <TabsTrigger value="sugarcane" className="py-2">Sugarcane</TabsTrigger>
-            <TabsTrigger value="mustard" className="py-2">Mustard</TabsTrigger>
+            <TabsTrigger value="rice" className="py-2 font-bold">Rice</TabsTrigger>
+            <TabsTrigger value="wheat" className="py-2 font-bold">Wheat</TabsTrigger>
+            <TabsTrigger value="potato" className="py-2 font-bold">Potato</TabsTrigger>
+            <TabsTrigger value="onion" className="py-2 font-bold">Onion</TabsTrigger>
+            <TabsTrigger value="sugarcane" className="py-2 font-bold">Sugarcane</TabsTrigger>
+            <TabsTrigger value="mustard" className="py-2 font-bold">Mustard</TabsTrigger>
           </TabsList>
           <TabsContent value={selectedCrop} className="mt-0">
             {isLoading ? (
@@ -169,12 +170,12 @@ export default function Index() {
 
                 <h3 className="font-medium text-lg mt-6 mb-3">Regional Price Comparison</h3>
                 <RegionalPrices 
-                  regions={data.regions}
+                  regions={data.regions || {}}
                   currentPrice={data.currentPrice}
                 />
                 
                 <div className="mt-4 text-xs text-right text-muted-foreground">
-                  <p>Data source: {data.source}</p>
+                  <p>Data source: {data.source || 'Agricultural Market Information Network'}</p>
                 </div>
               </>
             ) : null}

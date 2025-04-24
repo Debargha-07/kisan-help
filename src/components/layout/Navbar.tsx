@@ -1,7 +1,7 @@
 
 import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Menu, User, Bell, LogOut, Home, ChevronDown } from "lucide-react";
+import { Menu, User, Bell, LogOut, Home } from "lucide-react";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { useState } from "react";
 import { useAuth } from "@/contexts/AuthContext";
@@ -38,7 +38,7 @@ const Navbar = () => {
   };
 
   return (
-    <header className="sticky top-0 z-50 w-full bg-white/95 dark:bg-background/95 shadow-md backdrop-blur supports-[backdrop-filter]:bg-background/80">
+    <header className="sticky top-0 z-50 w-full bg-white/95 shadow-md backdrop-blur supports-[backdrop-filter]:bg-background/80">
       <div className="container mx-auto flex h-16 items-center justify-between px-4">
         {/* Logo and Brand */}
         <Link to="/" className="flex items-center gap-3 font-bold text-xl sm:text-2xl text-agri-primary hover:opacity-90 transition-opacity">
