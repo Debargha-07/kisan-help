@@ -11,9 +11,7 @@ import { toast } from "@/components/ui/use-toast";
 // Navbar links config
 const navigationLinks = [
   { title: "Home", href: "/" },
-  { title: "Forecasting", href: "/forecasting" },
-  { title: "Marketplace", href: "/marketplace" },
-  { title: "Schemes", href: "/schemes" }
+  { title: "Forecasting", href: "/forecasting" }
 ];
 
 const Navbar = () => {
@@ -40,28 +38,23 @@ const Navbar = () => {
   };
 
   return (
-    <header className="sticky top-0 z-50 w-full bg-white/80 dark:bg-background/80 shadow backdrop-blur supports-[backdrop-filter]:bg-background/60 transition">
-      <div className="container mx-auto flex h-16 items-center justify-between px-2">
+    <header className="sticky top-0 z-50 w-full bg-white/95 dark:bg-background/95 shadow-md backdrop-blur supports-[backdrop-filter]:bg-background/80">
+      <div className="container mx-auto flex h-16 items-center justify-between px-4">
         {/* Logo and Brand */}
         <Link to="/" className="flex items-center gap-3 font-bold text-xl sm:text-2xl text-agri-primary hover:opacity-90 transition-opacity">
-          <img src="/logo.svg" alt="Kisan Connect" className="h-8 w-8" />
-          <span className="tracking-tight">Kisan Connect</span>
+          <img src="/logo.svg" alt="Bhumiputra" className="h-8 w-8" />
+          <span className="tracking-tight">Bhumiputra</span>
         </Link>
 
         {/* Desktop Menu */}
-        <nav className="hidden md:flex items-center space-x-6">
+        <nav className="hidden md:flex items-center space-x-8">
           {navigationLinks.map(link => (
             <Link
               key={link.title}
               to={link.href}
-              className="relative text-[1rem] font-medium text-foreground/90 transition-colors hover:text-agri-primary px-2 py-1 rounded hover-scale"
+              className="relative text-[1.05rem] font-bold text-foreground/90 transition-colors hover:text-agri-primary px-3 py-1 rounded hover-scale"
             >
               {link.title}
-              {link.title === "Marketplace" && (
-                <span className="ml-1">
-                  <ChevronDown className="inline-block h-3 w-3 -mt-1 text-muted-foreground" />
-                </span>
-              )}
             </Link>
           ))}
         </nav>
@@ -109,8 +102,8 @@ const Navbar = () => {
           <SheetContent side="right" className="w-[240px] sm:w-[300px] bg-white/95 dark:bg-background/90 shadow-md">
             <div className="flex flex-col gap-6 pt-5">
               <div className="flex items-center gap-2 text-xl font-bold text-agri-primary mb-2">
-                <img src="/logo.svg" alt="Kisan Connect" className="h-7 w-7" />
-                <span>Kisan Connect</span>
+                <img src="/logo.svg" alt="Bhumiputra" className="h-7 w-7" />
+                <span>Bhumiputra</span>
               </div>
               <nav className="flex flex-col gap-y-4 text-base font-medium">
                 {navigationLinks.map(link => (

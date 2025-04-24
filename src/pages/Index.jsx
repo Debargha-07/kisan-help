@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import Layout from "@/components/layout/Layout";
 import { PriceCard } from "@/components/prices/PriceCard";
@@ -79,29 +80,14 @@ export default function Index() {
           </AlertDescription>
         </Alert>
 
-        <div className="flex flex-col md:flex-row justify-between items-start gap-4 mb-8">
-          <div className="w-full md:w-auto">
-            <Button asChild size="lg" className="bg-agri-primary hover:bg-agri-dark w-full md:w-auto text-white">
-              <Link to="/forecasting">Go to Advanced Forecasting</Link>
-            </Button>
-          </div>
-          <Card className="w-full md:w-auto bg-gradient-to-br from-agri-light to-white shadow rounded-xl">
-            <CardContent className="p-5">
-              <p className="text-sm text-muted-foreground">
-                Our forecasting system uses advanced AI to predict crop yields and prices based on climate data, soil conditions, and historical trends.
-              </p>
-            </CardContent>
-          </Card>
-        </div>
-
         <Tabs defaultValue="rice" onValueChange={setSelectedCrop} className="w-full">
-          <TabsList className="grid grid-cols-2 md:grid-cols-6 mb-4 bg-agri-light/60 rounded-lg">
-            <TabsTrigger value="rice">Rice</TabsTrigger>
-            <TabsTrigger value="wheat">Wheat</TabsTrigger>
-            <TabsTrigger value="potato">Potato</TabsTrigger>
-            <TabsTrigger value="onion">Onion</TabsTrigger>
-            <TabsTrigger value="sugarcane">Sugarcane</TabsTrigger>
-            <TabsTrigger value="mustard">Mustard</TabsTrigger>
+          <TabsList className="grid grid-cols-2 md:grid-cols-6 mb-4 bg-agri-light/60 rounded-lg h-auto">
+            <TabsTrigger value="rice" className="py-2">Rice</TabsTrigger>
+            <TabsTrigger value="wheat" className="py-2">Wheat</TabsTrigger>
+            <TabsTrigger value="potato" className="py-2">Potato</TabsTrigger>
+            <TabsTrigger value="onion" className="py-2">Onion</TabsTrigger>
+            <TabsTrigger value="sugarcane" className="py-2">Sugarcane</TabsTrigger>
+            <TabsTrigger value="mustard" className="py-2">Mustard</TabsTrigger>
           </TabsList>
           <TabsContent value={selectedCrop} className="mt-0">
             {isLoading ? (
@@ -209,9 +195,6 @@ export default function Index() {
                 <li>Market demand and price trends from AGMARKNET</li>
                 <li>Crop disease risk factors from ICAR research data</li>
               </ul>
-              <Button asChild className="mt-4 bg-agri-primary hover:bg-agri-dark text-white rounded-xl">
-                <Link to="/forecasting">Explore Advanced Forecasting</Link>
-              </Button>
             </CardContent>
           </Card>
         </div>

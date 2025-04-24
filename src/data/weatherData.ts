@@ -1,103 +1,174 @@
 
-// Weather forecast data for different regions in India
-// Based on historical climate data and seasonal patterns
+import { format, addMonths } from "date-fns";
 
 type WeatherDay = {
   day: string;
   temperature: number;
   humidity: number;
   rainfall: number;
-  description: string;
   icon: string;
+  description: string;
 };
 
-type RegionWeatherData = {
-  [region: string]: WeatherDay[];
+type LongTermForecastPoint = {
+  month: string;
+  avgTemp: number;
+  rainfall: number;
 };
 
-// Create realistic weather forecast data for different regions of India
-export const regionalWeatherData: RegionWeatherData = {
-  "West Bengal": [
-    { day: "Today", temperature: 34, humidity: 72, rainfall: 0, description: "Sunny", icon: "sun" },
-    { day: "Tomorrow", temperature: 35, humidity: 76, rainfall: 0, description: "Partly Cloudy", icon: "cloud-sun" },
-    { day: "Wed", temperature: 33, humidity: 78, rainfall: 8, description: "Light Rain", icon: "cloud-rain" },
-    { day: "Thu", temperature: 32, humidity: 82, rainfall: 12, description: "Thunderstorms", icon: "cloud-rain" },
-    { day: "Fri", temperature: 31, humidity: 76, rainfall: 4, description: "Light Rain", icon: "cloud-rain" },
-    { day: "Sat", temperature: 32, humidity: 70, rainfall: 0, description: "Mostly Sunny", icon: "cloud-sun" },
-    { day: "Sun", temperature: 33, humidity: 67, rainfall: 0, description: "Sunny", icon: "sun" },
-  ],
-  "Punjab": [
-    { day: "Today", temperature: 38, humidity: 45, rainfall: 0, description: "Hot", icon: "sun" },
-    { day: "Tomorrow", temperature: 37, humidity: 50, rainfall: 0, description: "Hot", icon: "sun" },
-    { day: "Wed", temperature: 36, humidity: 48, rainfall: 0, description: "Hot", icon: "sun" },
-    { day: "Thu", temperature: 38, humidity: 42, rainfall: 0, description: "Hot", icon: "sun" },
-    { day: "Fri", temperature: 39, humidity: 40, rainfall: 0, description: "Hot", icon: "sun" },
-    { day: "Sat", temperature: 37, humidity: 45, rainfall: 0, description: "Hot", icon: "sun" },
-    { day: "Sun", temperature: 36, humidity: 50, rainfall: 3, description: "Light Rain", icon: "cloud-rain" },
-  ],
-  "Uttar Pradesh": [
-    { day: "Today", temperature: 39, humidity: 48, rainfall: 0, description: "Hot", icon: "sun" },
-    { day: "Tomorrow", temperature: 38, humidity: 52, rainfall: 0, description: "Hot", icon: "sun" },
-    { day: "Wed", temperature: 37, humidity: 55, rainfall: 4, description: "Light Rain", icon: "cloud-rain" },
-    { day: "Thu", temperature: 36, humidity: 60, rainfall: 8, description: "Rain", icon: "cloud-rain" },
-    { day: "Fri", temperature: 35, humidity: 62, rainfall: 5, description: "Light Rain", icon: "cloud-rain" },
-    { day: "Sat", temperature: 36, humidity: 57, rainfall: 0, description: "Partly Cloudy", icon: "cloud-sun" },
-    { day: "Sun", temperature: 37, humidity: 50, rainfall: 0, description: "Sunny", icon: "sun" },
-  ],
-  "Maharashtra": [
-    { day: "Today", temperature: 33, humidity: 68, rainfall: 6, description: "Light Rain", icon: "cloud-rain" },
-    { day: "Tomorrow", temperature: 32, humidity: 72, rainfall: 12, description: "Rain", icon: "cloud-rain" },
-    { day: "Wed", temperature: 30, humidity: 78, rainfall: 20, description: "Heavy Rain", icon: "cloud-rain" },
-    { day: "Thu", temperature: 29, humidity: 82, rainfall: 18, description: "Heavy Rain", icon: "cloud-rain" },
-    { day: "Fri", temperature: 30, humidity: 76, rainfall: 10, description: "Rain", icon: "cloud-rain" },
-    { day: "Sat", temperature: 31, humidity: 70, rainfall: 5, description: "Light Rain", icon: "cloud-rain" },
-    { day: "Sun", temperature: 32, humidity: 65, rainfall: 0, description: "Partly Cloudy", icon: "cloud-sun" },
-  ],
-  "Karnataka": [
-    { day: "Today", temperature: 30, humidity: 62, rainfall: 0, description: "Partly Cloudy", icon: "cloud-sun" },
-    { day: "Tomorrow", temperature: 31, humidity: 60, rainfall: 0, description: "Sunny", icon: "sun" },
-    { day: "Wed", temperature: 32, humidity: 58, rainfall: 0, description: "Sunny", icon: "sun" },
-    { day: "Thu", temperature: 31, humidity: 62, rainfall: 4, description: "Light Rain", icon: "cloud-rain" },
-    { day: "Fri", temperature: 30, humidity: 65, rainfall: 8, description: "Rain", icon: "cloud-rain" },
-    { day: "Sat", temperature: 29, humidity: 68, rainfall: 6, description: "Light Rain", icon: "cloud-rain" },
-    { day: "Sun", temperature: 30, humidity: 64, rainfall: 0, description: "Partly Cloudy", icon: "cloud-sun" },
-  ],
-};
-
-// Long-term climate forecast data for the next 12 months
-export const longTermForecast = [
-  { month: "May", avgTemp: 35, rainfall: 35, humidity: 60 },
-  { month: "Jun", avgTemp: 33, rainfall: 130, humidity: 75 },
-  { month: "Jul", avgTemp: 31, rainfall: 180, humidity: 85 },
-  { month: "Aug", avgTemp: 30, rainfall: 200, humidity: 88 },
-  { month: "Sep", avgTemp: 29, rainfall: 150, humidity: 82 },
-  { month: "Oct", avgTemp: 28, rainfall: 70, humidity: 75 },
-  { month: "Nov", avgTemp: 25, rainfall: 20, humidity: 65 },
-  { month: "Dec", avgTemp: 22, rainfall: 10, humidity: 60 },
-  { month: "Jan", avgTemp: 20, rainfall: 5, humidity: 55 },
-  { month: "Feb", avgTemp: 22, rainfall: 10, humidity: 50 },
-  { month: "Mar", avgTemp: 26, rainfall: 15, humidity: 55 },
-  { month: "Apr", avgTemp: 30, rainfall: 25, humidity: 58 },
-];
-
-// Function to get weather data based on location
-export const getWeatherForecast = (location: string): WeatherDay[] => {
-  // Return data for the specified location or default to West Bengal if not found
-  return regionalWeatherData[location] || regionalWeatherData["West Bengal"];
-};
-
-// Function to get weather description based on data
-export const getSeasonalDescription = (location: string): string => {
-  const data = getWeatherForecast(location);
-  const avgRainfall = data.reduce((sum, day) => sum + day.rainfall, 0) / data.length;
+// Generate forecast data for a specific region
+const generateRegionalLongTermForecast = (region: string): LongTermForecastPoint[] => {
+  // Base data for default region (West Bengal)
+  const baseData = [
+    { monthIndex: 0, avgTemp: 25, rainfall: 20 },
+    { monthIndex: 1, avgTemp: 28, rainfall: 40 },
+    { monthIndex: 2, avgTemp: 32, rainfall: 75 },
+    { monthIndex: 3, avgTemp: 34, rainfall: 145 },
+    { monthIndex: 4, avgTemp: 33, rainfall: 290 },
+    { monthIndex: 5, avgTemp: 31, rainfall: 320 },
+    { monthIndex: 6, avgTemp: 29, rainfall: 340 },
+    { monthIndex: 7, avgTemp: 29, rainfall: 310 },
+    { monthIndex: 8, avgTemp: 30, rainfall: 170 },
+    { monthIndex: 9, avgTemp: 28, rainfall: 100 },
+    { monthIndex: 10, avgTemp: 25, rainfall: 20 },
+    { monthIndex: 11, avgTemp: 22, rainfall: 10 }
+  ];
   
-  if (avgRainfall > 10) {
-    return "Heavy monsoon conditions expected, ensure proper drainage and consider water-resistant crop varieties.";
-  } else if (avgRainfall > 5) {
-    return "Moderate rainfall expected, good conditions for most crops with adequate irrigation planning.";
-  } else if (avgRainfall > 0) {
-    return "Light rainfall expected, supplemental irrigation may be necessary for optimal crop growth.";
-  } else {
-    return "Dry conditions expected, irrigation will be essential for crop survival and growth.";
-  }
+  // Regional variations
+  const regionalFactors: Record<string, { tempOffset: number, rainfallMultiplier: number }> = {
+    "West Bengal": { tempOffset: 0, rainfallMultiplier: 1 },
+    "Punjab": { tempOffset: -2, rainfallMultiplier: 0.5 },
+    "Maharashtra": { tempOffset: 1, rainfallMultiplier: 0.7 },
+    "Karnataka": { tempOffset: 2, rainfallMultiplier: 0.8 },
+    "Uttar Pradesh": { tempOffset: -1, rainfallMultiplier: 0.6 }
+  };
+  
+  // Apply regional factors
+  const factor = regionalFactors[region] || { tempOffset: 0, rainfallMultiplier: 1 };
+  
+  // Generate the data with month names
+  const startDate = new Date();
+  return baseData.map(point => {
+    const date = addMonths(startDate, point.monthIndex);
+    return {
+      month: format(date, "MMM"),
+      avgTemp: point.avgTemp + factor.tempOffset,
+      rainfall: Math.round(point.rainfall * factor.rainfallMultiplier)
+    };
+  });
+};
+
+// Export the function to generate weather forecast data
+export const getWeatherForecast = (region: string): WeatherDay[] => {
+  console.log("Would fetch weather data for:", region);
+  
+  // Default weather patterns for different regions
+  const patterns: Record<string, any> = {
+    "West Bengal": {
+      temp: { base: 30, variation: 4 },
+      humidity: { base: 75, variation: 10 },
+      rainfall: { base: 8, variation: 12 },
+      conditions: ["sunny", "cloudy", "rainy", "drizzle", "sunny", "sunny", "cloudy"]
+    },
+    "Punjab": {
+      temp: { base: 28, variation: 5 },
+      humidity: { base: 60, variation: 15 },
+      rainfall: { base: 3, variation: 8 },
+      conditions: ["sunny", "sunny", "sunny", "cloudy", "cloudy", "drizzle", "sunny"]
+    },
+    "Maharashtra": {
+      temp: { base: 32, variation: 3 },
+      humidity: { base: 65, variation: 10 },
+      rainfall: { base: 5, variation: 10 },
+      conditions: ["sunny", "sunny", "cloudy", "cloudy", "rainy", "sunny", "sunny"]
+    },
+    "Karnataka": {
+      temp: { base: 31, variation: 2 },
+      humidity: { base: 70, variation: 8 },
+      rainfall: { base: 6, variation: 15 },
+      conditions: ["sunny", "cloudy", "sunny", "rainy", "sunny", "sunny", "drizzle"]
+    },
+    "Uttar Pradesh": {
+      temp: { base: 29, variation: 6 },
+      humidity: { base: 55, variation: 20 },
+      rainfall: { base: 4, variation: 12 },
+      conditions: ["sunny", "sunny", "dusty", "cloudy", "sunny", "rainy", "sunny"]
+    }
+  };
+  
+  // Use the region's pattern or default to West Bengal
+  const pattern = patterns[region] || patterns["West Bengal"];
+  
+  // Generate the next 7 days
+  const days = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+  const today = new Date().getDay();
+  
+  return Array(7).fill(0).map((_, index) => {
+    const dayIndex = (today + index) % 7;
+    const condition = pattern.conditions[index];
+    
+    // Random variations based on the pattern
+    const tempVariation = (Math.random() - 0.5) * pattern.temp.variation;
+    const humidityVariation = (Math.random() - 0.5) * pattern.humidity.variation;
+    const willRain = condition === "rainy" || condition === "drizzle";
+    
+    const temperature = Math.round(pattern.temp.base + tempVariation);
+    const humidity = Math.round(pattern.humidity.base + humidityVariation);
+    const rainfall = willRain ? Math.round((Math.random() * pattern.rainfall.variation) + pattern.rainfall.base) : 0;
+    
+    // Map conditions to icons and descriptions
+    let icon, description;
+    switch(condition) {
+      case "sunny":
+        icon = "sun";
+        description = "Clear sky";
+        break;
+      case "cloudy":
+        icon = "cloud-sun";
+        description = "Partly cloudy";
+        break;
+      case "rainy":
+        icon = "cloud-rain";
+        description = "Rain expected";
+        break;
+      case "drizzle":
+        icon = "cloud-drizzle";
+        description = "Light showers";
+        break;
+      case "dusty":
+        icon = "cloud";
+        description = "Dusty conditions";
+        break;
+      default:
+        icon = "sun";
+        description = "Generally clear";
+    }
+    
+    return {
+      day: days[dayIndex],
+      temperature,
+      humidity,
+      rainfall,
+      icon,
+      description
+    };
+  });
+};
+
+// Export seasonal descriptions for different regions
+export const getSeasonalDescription = (region: string): string => {
+  const descriptions: Record<string, string> = {
+    "West Bengal": "Expect monsoon with heavy rainfall from June to September. Winter will be mild with temperatures rarely dropping below 15°C.",
+    "Punjab": "Hot summers with temperatures reaching 45°C. Winter can be cold with occasional frost. Monsoon rainfall is moderate.",
+    "Maharashtra": "Coastal regions have high humidity year-round. Inland areas experience hot summers and mild winters with moderate rainfall.",
+    "Karnataka": "The plateau region enjoys a moderate climate year-round. Coastal areas experience heavy rainfall during monsoon.",
+    "Uttar Pradesh": "Extreme seasons with very hot summers and cold winters. Monsoon brings moderate rainfall from July to September."
+  };
+  
+  return descriptions[region] || descriptions["West Bengal"];
+};
+
+// Create region-based long-term forecasts
+export const longTermForecast = (region = "West Bengal") => {
+  return generateRegionalLongTermForecast(region);
 };

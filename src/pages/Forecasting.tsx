@@ -159,6 +159,7 @@ const Forecasting = () => {
   const [yieldResult, setYieldResult] = useState<any>(null);
   const [cropRecommendations, setCropRecommendations] = useState<any>(null);
   const [showSoilHealthReport, setShowSoilHealthReport] = useState(false);
+  const [forecastData, setForecastData] = useState<any[]>([]);
   
   const { data: weatherForecast, isLoading: isLoadingWeather } = useQuery({
     queryKey: ['weatherForecast', location],
@@ -167,14 +168,10 @@ const Forecasting = () => {
     refetchOnWindowFocus: false
   });
 
-  const { data: longTermData, isLoading: isLoadingLongTerm } = useQuery({
-    queryKey: ['longTermForecast'],
-    queryFn: () => Promise.resolve(longTermForecast),
-    staleTime: 1000 * 60 * 60,
-    refetchOnWindowFocus: false
-  });
-
   useEffect(() => {
+    const data = longTermForecast(location);
+    setForecastData(data);
+    
     const soilParams = getTypicalSoilParameters(location);
     setPhValue(soilParams.ph);
     setNitrogenValue(soilParams.nitrogen);
@@ -735,19 +732,19 @@ const Forecasting = () => {
           <TabsContent value="climate" className="space-y-4">
             <Card>
               <CardHeader>
-                <CardTitle>12-Month Climate Forecast</CardTitle>
+                <CardTitle>12-Month Climate Forecast for {location}</CardTitle>
               </CardHeader>
               <CardContent>
-                {isLoadingLongTerm ? (
+                {forecastData.length === 0 ? (
                   <div className="flex justify-center items-center h-40">
                     <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-agri-primary"></div>
                   </div>
-                ) : longTermData ? (
+                ) : (
                   <div className="space-y-6">
                     <div className="h-80">
                       <ResponsiveContainer width="100%" height="100%">
                         <AreaChart
-                          data={longTermData}
+                          data={forecastData}
                           margin={{ top: 10, right: 30, left: 0, bottom: 0 }}
                         >
                           <CartesianGrid strokeDasharray="3 3" />
@@ -766,14 +763,26 @@ const Forecasting = () => {
                       <div className="space-y-2">
                         <h4 className="font-medium">Rainfall Pattern</h4>
                         <p className="text-sm text-muted-foreground">
-                          Expected to follow normal seasonal patterns with peak rainfall during monsoon months (June-September). 
-                          Prepare water management strategies accordingly.
+                          {location === "West Bengal" ? 
+                          "Expected to follow normal seasonal patterns with peak rainfall during monsoon months (June-September)." :
+                          location === "Punjab" ? 
+                          "Lower rainfall overall with moderate precipitation during monsoon season." :
+                          location === "Uttar Pradesh" ?
+                          "Moderate rainfall concentrated in monsoon months, with dry winters." :
+                          location === "Maharashtra" ?
+                          "Coastal regions receive heavy rainfall, inland areas moderate." :
+                          "Follows typical pattern with regional variations."}
+                          {" "}Prepare water management strategies accordingly.
                         </p>
                         
                         <h4 className="font-medium mt-4">Temperature Trend</h4>
                         <p className="text-sm text-muted-foreground">
-                          Temperatures are expected to remain within normal ranges for {location} with some potential for higher than average
-                          temperatures during summer months.
+                          Temperatures are expected to remain within normal ranges for {location} with
+                          {location === "Punjab" ? " cooler winters and hot summers." :
+                          location === "Maharashtra" ? " consistently warm temperatures year-round." :
+                          location === "Karnataka" ? " generally warm temperatures throughout the year." :
+                          location === "Uttar Pradesh" ? " extreme variations between seasons." :
+                          " some potential for higher than average temperatures during summer months."}
                         </p>
                       </div>
                       
@@ -786,7 +795,13 @@ const Forecasting = () => {
                           </li>
                           <li className="flex gap-2">
                             <span className="text-amber-500">●</span>
-                            <span>Consider water conservation techniques during drier months (November-May).</span>
+                            <span>Consider water conservation techniques during drier months 
+                              {location === "West Bengal" ? " (November-May)." :
+                              location === "Punjab" ? " (October-June)." :
+                              location === "Maharashtra" ? " (November-June)." :
+                              location === "Karnataka" ? " (December-May)." :
+                              " (October-May)."}
+                            </span>
                           </li>
                           <li className="flex gap-2">
                             <span className="text-amber-500">●</span>
@@ -804,14 +819,6 @@ const Forecasting = () => {
                       </AlertDescription>
                     </Alert>
                   </div>
-                ) : (
-                  <Alert variant="destructive">
-                    <AlertCircle className="h-4 w-4" />
-                    <AlertTitle>Unable to load climate forecast</AlertTitle>
-                    <AlertDescription>
-                      Please try again later.
-                    </AlertDescription>
-                  </Alert>
                 )}
               </CardContent>
             </Card>
